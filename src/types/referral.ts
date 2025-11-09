@@ -13,6 +13,8 @@ export interface Referral {
   empresaContato: string;
   descricao: string;
   status: ReferralStatus;
+  valorEstimado?: number;
+  observacoes?: string;
   criadoEm: Date;
   atualizadoEm: Date;
 }
@@ -24,6 +26,7 @@ export interface CriarIndicacaoDTO {
   membroIndicadoId: string;
   empresaContato: string;
   descricao: string;
+  valorEstimado?: number;
 }
 
 /**
@@ -31,5 +34,6 @@ export interface CriarIndicacaoDTO {
  */
 export interface AtualizarStatusIndicacaoDTO {
   status: ReferralStatus;
+  observacoes?: string;
 }
 

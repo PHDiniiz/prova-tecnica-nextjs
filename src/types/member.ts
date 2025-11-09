@@ -10,6 +10,7 @@ export interface Member {
   linkedin?: string;
   areaAtuacao?: string;
   intencaoId?: string | null;
+  ativo: boolean;
   criadoEm: Date;
   atualizadoEm: Date;
 }

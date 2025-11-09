@@ -95,18 +95,25 @@ export class ReferralRepository {
    */
   async atualizarStatus(
     id: string,
-    status: ReferralStatus
+    status: ReferralStatus,
+    observacoes?: string
   ): Promise<Referral | null> {
     try {
+      const updateData: any = {
+        status,
+        atualizadoEm: new Date(),
+      };
+
+      if (observacoes !== undefined) {
+        updateData.observacoes = observacoes;
+      }
+
       const result = await this.db
         .collection<Referral>('referrals')
         .findOneAndUpdate(
           { _id: new ObjectId(id) },
           {
-            $set: {
-              status,
-              atualizadoEm: new Date(),
-            },
+            $set: updateData,
           },
           { returnDocument: 'after' }
         );

@@ -71,6 +71,27 @@ export class MemberRepository {
   }
 
   /**
+   * Busca membros ativos
+   */
+  async buscarAtivos(): Promise<Member[]> {
+    try {
+      const membros = await this.db
+        .collection<Member>('members')
+        .find({ ativo: true })
+        .sort({ criadoEm: -1 })
+        .toArray();
+
+      return membros.map((membro) => ({
+        ...membro,
+        _id: membro._id?.toString(),
+      }));
+    } catch (error) {
+      console.error('Erro ao buscar membros ativos:', error);
+      throw new Error('Não foi possível buscar os membros ativos');
+    }
+  }
+
+  /**
    * Cria um novo membro
    */
   async criar(membro: Omit<Member, '_id'>): Promise<Member> {
