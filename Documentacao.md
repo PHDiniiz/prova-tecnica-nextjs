@@ -143,9 +143,50 @@ Este documento padroniza todas as regras de negócio e o fluxo funcional da apli
 
 #### **Regras de Negócio**
 - Apenas membros ativos podem criar ou receber indicações.
-- O valor da indicação deve ser numérico positivo.
+- O valor da indicação deve ser numérico positivo (mínimo R$ 1.000, máximo R$ 10.000.000).
 - Alterações de status geram logs automáticos (`referral_logs`).
-- Um "obrigado" só pode ser criado após o status `done`.
+- Um "obrigado" só pode ser criado após o status `fechada`.
+- Membro não pode indicar para si mesmo.
+- Transições de status válidas:
+  - `nova` → `em-contato` | `recusada`
+  - `em-contato` → `fechada` | `recusada`
+  - `fechada` → (final, não pode mudar)
+  - `recusada` → (final, não pode mudar)
+
+#### **Sistema de "Obrigados" (Agradecimentos Públicos)**
+
+O sistema de "obrigados" permite que membros agradeçam publicamente por indicações que resultaram em negócios fechados.
+
+**Regras de Negócio:**
+- **Quem pode criar:** Apenas o membro que recebeu a indicação (membro indicado)
+- **Quando pode criar:** Apenas após a indicação ter status `fechada`
+- **Limite:** Um "obrigado" por indicação (relação 1:1 com `referrals`)
+- **Visibilidade:** Por padrão, todos os "obrigados" são públicos (`publico: true`)
+- **Conteúdo:** Mensagem obrigatória entre 10-500 caracteres
+
+**Fluxo:**
+1. Membro A cria indicação para Membro B
+2. Membro B atualiza status para `em-contato` → `fechada`
+3. Membro B pode criar "obrigado" para Membro A
+4. "Obrigado" aparece no feed público de agradecimentos
+5. Dashboard atualiza métricas de "obrigados" do mês
+
+**Estrutura de Dados:**
+```typescript
+{
+  _id: ObjectId,
+  indicacaoId: ObjectId (unique, ref: 'referrals'),
+  membroIndicadorId: ObjectId (ref: 'members'),
+  membroIndicadoId: ObjectId (ref: 'members'),
+  mensagem: string (10-500 caracteres),
+  publico: boolean (default: true),
+  createdAt: Date
+}
+```
+
+**API:**
+- `POST /api/obrigados` - Criar agradecimento (requer autenticação, apenas membro indicado)
+- `GET /api/obrigados` - Listar agradecimentos públicos (pode filtrar por membro)
 
 ### **2.6.4 Acompanhamento e Performance**
 
@@ -1335,6 +1376,44 @@ const CriarIntencaoSchema = z.object({
 - Mensagens de erro consistentes
 - Sanitização automática
 
+### **8.5.1 Validações Específicas Detalhadas**
+
+#### **Campos de Texto**
+
+| Campo | Regras | Exemplo |
+|-------|--------|---------|
+| **Nome** | 2-100 caracteres, apenas letras, espaços e acentos | "João Silva" |
+| **Email** | Formato email válido, único no sistema | "joao@empresa.com" |
+| **Empresa** | 2-100 caracteres | "Empresa XYZ Ltda" |
+| **Cargo** | Máximo 100 caracteres (opcional) | "Diretor Comercial" |
+| **Motivo/Descrição** | 10-500 caracteres para intenções, 10-1000 para indicações | Mínimo 10 caracteres |
+
+#### **Campos de Contato**
+
+| Campo | Regras | Exemplo |
+|-------|--------|---------|
+| **Telefone** | Formato brasileiro: `+55 (XX) XXXXX-XXXX` ou `(XX) XXXXX-XXXX`, máximo 20 caracteres | "+55 11 99999-9999" |
+| **LinkedIn** | URL completa válida ou username (sem @), máximo 200 caracteres | "https://linkedin.com/in/joaosilva" ou "joaosilva" |
+
+#### **Campos Numéricos**
+
+| Campo | Regras | Exemplo |
+|-------|--------|---------|
+| **Valor Estimado (Indicação)** | Número positivo, mínimo R$ 1.000, máximo R$ 10.000.000 | 50000 |
+| **Valor Mensalidade** | Número positivo, configurável por grupo | 500 |
+
+#### **Validações de Negócio**
+
+- **Email único:** Verificado no banco antes de criar intenção/membro
+- **Token de convite:** Válido por 7 dias (horário UTC), uso único
+- **Status de indicação:** Apenas transições válidas:
+  - `nova` → `em-contato` | `recusada`
+  - `em-contato` → `fechada` | `recusada`
+  - `fechada` → (final, não pode mudar)
+  - `recusada` → (final, não pode mudar)
+- **Auto-indicação:** Membro não pode indicar para si mesmo
+- **Membro ativo:** Apenas membros com `isActive: true` podem criar/receber indicações
+
 ### **8.6 Proteção contra SQL Injection**
 
 MongoDB com driver oficial previne SQL Injection naturalmente através de:
@@ -1347,23 +1426,240 @@ MongoDB com driver oficial previne SQL Injection naturalmente através de:
 Todas as configurações sensíveis em `.env.local`:
 
 ```env
+# MongoDB
 MONGODB_URI=mongodb+srv://...
 MONGODB_DB_NAME=networking_group
+
+# Autenticação Admin
 ADMIN_TOKEN=seu_token_secreto_aqui
+
+# Autenticação Membros (JWT)
+JWT_SECRET=seu_jwt_secret_super_seguro_aqui
+JWT_EXPIRES_IN=30d
+
+# Aplicação
 NEXT_PUBLIC_APP_URL=https://app.com
 ```
 
 **Boas Práticas:**
 - Nunca commitar `.env.local` no Git
-- Usar `.env.example` como template
+- ✅ Usar `.env.example` como template (já existe)
 - Rotacionar tokens periodicamente
 - Usar diferentes tokens para dev/prod
+- JWT_SECRET deve ter mínimo 32 caracteres
 
-**Status:** Arquivo `.env.example` precisa ser atualizado com todas as variáveis necessárias.
+**Status:** ✅ Arquivo `.env.example` existe e contém todas as variáveis necessárias.
+
+### **8.7.1 Padrão de Tratamento de Erros**
+
+O sistema segue um padrão consistente para tratamento e resposta de erros em todas as API Routes.
+
+#### **Formato Padrão de Resposta de Erro**
+
+```typescript
+{
+  success: false,
+  error: string,        // Tipo/categoria do erro
+  message: string,      // Mensagem amigável para o usuário
+  details?: any         // Detalhes adicionais (validações, stack em dev)
+}
+```
+
+#### **Códigos HTTP e Tipos de Erro**
+
+| Código | Tipo | Quando Usar | Exemplo |
+|--------|------|-------------|---------|
+| **400** | Bad Request | Dados inválidos, validação falhou | Email já cadastrado, campos obrigatórios faltando |
+| **401** | Unauthorized | Token ausente ou inválido | Token expirado, não autenticado |
+| **403** | Forbidden | Sem permissão para a ação | Membro tentando acessar área admin |
+| **404** | Not Found | Recurso não encontrado | Intenção/Membro/Indicação não existe |
+| **409** | Conflict | Conflito de estado | Token já usado, status inválido para transição |
+| **500** | Internal Server Error | Erro interno do servidor | Erro de conexão com banco, exceção não tratada |
+
+#### **Exemplos de Respostas de Erro**
+
+**Validação (400):**
+```json
+{
+  "success": false,
+  "error": "Dados inválidos",
+  "details": [
+    { "path": "email", "message": "Email inválido" },
+    { "path": "nome", "message": "Nome deve ter pelo menos 2 caracteres" }
+  ]
+}
+```
+
+**Não Autorizado (401):**
+```json
+{
+  "success": false,
+  "error": "Não autorizado",
+  "message": "Token de autenticação inválido ou ausente"
+}
+```
+
+**Recurso Não Encontrado (404):**
+```json
+{
+  "success": false,
+  "error": "Recurso não encontrado",
+  "message": "Intenção não encontrada"
+}
+```
+
+**Conflito (409):**
+```json
+{
+  "success": false,
+  "error": "Conflito",
+  "message": "Token de convite já foi utilizado"
+}
+```
+
+#### **Tratamento de Erros no Código**
+
+```typescript
+// Padrão de tratamento em API Routes
+export async function POST(request: NextRequest) {
+  try {
+    // Lógica da rota
+    const result = await service.criar(data);
+    
+    return NextResponse.json(
+      { success: true, data: result },
+      { status: 201 }
+    );
+  } catch (error) {
+    // Erro de validação Zod
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Dados inválidos',
+          details: error.errors.map(err => ({
+            path: err.path.join('.'),
+            message: err.message
+          }))
+        },
+        { status: 400 }
+      );
+    }
+    
+    // Erro de negócio conhecido
+    if (error instanceof BusinessError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: error.type,
+          message: error.message
+        },
+        { status: error.statusCode }
+      );
+    }
+    
+    // Erro inesperado
+    console.error('Erro inesperado:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Erro interno do servidor',
+        message: process.env.NODE_ENV === 'development' 
+          ? error.message 
+          : 'Ocorreu um erro inesperado. Tente novamente mais tarde.'
+      },
+      { status: 500 }
+    );
+  }
+}
+```
+
+#### **Logging de Erros**
+
+- **Desenvolvimento:** Log completo com stack trace
+- **Produção:** Log apenas tipo e mensagem (sem dados sensíveis)
+- **Erros críticos:** Notificar administradores (futuro: integração com Sentry)
+
+### **8.8 Autenticação de Membros**
+
+Após o cadastro completo, os membros precisam de autenticação para acessar funcionalidades protegidas. O sistema utiliza **JWT (JSON Web Tokens)** para autenticação de membros.
+
+#### **Fluxo de Autenticação**
+
+1. **Após Cadastro Completo:**
+   - Membro completa cadastro via `/register/[token]`
+   - Sistema gera token JWT contendo: `{ membroId, email, isActive }`
+   - Token é retornado na resposta do cadastro
+   - Frontend armazena token em `localStorage` ou `httpOnly cookie`
+
+2. **Uso do Token:**
+   - Token é enviado no header `Authorization: Bearer {token}` em todas as requisições protegidas
+   - Validade padrão: **30 dias** (renovável)
+   - Token é validado em middleware antes de acessar rotas protegidas
+
+3. **Renovação de Token:**
+   - Token pode ser renovado via endpoint `POST /api/auth/refresh`
+   - Novo token é gerado se o token atual estiver válido e não expirado
+
+#### **Implementação Técnica**
+
+```typescript
+// Geração de token JWT
+import jwt from 'jsonwebtoken';
+
+const token = jwt.sign(
+  { 
+    membroId: member._id, 
+    email: member.email,
+    isActive: member.ativo 
+  },
+  process.env.JWT_SECRET!,
+  { expiresIn: '30d' }
+);
+
+// Validação de token em middleware
+export function verificarMembroToken(request: NextRequest): DecodedToken | null {
+  const authHeader = request.headers.get('Authorization');
+  const token = authHeader?.replace('Bearer ', '');
+  
+  if (!token) return null;
+  
+  try {
+    return jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
+  } catch {
+    return null;
+  }
+}
+```
+
+#### **Rotas Protegidas para Membros**
+
+- `POST /api/referrals` - Criar indicação
+- `GET /api/referrals` - Listar indicações (feitas/recebidas)
+- `PATCH /api/referrals/[id]/status` - Atualizar status
+- `POST /api/obrigados` - Criar agradecimento
+- `GET /api/meetings` - Listar reuniões
+- `POST /api/meetings` - Criar reunião
+- `PATCH /api/meetings/[id]/checkin` - Realizar check-in
+- `GET /api/members/me` - Obter dados do próprio perfil
+- `PATCH /api/members/me` - Atualizar próprio perfil
+
+#### **Variáveis de Ambiente**
+
+```env
+JWT_SECRET=seu_jwt_secret_super_seguro_aqui
+JWT_EXPIRES_IN=30d
+```
+
+**Boas Práticas:**
+- JWT_SECRET deve ser uma string aleatória longa (mínimo 32 caracteres)
+- Usar diferentes secrets para dev/prod
+- Rotacionar secret periodicamente
+- Armazenar token em httpOnly cookie em produção (mais seguro que localStorage)
 
 ---
 
-## 🔐 8.8 Acesso e Permissões
+## 🔐 8.9 Acesso e Permissões
 
 O sistema define três níveis de acesso com permissões específicas para cada função:
 
@@ -1514,6 +1810,145 @@ Cobrem os fluxos críticos do sistema:
 - **Faker.js (pt_BR):** Para geração de dados de teste realistas
 - **Jest + React Testing Library:** Para testes unitários e de componentes
 
+### **11.4 Estratégia de Testes Detalhada**
+
+#### **Configuração de Ambiente de Teste**
+
+**MongoDB Memory Server:**
+- Banco de dados isolado para cada suite de testes
+- Limpeza automática entre testes
+- Configuração em `jest.setup.js`:
+
+```typescript
+import { MongoMemoryServer } from 'mongodb-memory-server';
+
+let mongoServer: MongoMemoryServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  process.env.MONGODB_URI = mongoServer.getUri();
+});
+
+afterAll(async () => {
+  await mongoServer.stop();
+});
+
+afterEach(async () => {
+  // Limpar collections entre testes
+  const db = await getDatabase();
+  await db.collection('intentions').deleteMany({});
+  await db.collection('members').deleteMany({});
+  // ... outras collections
+});
+```
+
+**MSW (Mock Service Worker):**
+- Intercepta requisições HTTP em testes
+- Permite testar componentes sem servidor real
+- Configuração em `src/tests/mocks/handlers.ts`:
+
+```typescript
+import { rest } from 'msw';
+
+export const handlers = [
+  rest.post('/api/intentions', (req, res, ctx) => {
+    return res(ctx.status(201), ctx.json({ success: true, data: {...} }));
+  }),
+  // ... outros handlers
+];
+```
+
+#### **Estrutura de Testes**
+
+```
+tests/
+├── unit/                    # Testes unitários
+│   ├── components/          # Componentes isolados
+│   ├── hooks/              # Custom hooks
+│   ├── services/           # Services (lógica de negócio)
+│   ├── repositories/       # Repositories (acesso a dados)
+│   └── utils/              # Funções utilitárias
+│
+├── integration/            # Testes de integração
+│   ├── api/                # API Routes completas
+│   ├── flows/              # Fluxos completos
+│   │   ├── admission.test.ts      # Intenção → Aprovação → Cadastro
+│   │   ├── referral.test.ts        # Criação → Atualização → Obrigado
+│   │   └── meeting.test.ts         # Criação → Check-in
+│   └── database/           # Testes de persistência
+│
+└── e2e/                     # Testes end-to-end (Cypress)
+    ├── admission.cy.ts      # Fluxo completo de admissão
+    ├── referral.cy.ts       # Fluxo de indicações
+    └── dashboard.cy.ts      # Dashboard administrativo
+```
+
+#### **Cobertura de Testes por Camada**
+
+| Camada | Cobertura Mínima | Foco |
+|--------|-------------------|------|
+| **Components** | 95% | Renderização, interações, validações de formulário |
+| **Hooks** | 95% | Lógica de estado, chamadas de API, cache |
+| **Services** | 95% | Regras de negócio, validações, transformações |
+| **Repositories** | 90% | Queries, CRUD, validações de dados |
+| **API Routes** | 95% | End-to-end: request → service → response |
+| **Utils** | 95% | Funções puras, formatação, cálculos |
+
+#### **Comandos de Teste**
+
+```bash
+# Executar todos os testes
+pnpm test
+
+# Executar com cobertura
+pnpm test:coverage
+
+# Executar apenas testes unitários
+pnpm test:unit
+
+# Executar apenas testes de integração
+pnpm test:integration
+
+# Executar testes E2E (Cypress)
+pnpm test:e2e
+
+# Executar testes em modo watch
+pnpm test:watch
+```
+
+#### **Exemplo de Teste de Integração**
+
+```typescript
+describe('Fluxo Completo de Admissão', () => {
+  it('deve criar intenção, aprovar, gerar convite e cadastrar membro', async () => {
+    // 1. Criar intenção
+    const intencao = await criarIntencao(dadosFake);
+    expect(intencao.status).toBe('pending');
+    
+    // 2. Aprovar intenção (admin)
+    const aprovacao = await aprovarIntencao(intencao._id, ADMIN_TOKEN);
+    expect(aprovacao.status).toBe('approved');
+    expect(aprovacao.invite.token).toBeDefined();
+    
+    // 3. Validar token
+    const validacao = await validarToken(aprovacao.invite.token);
+    expect(validacao.valido).toBe(true);
+    
+    // 4. Cadastrar membro completo
+    const membro = await cadastrarMembro({
+      ...dadosFake,
+      token: aprovacao.invite.token
+    });
+    expect(membro._id).toBeDefined();
+    expect(membro.ativo).toBe(true);
+    
+    // 5. Verificar token marcado como usado
+    const inviteUsado = await buscarInvite(aprovacao.invite.token);
+    expect(inviteUsado.usado).toBe(true);
+  });
+});
+```
+
 ### Implementado
 - ✅ **Testes Unitários:**
   - ✅ Componentes: IntentionForm, Button, Input
@@ -1533,20 +1968,161 @@ Cobrem os fluxos críticos do sistema:
 
 ---
 
-## ⚙️ 12. Deploy
+## ⚙️ 12. Performance e Otimizações
+
+### **12.1 Paginação e Limites**
+
+Todas as listagens implementam paginação para garantir performance:
+
+| Endpoint | Limite Padrão | Limite Máximo | Ordenação |
+|----------|---------------|---------------|-----------|
+| `GET /api/intentions` | 20 | 100 | `createdAt: -1` |
+| `GET /api/referrals` | 20 | 100 | `createdAt: -1` |
+| `GET /api/members` | 20 | 100 | `createdAt: -1` |
+| `GET /api/obrigados` | 20 | 100 | `createdAt: -1` |
+| `GET /api/meetings` | 20 | 100 | `data: -1` |
+
+**Parâmetros de Paginação:**
+- `page`: Número da página (default: 1)
+- `limit`: Itens por página (default: 20, max: 100)
+
+**Resposta com Paginação:**
+```json
+{
+  "success": true,
+  "data": [...],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 45,
+    "totalPages": 3
+  }
+}
+```
+
+### **12.2 Cache e TTL**
+
+O sistema utiliza TanStack Query para cache inteligente:
+
+| Tipo de Dado | staleTime | gcTime | Refetch |
+|--------------|-----------|--------|---------|
+| **Dados Críticos** (intenções, indicações) | 5s | 10min | onFocus, onMount, onInterval (5s) |
+| **Dados Estáticos** (membros, configurações) | 5min | 30min | onFocus, onMount |
+| **Dados Públicos** (avisos) | 1min | 5min | onFocus, onMount |
+
+**Configuração Global:**
+```typescript
+// src/app/providers.tsx
+staleTime: 1000 * 60 * 5,  // 5 minutos padrão
+gcTime: 1000 * 60 * 10,    // 10 minutos no cache
+refetchOnWindowFocus: true,
+refetchOnMount: true,
+```
+
+### **12.3 Índices MongoDB**
+
+Índices otimizados para queries frequentes:
+
+**Collection: `intentions`:**
+- `{ email: 1 }` - Único (evita duplicatas)
+- `{ status: 1, createdAt: -1 }` - Composto (listagem admin)
+- `{ createdAt: -1 }` - Ordenação temporal
+
+**Collection: `referrals`:**
+- `{ membroIndicadorId: 1, status: 1 }` - Indicações feitas
+- `{ membroIndicadoId: 1, status: 1 }` - Indicações recebidas
+- `{ status: 1, createdAt: -1 }` - Dashboard e relatórios
+
+**Collection: `members`:**
+- `{ email: 1 }` - Único (login e busca)
+- `{ ativo: 1, createdAt: -1 }` - Listagem de membros ativos
+
+### **12.4 Rate Limiting**
+
+Proteção contra abuso e sobrecarga:
+
+| Endpoint | Limite | Janela | Ação |
+|----------|--------|--------|------|
+| `POST /api/intentions` | 3 req | 1 hora | Bloqueia IP temporariamente |
+| `POST /api/members` | 5 req | 1 hora | Bloqueia IP temporariamente |
+| `POST /api/referrals` | 20 req | 1 minuto | Retorna 429 (Too Many Requests) |
+| `GET /api/*` | 100 req | 1 minuto | Retorna 429 |
+
+**Implementação Futura:**
+- Usar `@upstash/ratelimit` ou similar
+- Armazenar contadores em Redis
+- Headers de resposta: `X-RateLimit-Limit`, `X-RateLimit-Remaining`
+
+### **12.5 Otimizações de Queries**
+
+**Agregações MongoDB:**
+- Usar `$lookup` para joins quando necessário
+- `$project` para retornar apenas campos necessários
+- `$limit` e `$skip` para paginação eficiente
+
+**Exemplo de Query Otimizada:**
+```typescript
+// Buscar indicações com dados do membro indicado
+db.referrals.aggregate([
+  { $match: { membroIndicadorId: memberId } },
+  { $lookup: {
+      from: 'members',
+      localField: 'membroIndicadoId',
+      foreignField: '_id',
+      as: 'membroIndicado'
+    }
+  },
+  { $unwind: '$membroIndicado' },
+  { $project: {
+      empresaContato: 1,
+      descricao: 1,
+      status: 1,
+      'membroIndicado.nome': 1,
+      'membroIndicado.empresa': 1
+    }
+  },
+  { $sort: { createdAt: -1 } },
+  { $limit: 20 }
+]);
+```
+
+### **12.6 Lazy Loading e Code Splitting**
+
+- **Componentes:** Lazy load de componentes pesados (gráficos, tabelas grandes)
+- **Rotas:** Code splitting automático pelo Next.js App Router
+- **Imagens:** Next.js Image component com otimização automática
+
+### **12.7 Monitoramento de Performance**
+
+**Métricas a Monitorar:**
+- Tempo de resposta de APIs (p95, p99)
+- Taxa de erro por endpoint
+- Uso de memória e CPU
+- Conexões ativas no MongoDB
+- Tamanho das collections
+
+**Ferramentas Futuras:**
+- Vercel Analytics (frontend)
+- MongoDB Atlas Performance Advisor
+- Sentry (erros e performance)
+
+---
+
+## 🚀 13. Deploy
 - **Frontend:** Vercel  
 - **Backend/API:** rotas integradas (Next.js)  
 - **Banco:** MongoDB Atlas  
 - **Variáveis (.env.local):**
   ```env
   MONGODB_URI=
-  ADMIN_SECRET=
-  NEXT_PUBLIC_API_URL=
+  ADMIN_TOKEN=
+  JWT_SECRET=
+  NEXT_PUBLIC_APP_URL=
   ```
 
 ---
 
-## 📊 13. Critérios de Avaliação (Ajustados)
+## 📊 14. Critérios de Avaliação (Ajustados)
 
 | Critério | Peso | Requisito |
 |-----------|-------|-----------|
@@ -1557,10 +2133,10 @@ Cobrem os fluxos críticos do sistema:
 
 ---
 
-## ✅ 14. Conclusão
+## ✅ 15. Conclusão
 Este documento define uma base sólida para a implementação de um sistema moderno, escalável e responsivo, aplicando os princípios de **Clean Code**, **Clean Architecture**, **Atomic Design**, **UI Otimista** e **Realtime Refetch**.  
 
-### **14.1 Benefícios das Regras e Fluxos Definidos**
+### **15.1 Benefícios das Regras e Fluxos Definidos**
 
 As regras e fluxos definidos asseguram:
 - **Clareza nas responsabilidades e etapas:** Cada módulo possui regras de negócio claras e fluxos bem documentados, facilitando a manutenção e evolução do sistema.
@@ -1568,7 +2144,7 @@ As regras e fluxos definidos asseguram:
 - **Validações consistentes e controle administrativo robusto:** Todas as entradas são validadas com Zod no frontend e backend, garantindo integridade dos dados e segurança.
 - **Base sólida para evolução futura:** A arquitetura permite fácil adição de funcionalidades como notificações, gamificação e planos pagos sem necessidade de refatoração significativa.
 
-### **14.2 Progresso Atual**
+### **15.2 Progresso Atual**
 O projeto está em desenvolvimento ativo com a base sólida já implementada:
 - ✅ Infraestrutura completa (MongoDB, React Query, Jest)
 - ✅ Componentes UI base (Button, Input, Textarea, Card, Badge, Skeleton)
@@ -1576,8 +2152,8 @@ O projeto está em desenvolvimento ativo com a base sólida já implementada:
 - ✅ Camadas de arquitetura (Repositories, Services, Types)
 - ✅ Helpers de teste configurados
 
-### ✅ Correções de Configuração Concluídas
-Todas as correções de configuração identificadas na seção 15 foram concluídas:
+### **15.3 Correções de Configuração Concluídas**
+Todas as correções de configuração identificadas na seção 16 foram concluídas:
 1. ✅ Corrigidos caminhos no `jest.config.js` para estrutura `src/`
 2. ✅ Criado arquivo `.env.example` com todas as variáveis necessárias
 3. ✅ Adicionados headers de segurança no `next.config.ts`
@@ -1595,11 +2171,11 @@ Com cobertura de testes de **95%+** (meta), o sistema garantirá confiabilidade 
 
 ---
 
-## ⚠️ 15. Problemas de Configuração Identificados
+## ⚠️ 16. Problemas de Configuração Identificados
 
 Antes de iniciar a implementação das features pendentes, os seguintes problemas de configuração precisam ser corrigidos:
 
-### **15.1 Configuração do Jest (jest.config.js)** ✅ **CONCLUÍDO**
+### **16.1 Configuração do Jest (jest.config.js)** ✅ **CONCLUÍDO**
 
 **Problema:** Os caminhos de cobertura estavam incorretos - estava procurando em `app/**`, `components/**`, mas o projeto usa `src/app/**`, `src/components/**`.
 
@@ -1607,7 +2183,7 @@ Antes de iniciar a implementação das features pendentes, os seguintes problema
 - ✅ Ajustado `collectCoverageFrom` para usar `src/app/**`, `src/components/**`, `src/hooks/**`, `src/services/**`, `src/lib/**`
 - ✅ Ajustado `moduleNameMapper` para mapear `@/*` para `<rootDir>/src/*`
 
-### **15.2 Arquivo .env.example** ✅ **CONCLUÍDO**
+### **16.2 Arquivo .env.example** ✅ **CONCLUÍDO**
 
 **Problema:** Arquivo não existia, mas é necessário conforme boas práticas.
 
@@ -1620,7 +2196,7 @@ Antes de iniciar a implementação das features pendentes, os seguintes problema
   NEXT_PUBLIC_APP_URL=http://localhost:3000
   ```
 
-### **15.3 Headers de Segurança (next.config.ts)** ✅ **CONCLUÍDO**
+### **16.3 Headers de Segurança (next.config.ts)** ✅ **CONCLUÍDO**
 
 **Problema:** Headers de segurança não estavam configurados conforme documentação.
 
@@ -1632,7 +2208,7 @@ Antes de iniciar a implementação das features pendentes, os seguintes problema
   - X-Content-Type-Options
   - X-XSS-Protection
 
-### **15.4 Inconsistência nos Imports TypeScript** ✅ **CONCLUÍDO**
+### **16.4 Inconsistência nos Imports TypeScript** ✅ **CONCLUÍDO**
 
 **Problema:** Alguns arquivos usavam `@/src/...` e outros `@/lib/...`. O `tsconfig.json` definia `@/*` como `./*`, então havia inconsistência.
 
@@ -1644,7 +2220,7 @@ Antes de iniciar a implementação das features pendentes, os seguintes problema
   - `@/src/hooks/...` → `@/hooks/...`
 - ✅ Revisados e corrigidos todos os imports no projeto (15 arquivos atualizados)
 
-### **15.5 Estrutura de Pastas**
+### **16.5 Estrutura de Pastas**
 
 **Observação:** O projeto utiliza a estrutura `src/` para organização do código. Todos os caminhos de configuração devem considerar essa estrutura.
 
@@ -1662,7 +2238,7 @@ src/
 
 ---
 
-## 📋 16. Checklist de Implementação
+## 📋 17. Checklist de Implementação
 
 ### **Infraestrutura e Configuração**
 - [x] Configuração do projeto Next.js 15 com App Router
