@@ -391,129 +391,130 @@ A estrutura segue o padrão **ATOMIC DESIGN** para garantir reutilização e man
 - ✅ Repositórios e serviços organizados
 
 ```
-app/
-├── (public)/                    # Rotas públicas
-│   ├── intention/               # Formulário de intenção ✅
-│   │   └── page.tsx
-│   └── register/                # Cadastro completo com token
-│       └── [token]/page.tsx
+src/
+├── app/                         # Next.js App Router
+│   ├── (public)/                # Rotas públicas
+│   │   ├── intention/           # Formulário de intenção ✅
+│   │   │   └── page.tsx
+│   │   └── register/            # Cadastro completo com token
+│   │       └── [token]/page.tsx
+│   │
+│   ├── (admin)/                 # Rotas administrativas
+│   │   ├── intents/             # Gestão de intenções
+│   │   │   └── page.tsx
+│   │   ├── referrals/           # Gestão de indicações
+│   │   │   └── page.tsx
+│   │   ├── dashboard/           # Dashboard de performance
+│   │   │   └── page.tsx
+│   │   └── members/             # Lista de membros
+│   │       └── page.tsx
+│   │
+│   ├── api/                     # API Routes
+│   │   ├── intentions/
+│   │   │   ├── route.ts         # POST ✅
+│   │   │   └── [id]/
+│   │   │       └── status/route.ts  # PATCH
+│   │   ├── invites/
+│   │   │   ├── route.ts         # POST
+│   │   │   └── [token]/route.ts # GET
+│   │   ├── members/
+│   │   │   └── route.ts         # POST, GET
+│   │   └── referrals/
+│   │       ├── route.ts         # GET, POST
+│   │       └── [id]/
+│   │           └── status/route.ts  # PATCH
+│   │
+│   ├── layout.tsx               # Layout raiz
+│   ├── page.tsx                 # Homepage
+│   └── providers.tsx            # ✅ React Query Provider (refetch configurado)
 │
-├── (admin)/                     # Rotas administrativas
-│   ├── intents/                 # Gestão de intenções
-│   │   └── page.tsx
-│   ├── referrals/               # Gestão de indicações
-│   │   └── page.tsx
-│   ├── dashboard/                # Dashboard de performance
-│   │   └── page.tsx
-│   └── members/                 # Lista de membros
-│       └── page.tsx
+├── components/                  # Componentes React
+│   ├── ui/                      # ATOMS - Componentes básicos ✅
+│   │   ├── button.tsx           # ✅ Implementado
+│   │   ├── input.tsx            # ✅ Implementado
+│   │   ├── textarea.tsx         # ✅ Implementado
+│   │   ├── card.tsx             # ✅ Implementado
+│   │   ├── badge.tsx            # ✅ Implementado
+│   │   ├── skeleton.tsx         # ✅ Implementado
+│   │   └── ...                  # Modal, Toast, Select pendentes
+│   │
+│   ├── features/                # MOLECULES & ORGANISMS - Por feature
+│   │   ├── intention/
+│   │   │   ├── IntentionForm.tsx    # ✅ Implementado com testes
+│   │   │   └── IntentionList.tsx    # ⏳ Pendente
+│   │   ├── member/
+│   │   │   ├── MemberForm.tsx
+│   │   │   └── MemberCard.tsx
+│   │   ├── referral/
+│   │   │   ├── ReferralForm.tsx
+│   │   │   ├── ReferralTable.tsx
+│   │   │   └── ReferralStatusBadge.tsx
+│   │   └── dashboard/
+│   │       ├── StatsCard.tsx
+│   │       └── PerformanceChart.tsx
+│   │
+│   └── layouts/                 # TEMPLATES - Layouts reutilizáveis
+│       ├── AdminLayout.tsx
+│       ├── PublicLayout.tsx
+│       └── DashboardLayout.tsx
+
+├── hooks/                      # Custom Hooks
+│   ├── useIntentions.ts        # ✅ Implementado (criação) com testes
+│   ├── useReferrals.ts         # ⏳ Pendente
+│   ├── useMembers.ts           # ⏳ Pendente
+│   └── useDashboard.ts         # ⏳ Pendente
 │
-├── api/                         # API Routes
-│   ├── intentions/
-│   │   ├── route.ts             # POST ✅
-│   │   └── [id]/
-│   │       └── status/route.ts  # PATCH
-│   ├── invites/
-│   │   ├── route.ts             # POST
-│   │   └── [token]/route.ts     # GET
-│   ├── members/
-│   │   └── route.ts             # POST, GET
-│   └── referrals/
-│       ├── route.ts             # GET, POST
-│       └── [id]/
-│           └── status/route.ts  # PATCH
+├── services/                   # Camada de Aplicação
+│   ├── IntentionService.ts     # ✅ Implementado
+│   ├── InviteService.ts        # ✅ Implementado
+│   ├── MemberService.ts        # ✅ Implementado
+│   ├── ReferralService.ts      # ✅ Implementado
+│   └── DashboardService.ts     # ⏳ Pendente
 │
-├── layout.tsx                   # Layout raiz
-├── page.tsx                    # Homepage
-└── providers.tsx               # ✅ React Query Provider (refetch configurado)
-
-components/
-├── ui/                         # ATOMS - Componentes básicos ✅
-│   ├── button.tsx              # ✅ Implementado
-│   ├── input.tsx                # ✅ Implementado
-│   ├── textarea.tsx             # ✅ Implementado
-│   ├── card.tsx                 # ✅ Implementado
-│   ├── badge.tsx                # ✅ Implementado
-│   ├── skeleton.tsx              # ✅ Implementado
-│   └── ...                      # Modal, Toast, Select pendentes
+├── lib/                        # Infraestrutura
+│   ├── mongodb.ts              # ✅ Conexão MongoDB (pooling, transactions)
+│   ├── repositories/           # ✅ Camada de Infraestrutura
+│   │   ├── IntentionRepository.ts  # ✅ Implementado
+│   │   ├── InviteRepository.ts     # ✅ Implementado
+│   │   ├── MemberRepository.ts    # ✅ Implementado
+│   │   └── ReferralRepository.ts   # ✅ Implementado
+│   └── utils.ts               # ✅ Utilitários (cn function)
 │
-├── features/                   # MOLECULES & ORGANISMS - Por feature
-│   ├── intention/
-│   │   ├── IntentionForm.tsx   # ✅ Implementado com testes
-│   │   └── IntentionList.tsx   # ⏳ Pendente
-│   ├── member/
-│   │   ├── MemberForm.tsx
-│   │   └── MemberCard.tsx
-│   ├── referral/
-│   │   ├── ReferralForm.tsx
-│   │   ├── ReferralTable.tsx
-│   │   └── ReferralStatusBadge.tsx
-│   └── dashboard/
-│       ├── StatsCard.tsx
-│       └── PerformanceChart.tsx
+├── types/                      # ✅ TypeScript Types
+│   ├── intention.ts            # ✅ Implementado (com DTOs)
+│   ├── invite.ts               # ✅ Implementado (com DTOs)
+│   ├── member.ts               # ✅ Implementado (com DTOs)
+│   ├── referral.ts             # ✅ Implementado (com DTOs)
+│   └── ...                     # Meeting, Notice, Payment pendentes
 │
-└── layouts/                    # TEMPLATES - Layouts reutilizáveis
-    ├── AdminLayout.tsx
-    ├── PublicLayout.tsx
-    └── DashboardLayout.tsx
-
-hooks/                          # Custom Hooks
-├── useIntentions.ts            # ✅ Implementado (criação) com testes
-├── useReferrals.ts            # ⏳ Pendente
-├── useMembers.ts              # ⏳ Pendente
-└── useDashboard.ts             # ⏳ Pendente
-
-services/                       # Camada de Aplicação
-├── IntentionService.ts         # ✅ Implementado
-├── InviteService.ts            # ✅ Implementado
-├── MemberService.ts            # ✅ Implementado
-├── ReferralService.ts          # ✅ Implementado
-└── DashboardService.ts         # ⏳ Pendente
-
-lib/
-├── mongodb.ts                  # ✅ Conexão MongoDB (pooling, transactions)
-├── repositories/              # ✅ Camada de Infraestrutura
-│   ├── IntentionRepository.ts # ✅ Implementado
-│   ├── InviteRepository.ts    # ✅ Implementado
-│   ├── MemberRepository.ts    # ✅ Implementado
-│   └── ReferralRepository.ts  # ✅ Implementado
-└── utils.ts                   # ✅ Utilitários (cn function)
-
-types/                         # ✅ TypeScript Types
-├── intention.ts               # ✅ Implementado (com DTOs)
-├── invite.ts                  # ✅ Implementado (com DTOs)
-├── member.ts                  # ✅ Implementado (com DTOs)
-├── referral.ts                # ✅ Implementado (com DTOs)
-└── ...                        # Meeting, Notice, Payment pendentes
-
-context/                       # React Contexts (se necessário)
-└── AuthContext.tsx
-
-tests/
-├── helpers/                   # ✅ Helpers de teste
-│   ├── faker.ts               # ✅ Faker.js configurado (pt_BR)
-│   └── seeders.ts             # ✅ Seeders para popular banco
-├── unit/                      # ✅ Testes unitários (parcial)
-│   └── ...                    # IntentionForm, useIntentions, API Route
-├── integration/               # ⏳ Testes de integração
-└── e2e/                       # ⏳ Testes end-to-end (Cypress)
+├── context/                    # React Contexts (se necessário)
+│   └── AuthContext.tsx
+│
+└── tests/                      # Helpers de teste
+    ├── helpers/                # ✅ Helpers de teste
+    │   ├── faker.ts            # ✅ Faker.js configurado (pt_BR)
+    │   └── seeders.ts          # ✅ Seeders para popular banco
+    ├── unit/                   # ✅ Testes unitários (parcial)
+    │   └── ...                 # IntentionForm, useIntentions, API Route
+    ├── integration/            # ⏳ Testes de integração
+    └── e2e/                    # ⏳ Testes end-to-end (Cypress)
 ```
 
 ### **5.2 Organização por Features**
 
 Cada funcionalidade possui:
-- **Componentes específicos** em `components/features/[feature]/`
-- **Hook customizado** em `hooks/use[Feature].ts`
-- **Service** em `services/[Feature]Service.ts`
-- **Repository** em `lib/repositories/[Feature]Repository.ts`
-- **Types** em `types/[feature].ts`
-- **API Routes** em `app/api/[feature]/`
+- **Componentes específicos** em `src/components/features/[feature]/`
+- **Hook customizado** em `src/hooks/use[Feature].ts`
+- **Service** em `src/services/[Feature]Service.ts`
+- **Repository** em `src/lib/repositories/[Feature]Repository.ts`
+- **Types** em `src/types/[feature].ts`
+- **API Routes** em `src/app/api/[feature]/`
 
 ### **5.3 Server Components vs Client Components**
 
 **Server Components (padrão):**
-- Páginas (`app/**/page.tsx`)
-- Layouts (`app/layout.tsx`, `components/layouts/`)
+- Páginas (`src/app/**/page.tsx`)
+- Layouts (`src/app/layout.tsx`, `src/components/layouts/`)
 - Componentes de apresentação sem interatividade
 
 **Client Components (`'use client'`):**
@@ -1114,7 +1115,7 @@ if (!invite || invite.usado || invite.expiraEm < new Date()) {
 
 ### **8.3 Headers de Segurança**
 
-Headers de segurança configurados no Next.js:
+Headers de segurança devem ser configurados no Next.js:
 
 ```typescript
 // next.config.ts
@@ -1140,7 +1141,20 @@ const securityHeaders = [
     value: '1; mode=block'
   }
 ];
+
+export default {
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: securityHeaders,
+      },
+    ];
+  },
+};
 ```
+
+**Status:** Headers de segurança precisam ser implementados no `next.config.ts`.
 
 ### **8.4 Rate Limiting**
 
@@ -1194,6 +1208,8 @@ NEXT_PUBLIC_APP_URL=https://app.com
 - Usar `.env.example` como template
 - Rotacionar tokens periodicamente
 - Usar diferentes tokens para dev/prod
+
+**Status:** Arquivo `.env.example` precisa ser atualizado com todas as variáveis necessárias.
 
 ---
 
@@ -1288,7 +1304,15 @@ O projeto está em desenvolvimento ativo com a base sólida já implementada:
 - ✅ Camadas de arquitetura (Repositories, Services, Types)
 - ✅ Helpers de teste configurados
 
+### ⚠️ Ações Necessárias Antes de Continuar
+Antes de iniciar a implementação das features pendentes, é **essencial** corrigir os problemas de configuração identificados na seção 15:
+1. Corrigir caminhos no `jest.config.js` para estrutura `src/`
+2. Criar arquivo `.env.example` com todas as variáveis necessárias
+3. Adicionar headers de segurança no `next.config.ts`
+4. Padronizar imports TypeScript (ajustar paths e revisar imports)
+
 ### Próximos Passos
+- 🔧 **PRIORITÁRIO:** Corrigir problemas de configuração (seção 15)
 - 🚧 Área administrativa para gestão de intenções
 - 🚧 Sistema completo de convites e cadastro de membros
 - 🚧 Sistema de indicações de negócios
@@ -1299,7 +1323,66 @@ Com cobertura de testes de **95%+** (meta), o sistema garantirá confiabilidade 
 
 ---
 
-## 📋 15. Checklist de Implementação
+## ⚠️ 15. Problemas de Configuração Identificados
+
+Antes de iniciar a implementação das features pendentes, os seguintes problemas de configuração precisam ser corrigidos:
+
+### **15.1 Configuração do Jest (jest.config.js)**
+
+**Problema:** Os caminhos de cobertura estão incorretos - está procurando em `app/**`, `components/**`, mas o projeto usa `src/app/**`, `src/components/**`.
+
+**Correção necessária:**
+- Ajustar `collectCoverageFrom` para usar `src/app/**`, `src/components/**`, `src/hooks/**`, `src/services/**`, `src/lib/**`
+- Verificar se `moduleNameMapper` está correto para a estrutura `src/` (deve mapear `@/*` para `<rootDir>/src/*`)
+
+### **15.2 Arquivo .env.example**
+
+**Problema:** Arquivo não existe, mas é necessário conforme boas práticas.
+
+**Correção necessária:**
+- Criar `.env.example` na raiz do projeto com todas as variáveis de ambiente necessárias:
+  ```env
+  MONGODB_URI=mongodb+srv://...
+  MONGODB_DB_NAME=networking_group
+  ADMIN_TOKEN=seu_token_secreto_aqui
+  NEXT_PUBLIC_APP_URL=http://localhost:3000
+  ```
+
+### **15.3 Headers de Segurança (next.config.ts)**
+
+**Problema:** Headers de segurança não estão configurados conforme documentação.
+
+**Correção necessária:**
+- Adicionar função `headers()` no `next.config.ts` com os headers de segurança listados na seção 8.3
+
+### **15.4 Inconsistência nos Imports TypeScript**
+
+**Problema:** Alguns arquivos usam `@/src/...` e outros `@/lib/...`. O `tsconfig.json` define `@/*` como `./*`, então há inconsistência.
+
+**Correção necessária:**
+- Opção 1: Ajustar `tsconfig.json` para que `@/*` aponte para `./src/*` e padronizar todos os imports para usar `@/...` (sem `src/`)
+- Opção 2: Manter `@/*` como `./*` e garantir que todos os imports usem `@/src/...` consistentemente
+- Revisar e padronizar todos os imports no projeto
+
+### **15.5 Estrutura de Pastas**
+
+**Observação:** O projeto utiliza a estrutura `src/` para organização do código. Todos os caminhos de configuração devem considerar essa estrutura.
+
+**Estrutura atual:**
+```
+src/
+├── app/          # Next.js App Router
+├── components/   # Componentes React
+├── hooks/        # Custom Hooks
+├── services/     # Camada de Aplicação
+├── lib/          # Infraestrutura (MongoDB, Repositories, Utils)
+├── types/        # TypeScript Types
+└── tests/        # Helpers de teste
+```
+
+---
+
+## 📋 16. Checklist de Implementação
 
 ### **Infraestrutura e Configuração**
 - [x] Configuração do projeto Next.js 15 com App Router
@@ -1308,8 +1391,10 @@ Com cobertura de testes de **95%+** (meta), o sistema garantirá confiabilidade 
 - [x] Configuração do Jest e React Testing Library
 - [ ] Configuração do ESLint e Prettier
 - [x] Configuração do TailwindCSS e ShadCN/UI
-- [x] Setup de variáveis de ambiente (.env.example)
-- [ ] Configuração de headers de segurança
+- [ ] **Setup de variáveis de ambiente (.env.example)** - ⚠️ **PENDENTE: Criar arquivo**
+- [ ] **Configuração de headers de segurança** - ⚠️ **PENDENTE: Adicionar no next.config.ts**
+- [ ] **Correção de caminhos no jest.config.js** - ⚠️ **PENDENTE: Ajustar para estrutura src/**
+- [ ] **Padronização de imports TypeScript** - ⚠️ **PENDENTE: Ajustar paths e imports**
 
 ### **Componentes UI Base (ATOMIC)**
 - [x] Button (variantes, tamanhos, loading, animações)
