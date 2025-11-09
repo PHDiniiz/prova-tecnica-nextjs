@@ -33,10 +33,10 @@ describe('IntentionForm', () => {
     useIntentions.mockReturnValue({
       criarIntencao: mockCriarIntencao,
       isCreating: false,
-      isSuccess: false,
-      isError: false,
-      error: null,
-      reset: mockReset,
+      isCreateSuccess: false,
+      isCreateError: false,
+      createError: null,
+      resetCreate: mockReset,
     });
   });
 
@@ -67,19 +67,32 @@ describe('IntentionForm', () => {
     const user = userEvent.setup();
     render(<IntentionForm />, { wrapper: createWrapper() });
 
-    const emailInput = screen.getByLabelText(/email/i);
-    await user.type(emailInput, 'email-invalido');
-    await user.tab(); // Sair do campo para triggerar validação
+    // Preenche campos obrigatórios com valores válidos
+    await user.type(screen.getByLabelText(/nome completo/i), 'João Silva');
+    await user.type(screen.getByLabelText(/empresa/i), 'Empresa Teste');
+    await user.type(screen.getByLabelText(/motivo/i), 'Quero participar do grupo de networking');
 
+    // Digita email inválido
+    const emailInput = screen.getByLabelText(/email/i) as HTMLInputElement;
+    await user.clear(emailInput);
+    await user.type(emailInput, 'email-invalido');
+
+    // Tenta submeter o formulário (isso deve triggerar a validação)
     const submitButton = screen.getByRole('button', { name: /enviar solicitação/i });
     await user.click(submitButton);
 
+    // Aguarda a mensagem de erro aparecer após a validação
+    // O react-hook-form valida no onSubmit e atualiza o formState.errors
     await waitFor(
       () => {
-        expect(screen.getByText(/email inválido/i)).toBeInTheDocument();
+        const errorMessage = screen.getByText(/Email inválido/i);
+        expect(errorMessage).toBeInTheDocument();
       },
       { timeout: 3000 }
     );
+
+    // Verifica que o mock não foi chamado (formulário não foi submetido devido à validação)
+    expect(mockCriarIntencao).not.toHaveBeenCalled();
   });
 
   it('deve validar tamanho mínimo do motivo', async () => {
@@ -129,16 +142,16 @@ describe('IntentionForm', () => {
     useIntentions.mockReturnValue({
       criarIntencao: mockCriarIntencao,
       isCreating: false,
-      isSuccess: true,
-      isError: false,
-      error: null,
-      reset: mockReset,
+      isCreateSuccess: true,
+      isCreateError: false,
+      createError: null,
+      resetCreate: mockReset,
     });
 
     render(<IntentionForm />, { wrapper: createWrapper() });
 
     expect(
-      screen.getByText(/intenção criada com sucesso/i)
+      screen.getByText(/Intenção criada com sucesso/i)
     ).toBeInTheDocument();
   });
 
@@ -147,25 +160,25 @@ describe('IntentionForm', () => {
     useIntentions.mockReturnValue({
       criarIntencao: mockCriarIntencao,
       isCreating: false,
-      isSuccess: false,
-      isError: true,
-      error,
-      reset: mockReset,
+      isCreateSuccess: false,
+      isCreateError: true,
+      createError: error,
+      resetCreate: mockReset,
     });
 
     render(<IntentionForm />, { wrapper: createWrapper() });
 
-    expect(screen.getByText(/erro ao criar intenção/i)).toBeInTheDocument();
+    expect(screen.getByText(/Erro ao criar intenção/i)).toBeInTheDocument();
   });
 
   it('deve desabilitar campos durante o envio', async () => {
     useIntentions.mockReturnValue({
       criarIntencao: mockCriarIntencao,
       isCreating: true,
-      isSuccess: false,
-      isError: false,
-      error: null,
-      reset: mockReset,
+      isCreateSuccess: false,
+      isCreateError: false,
+      createError: null,
+      resetCreate: mockReset,
     });
 
     render(<IntentionForm />, { wrapper: createWrapper() });

@@ -11,7 +11,7 @@ const customJestConfig = {
   testEnvironment: 'jest-environment-jsdom',
   
   // Setup files antes dos testes
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   
   // Cobertura de testes
   collectCoverageFrom: [
@@ -42,6 +42,11 @@ const customJestConfig = {
       },
     }],
   },
+  
+  // Transformar módulos ESM do node_modules (ex: bson do MongoDB, faker)
+  transformIgnorePatterns: [
+    'node_modules/(?!(bson|mongodb|@faker-js)/)',
+  ],
   
   // Arquivos de teste
   testMatch: [

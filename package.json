@@ -47,6 +47,6 @@
     "tailwindcss": "^4",
     "ts-jest": "^29.4.5",
     "typescript": "^5",
-    "husky": "^8.0.0"
+    "husky": "^9.1.7"
   }
 }
