@@ -1,8 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import { Referral, ReferralStatus } from '@/types/referral';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ReferralStatusBadge } from './ReferralStatusBadge';
+import { ObrigadoForm } from '@/components/features/obrigado/ObrigadoForm';
+
 // Função simples de formatação de data (sem dependência externa)
 const formatarDataSimples = (data: Date | string): string => {
   try {
@@ -33,8 +38,10 @@ export function ReferralCard({
   membroId,
   tipo,
 }: ReferralCardProps) {
+  const [showObrigadoForm, setShowObrigadoForm] = useState(false);
   const isDestinatario = referral.membroIndicadoId === membroId;
   const podeAtualizarStatus = isDestinatario && tipo === 'recebida';
+  const podeCriarObrigado = isDestinatario && tipo === 'recebida' && referral.status === 'fechada';
 
   const formatarData = formatarDataSimples;
 
@@ -44,6 +51,10 @@ export function ReferralCard({
       style: 'currency',
       currency: 'BRL',
     }).format(valor);
+  };
+
+  const handleObrigadoSuccess = () => {
+    setShowObrigadoForm(false);
   };
 
   return (
@@ -94,8 +105,34 @@ export function ReferralCard({
               </div>
             )}
           </div>
+
+          {podeCriarObrigado && (
+            <div className="pt-3 border-t border-gray-200 mt-3">
+              <Button
+                onClick={() => setShowObrigadoForm(true)}
+                variant="primary"
+                className="w-full"
+              >
+                Agradecer pela Indicação
+              </Button>
+            </div>
+          )}
         </div>
       </CardContent>
+
+      {/* Dialog para criar obrigado */}
+      <Dialog open={showObrigadoForm} onOpenChange={setShowObrigadoForm}>
+        <DialogContent size="md">
+          <DialogHeader>
+            <DialogTitle>Agradecer pela Indicação</DialogTitle>
+          </DialogHeader>
+          <ObrigadoForm
+            indicacaoId={referral._id || ''}
+            membroId={membroId}
+            onSuccess={handleObrigadoSuccess}
+          />
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

@@ -7,10 +7,12 @@ import {
   FieldValues,
   Path,
   Controller,
-  ControllerProps,
+  ControllerRenderProps,
+  ControllerFieldState,
+  UseFormStateReturn,
 } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ZodSchema, ZodTypeAny } from 'zod';
+import { ZodSchema } from 'zod';
 import { HTMLAttributes, forwardRef, ReactNode } from 'react';
 
 /**
@@ -18,7 +20,7 @@ import { HTMLAttributes, forwardRef, ReactNode } from 'react';
  * Wrapper para formulários com React Hook Form + Zod
  */
 
-interface FormProps<T extends FieldValues> extends Omit<HTMLAttributes<HTMLFormElement>, 'onSubmit'> {
+interface FormProps<T extends FieldValues> extends Omit<HTMLAttributes<HTMLFormElement>, 'onSubmit' | 'children'> {
   schema: ZodSchema<T>;
   defaultValues?: Partial<T>;
   onSubmit: (data: T) => void | Promise<void>;
@@ -35,15 +37,17 @@ export function Form<T extends FieldValues>({
   ...props
 }: FormProps<T>) {
   const methods = useForm<T>({
-    resolver: zodResolver(schema),
-    defaultValues: defaultValues as T,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(schema as any) as any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    defaultValues: (defaultValues as any) ?? undefined,
     mode: 'onBlur',
     reValidateMode: 'onChange',
   });
 
   const handleSubmit = methods.handleSubmit(async (data) => {
     try {
-      await onSubmit(data);
+      await onSubmit(data as T);
     } catch (error) {
       console.error('Form submission error:', error);
     }
@@ -51,7 +55,7 @@ export function Form<T extends FieldValues>({
 
   return (
     <form onSubmit={handleSubmit} className={cn('space-y-4', className)} {...props}>
-      {children(methods)}
+      {children(methods as UseFormReturn<T>)}
     </form>
   );
 }
@@ -59,7 +63,11 @@ export function Form<T extends FieldValues>({
 interface FormFieldProps<T extends FieldValues> {
   control: UseFormReturn<T>['control'];
   name: Path<T>;
-  render: ControllerProps<T, Path<T>>['render'];
+  render: (props: {
+    field: ControllerRenderProps<T, Path<T>>;
+    fieldState: ControllerFieldState;
+    formState: UseFormStateReturn<T>;
+  }) => ReactNode;
 }
 
 export function FormField<T extends FieldValues>({
@@ -71,7 +79,10 @@ export function FormField<T extends FieldValues>({
     <Controller
       control={control}
       name={name}
-      render={({ field, fieldState }) => render({ field, fieldState })}
+      render={({ field, fieldState, formState }) => {
+        const result = render({ field, fieldState, formState });
+        return result as React.ReactElement;
+      }}
     />
   );
 }
@@ -92,9 +103,10 @@ export const FormItem = forwardRef<HTMLDivElement, FormItemProps>(
 
 FormItem.displayName = 'FormItem';
 
-interface FormLabelProps extends HTMLAttributes<HTMLLabelElement> {
+interface FormLabelProps extends Omit<HTMLAttributes<HTMLLabelElement>, 'htmlFor'> {
   children: ReactNode;
   required?: boolean;
+  htmlFor?: string;
 }
 
 export const FormLabel = forwardRef<HTMLLabelElement, FormLabelProps>(

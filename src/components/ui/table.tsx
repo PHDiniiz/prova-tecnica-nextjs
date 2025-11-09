@@ -111,11 +111,14 @@ TableHead.displayName = 'TableHead';
 
 export const TableCell = forwardRef<
   HTMLTableCellElement,
-  HTMLAttributes<HTMLTableCellElement>
->(({ className, ...props }, ref) => {
+  HTMLAttributes<HTMLTableCellElement> & {
+    colSpan?: number;
+  }
+>(({ className, colSpan, ...props }, ref) => {
   return (
     <td
       ref={ref}
+      colSpan={colSpan}
       className={cn('px-4 py-3 text-sm text-gray-900 dark:text-gray-100', className)}
       {...props}
     />

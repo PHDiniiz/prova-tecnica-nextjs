@@ -20,7 +20,8 @@
     ],
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "types": ["jest", "@types/jest", "@testing-library/jest-dom"]
   },
   "include": [
     "next-env.d.ts",
@@ -29,7 +30,8 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts",
-    "src/types/jest-dom.d.ts"
+    "src/types/jest-dom.d.ts",
+    "src/types/jest-globals.d.ts"
   ],
-  "exclude": ["node_modules", "**/*.cy.ts", "**/*.cy.tsx", "Docs/**/*"]
+  "exclude": ["node_modules", "**/*.cy.ts", "**/*.cy.tsx", "Docs/**/*", "cypress/**/*"]
 }

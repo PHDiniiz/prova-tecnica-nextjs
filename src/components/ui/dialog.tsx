@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, HTMLMotionProps } from 'framer-motion';
 import React, { forwardRef, ReactNode, useEffect } from 'react';
 
 /**
@@ -16,7 +16,7 @@ interface DialogProps {
   className?: string;
 }
 
-interface DialogContentProps extends React.HTMLAttributes<HTMLDivElement> {
+interface DialogContentProps extends Omit<HTMLMotionProps<'div'>, 'children'> {
   children: ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
 }

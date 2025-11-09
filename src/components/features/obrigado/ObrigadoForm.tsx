@@ -9,11 +9,18 @@ import { useCreateObrigado } from '@/hooks/useObrigados';
 import { useToast } from '@/components/ui/toast';
 import { CriarObrigadoDTO } from '@/types/obrigado';
 
+// Tipo para os dados do formulário (apenas campos editáveis pelo usuário)
+type ObrigadoFormData = {
+  mensagem: string;
+  publico?: boolean;
+};
+
 const obrigadoSchema = z.object({
   mensagem: z
     .string()
     .min(10, 'Mensagem deve ter pelo menos 10 caracteres')
     .max(500, 'Mensagem deve ter no máximo 500 caracteres'),
+  publico: z.boolean().optional().default(true),
 });
 
 interface ObrigadoFormProps {
@@ -39,7 +46,7 @@ export function ObrigadoForm({
   membroId,
   onSuccess,
 }: ObrigadoFormProps) {
-  const { toast } = useToast();
+  const { addToast } = useToast();
   const createObrigado = useCreateObrigado();
 
   const {
@@ -47,7 +54,7 @@ export function ObrigadoForm({
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<CriarObrigadoDTO>({
+  } = useForm<ObrigadoFormData>({
     resolver: zodResolver(obrigadoSchema),
     defaultValues: {
       mensagem: '',
@@ -55,15 +62,19 @@ export function ObrigadoForm({
     },
   });
 
-  const onSubmit = async (data: CriarObrigadoDTO) => {
+  const onSubmit = async (data: ObrigadoFormData) => {
     try {
-      await createObrigado.mutateAsync({
-        ...data,
+      // Converter ObrigadoFormData para CriarObrigadoDTO com membroId
+      const criarObrigadoDTO: CriarObrigadoDTO & { membroId: string } = {
+        mensagem: data.mensagem,
+        publico: data.publico ?? true,
         indicacaoId,
         membroId,
-      });
+      };
 
-      toast({
+      await createObrigado.mutateAsync(criarObrigadoDTO);
+
+      addToast({
         variant: 'success',
         title: 'Sucesso!',
         description: 'Agradecimento registrado com sucesso!',
@@ -72,7 +83,7 @@ export function ObrigadoForm({
       reset();
       onSuccess?.();
     } catch (error) {
-      toast({
+      addToast({
         variant: 'error',
         title: 'Erro',
         description:
