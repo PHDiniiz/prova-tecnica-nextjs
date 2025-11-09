@@ -9,7 +9,12 @@
     "lint": "eslint",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "prepare": "husky install",
+    "typecheck": "npx tsc --noEmit -p tsconfig.json",
+    "test:unit": "jest --coverage",
+    "test:e2e": "cypress run",
+    "ci:checks": "pnpm typecheck && pnpm lint && pnpm test:unit"
   },
   "dependencies": {
     "@faker-js/faker": "^10.1.0",
@@ -41,6 +46,7 @@
     "jest-environment-jsdom": "^30.2.0",
     "tailwindcss": "^4",
     "ts-jest": "^29.4.5",
-    "typescript": "^5"
+    "typescript": "^5",
+    "husky": "^8.0.0"
   }
 }

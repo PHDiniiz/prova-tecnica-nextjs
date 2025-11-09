@@ -40,5 +40,3 @@ next-env.d.ts
 
 # Sentry Config File
 .env.sentry-build-plugin
-# Snyk Security Extension - AI Rules (auto-generated)
-.cursor\rules\snyk_rules.mdc
