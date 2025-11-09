@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode, useRef, useEffect } from 'react';
 import { Button } from './button';
 
 /**
@@ -42,6 +42,17 @@ interface ToastProviderProps {
 
 export const ToastProvider = ({ children }: ToastProviderProps) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const timeoutsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+
+  // Limpar todos os timeouts quando o componente desmontar
+  useEffect(() => {
+    return () => {
+      timeoutsRef.current.forEach((timeout) => {
+        clearTimeout(timeout);
+      });
+      timeoutsRef.current.clear();
+    };
+  }, []);
 
   const addToast = useCallback((toast: Omit<Toast, 'id'>) => {
     const id = Math.random().toString(36).substring(2, 9);
@@ -55,13 +66,26 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
 
     // Remover automaticamente após duration
     if (newToast.duration && newToast.duration > 0) {
-      setTimeout(() => {
-        setToasts((prev) => prev.filter((t) => t.id !== id));
+      const timeoutId = setTimeout(() => {
+        setToasts((prev) => {
+          const updated = prev.filter((t) => t.id !== id);
+          timeoutsRef.current.delete(id);
+          return updated;
+        });
       }, newToast.duration);
+      
+      timeoutsRef.current.set(id, timeoutId);
     }
   }, []);
 
   const removeToast = useCallback((id: string) => {
+    // Limpar timeout se existir
+    const timeoutId = timeoutsRef.current.get(id);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      timeoutsRef.current.delete(id);
+    }
+    
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 

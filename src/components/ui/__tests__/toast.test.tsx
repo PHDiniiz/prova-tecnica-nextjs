@@ -41,7 +41,9 @@ describe('Toast Component', () => {
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
+    act(() => {
+      jest.runOnlyPendingTimers();
+    });
     jest.useRealTimers();
   });
 
@@ -85,14 +87,28 @@ describe('Toast Component', () => {
       expect(screen.getByText('Teste toast')).toBeInTheDocument();
     });
 
-    // Avançar o tempo (default duration é 5000ms)
+    // Avançar o tempo (default duration é 5000ms + animação de saída ~200ms)
     act(() => {
       jest.advanceTimersByTime(5000);
     });
 
+    // Aguardar que o estado seja atualizado (toast removido do array)
     await waitFor(() => {
-      expect(screen.queryByText('Teste toast')).not.toBeInTheDocument();
+      expect(screen.getByTestId('toast-count')).toHaveTextContent('0');
     });
+
+    // Avançar o tempo da animação de saída (200ms)
+    act(() => {
+      jest.advanceTimersByTime(200);
+    });
+
+    // Aguardar a remoção do toast do DOM após a animação
+    await waitFor(
+      () => {
+        expect(screen.queryByText('Teste toast')).not.toBeInTheDocument();
+      },
+      { timeout: 1000 }
+    );
   });
 
   it('deve renderizar diferentes variantes de toast', async () => {
