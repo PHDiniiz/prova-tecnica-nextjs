@@ -84,11 +84,10 @@ describe('POST /api/intentions', () => {
       {
         code: 'too_small',
         minimum: 2,
-        type: 'string',
         inclusive: true,
         path: ['nome'],
         message: 'Nome deve ter pelo menos 2 caracteres',
-      },
+      } as any,
     ]);
     mockService.criarIntencao.mockRejectedValueOnce(error);
 

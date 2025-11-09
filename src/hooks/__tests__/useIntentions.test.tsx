@@ -99,7 +99,7 @@ describe('useIntentions', () => {
       await expect(result.current.criarIntencao(dto)).rejects.toThrow();
     });
 
-    expect(result.current.isError).toBe(true);
+    expect(result.current.isCreateError).toBe(true);
   });
 
   it('deve mostrar estado de loading durante a criação', async () => {

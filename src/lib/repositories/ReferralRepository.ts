@@ -18,10 +18,10 @@ export class ReferralRepository {
     try {
       const query: any = {};
       if (filtro?.membroIndicadorId) {
-        query.membroIndicadorId = filtro.membroIndicadorId;
+        query.membroIndicadorId = new ObjectId(filtro.membroIndicadorId) as any;
       }
       if (filtro?.membroIndicadoId) {
-        query.membroIndicadoId = filtro.membroIndicadoId;
+        query.membroIndicadoId = new ObjectId(filtro.membroIndicadoId) as any;
       }
       if (filtro?.status) {
         query.status = filtro.status;
@@ -36,6 +36,8 @@ export class ReferralRepository {
       return indicacoes.map((indicacao) => ({
         ...indicacao,
         _id: indicacao._id?.toString(),
+        membroIndicadorId: indicacao.membroIndicadorId?.toString() || indicacao.membroIndicadorId,
+        membroIndicadoId: indicacao.membroIndicadoId?.toString() || indicacao.membroIndicadoId,
       }));
     } catch (error) {
       console.error('Erro ao buscar indicações:', error);
@@ -57,6 +59,8 @@ export class ReferralRepository {
       return {
         ...indicacao,
         _id: indicacao._id?.toString(),
+        membroIndicadorId: indicacao.membroIndicadorId?.toString() || indicacao.membroIndicadorId,
+        membroIndicadoId: indicacao.membroIndicadoId?.toString() || indicacao.membroIndicadoId,
       };
     } catch (error) {
       console.error('Erro ao buscar indicação:', error);
@@ -70,19 +74,23 @@ export class ReferralRepository {
   async criar(indicacao: Omit<Referral, '_id'>): Promise<Referral> {
     try {
       const agora = new Date();
-      const novaIndicacao: Omit<Referral, '_id'> = {
+      const novaIndicacao: any = {
         ...indicacao,
+        membroIndicadorId: new ObjectId(indicacao.membroIndicadorId),
+        membroIndicadoId: new ObjectId(indicacao.membroIndicadoId),
         criadoEm: agora,
         atualizadoEm: agora,
       };
 
       const result = await this.db
         .collection<Referral>('referrals')
-        .insertOne(novaIndicacao as any);
+        .insertOne(novaIndicacao);
 
       return {
-        ...novaIndicacao,
+        ...indicacao,
         _id: result.insertedId.toString(),
+        membroIndicadorId: indicacao.membroIndicadorId,
+        membroIndicadoId: indicacao.membroIndicadoId,
       };
     } catch (error) {
       console.error('Erro ao criar indicação:', error);
@@ -123,6 +131,8 @@ export class ReferralRepository {
       return {
         ...result,
         _id: result._id?.toString(),
+        membroIndicadorId: result.membroIndicadorId?.toString() || result.membroIndicadorId,
+        membroIndicadoId: result.membroIndicadoId?.toString() || result.membroIndicadoId,
       };
     } catch (error) {
       console.error('Erro ao atualizar status da indicação:', error);
