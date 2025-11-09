@@ -9,8 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useIntentions } from '@/src/hooks/useIntentions';
-import { CriarIntencaoDTO } from '@/src/types/intention';
+import { useIntentions } from '@/hooks/useIntentions';
+import { CriarIntencaoDTO } from '@/types/intention';
 
 /**
  * Schema de validação para o formulário

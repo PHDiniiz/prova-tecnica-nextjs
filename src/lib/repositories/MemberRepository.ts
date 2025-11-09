@@ -1,5 +1,5 @@
 import { Db, ObjectId } from 'mongodb';
-import { Member } from '@/src/types/member';
+import { Member } from '@/types/member';
 
 /**
  * Repositório para operações com membros no MongoDB

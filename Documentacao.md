@@ -58,10 +58,30 @@ O objetivo é digitalizar e otimizar a gestão de grupos de networking, eliminan
   - Funções para gerar dados fake
   - Seeders para popular banco de dados
 
+### ✅ Concluído (Atualizado)
+- [x] **Feature 4: Fluxo de Admissão - Área Administrativa**
+  - Listagem de intenções com paginação e filtros
+  - Aprovação/recusa de intenções
+  - Geração automática de convite ao aprovar
+  - Proteção com ADMIN_TOKEN
+  - Página admin `/admin/intents`
+  - Componentes: IntentionList, IntentionCard
+
+- [x] **Feature 5: Sistema de Convites (APIs)**
+  - API POST /api/invites (gerar convite manualmente)
+  - API GET /api/invites/[token] (validar token)
+  - Geração automática ao aprovar intenção
+  - Validação de token (expirado, usado)
+
+- [x] **Feature 6: Cadastro Completo de Membros**
+  - Página pública `/register/[token]`
+  - Validação de token antes de exibir formulário
+  - Formulário completo (telefone, linkedin, área de atuação)
+  - API POST /api/members
+  - Marca token como usado após cadastro
+  - Componente: MemberForm
+
 ### 🚧 Em Progresso
-- [ ] Feature 4: Fluxo de Admissão - Área Administrativa
-- [ ] Feature 5: Sistema de Convites (APIs)
-- [ ] Feature 6: Cadastro Completo de Membros
 - [ ] Feature 7: Sistema de Indicações
 
 ### 📋 Pendente
@@ -666,8 +686,8 @@ Authorization: Bearer {ADMIN_TOKEN}
 
 ### **6.2 Funcionalidade 2: Sistema de Convites**
 
-#### **POST /api/invites**
-Gera um convite após aprovação de intenção (admin apenas, automático).
+#### **POST /api/invites** ✅ **IMPLEMENTADO**
+Gera um convite manualmente (admin apenas). Também é gerado automaticamente ao aprovar intenção.
 
 **Headers:**
 ```
@@ -691,13 +711,13 @@ Authorization: Bearer {ADMIN_TOKEN}
     "intencaoId": "507f1f77bcf86cd799439011",
     "usado": false,
     "expiraEm": "2024-01-22T11:00:00.000Z",
-    "createdAt": "2024-01-15T11:00:00.000Z"
+    "criadoEm": "2024-01-15T11:00:00.000Z"
   },
   "url": "https://app.com/register/abc123def456ghi789"
 }
 ```
 
-#### **GET /api/invites/[token]**
+#### **GET /api/invites/[token]** ✅ **IMPLEMENTADO**
 Valida um token de convite (público).
 
 **Response 200:**
@@ -707,10 +727,12 @@ Valida um token de convite (público).
   "data": {
     "token": "abc123def456ghi789",
     "valido": true,
+    "expiraEm": "2024-01-22T11:00:00.000Z",
     "intencao": {
       "nome": "João Silva",
       "email": "joao@empresa.com",
-      "empresa": "Empresa XYZ"
+      "empresa": "Empresa XYZ",
+      "cargo": "Diretor Comercial"
     }
   }
 }
@@ -724,7 +746,7 @@ Valida um token de convite (público).
 }
 ```
 
-#### **POST /api/members**
+#### **POST /api/members** ✅ **IMPLEMENTADO**
 Cadastro completo de membro usando token de convite (público).
 
 **Request:**
@@ -750,9 +772,9 @@ Cadastro completo de membro usando token de convite (público).
     "nome": "João Silva",
     "email": "joao@empresa.com",
     "empresa": "Empresa XYZ",
-    "ativo": true,
-    "createdAt": "2024-01-15T12:00:00.000Z"
-  }
+    "criadoEm": "2024-01-15T12:00:00.000Z"
+  },
+  "message": "Cadastro realizado com sucesso!"
 }
 ```
 
@@ -1304,19 +1326,19 @@ O projeto está em desenvolvimento ativo com a base sólida já implementada:
 - ✅ Camadas de arquitetura (Repositories, Services, Types)
 - ✅ Helpers de teste configurados
 
-### ⚠️ Ações Necessárias Antes de Continuar
-Antes de iniciar a implementação das features pendentes, é **essencial** corrigir os problemas de configuração identificados na seção 15:
-1. Corrigir caminhos no `jest.config.js` para estrutura `src/`
-2. Criar arquivo `.env.example` com todas as variáveis necessárias
-3. Adicionar headers de segurança no `next.config.ts`
-4. Padronizar imports TypeScript (ajustar paths e revisar imports)
+### ✅ Correções de Configuração Concluídas
+Todas as correções de configuração identificadas na seção 15 foram concluídas:
+1. ✅ Corrigidos caminhos no `jest.config.js` para estrutura `src/`
+2. ✅ Criado arquivo `.env.example` com todas as variáveis necessárias
+3. ✅ Adicionados headers de segurança no `next.config.ts`
+4. ✅ Padronizados imports TypeScript (ajustados paths e revisados imports)
 
 ### Próximos Passos
-- 🔧 **PRIORITÁRIO:** Corrigir problemas de configuração (seção 15)
-- 🚧 Área administrativa para gestão de intenções
-- 🚧 Sistema completo de convites e cadastro de membros
+- ✅ **CONCLUÍDO:** Correções de configuração (seção 15)
+- ✅ **CONCLUÍDO:** Área administrativa para gestão de intenções
+- ✅ **CONCLUÍDO:** Sistema completo de convites e cadastro de membros
 - 🚧 Sistema de indicações de negócios
-- 📋 Testes com cobertura ≥ 95%
+- 📋 Testes com cobertura ≥ 95% (em progresso)
 - 📋 Refinamentos e otimizações
 
 Com cobertura de testes de **95%+** (meta), o sistema garantirá confiabilidade e alto padrão de qualidade.
@@ -1327,20 +1349,20 @@ Com cobertura de testes de **95%+** (meta), o sistema garantirá confiabilidade 
 
 Antes de iniciar a implementação das features pendentes, os seguintes problemas de configuração precisam ser corrigidos:
 
-### **15.1 Configuração do Jest (jest.config.js)**
+### **15.1 Configuração do Jest (jest.config.js)** ✅ **CONCLUÍDO**
 
-**Problema:** Os caminhos de cobertura estão incorretos - está procurando em `app/**`, `components/**`, mas o projeto usa `src/app/**`, `src/components/**`.
+**Problema:** Os caminhos de cobertura estavam incorretos - estava procurando em `app/**`, `components/**`, mas o projeto usa `src/app/**`, `src/components/**`.
 
-**Correção necessária:**
-- Ajustar `collectCoverageFrom` para usar `src/app/**`, `src/components/**`, `src/hooks/**`, `src/services/**`, `src/lib/**`
-- Verificar se `moduleNameMapper` está correto para a estrutura `src/` (deve mapear `@/*` para `<rootDir>/src/*`)
+**Correção realizada:**
+- ✅ Ajustado `collectCoverageFrom` para usar `src/app/**`, `src/components/**`, `src/hooks/**`, `src/services/**`, `src/lib/**`
+- ✅ Ajustado `moduleNameMapper` para mapear `@/*` para `<rootDir>/src/*`
 
-### **15.2 Arquivo .env.example**
+### **15.2 Arquivo .env.example** ✅ **CONCLUÍDO**
 
-**Problema:** Arquivo não existe, mas é necessário conforme boas práticas.
+**Problema:** Arquivo não existia, mas é necessário conforme boas práticas.
 
-**Correção necessária:**
-- Criar `.env.example` na raiz do projeto com todas as variáveis de ambiente necessárias:
+**Correção realizada:**
+- ✅ Criado `.env.example` na raiz do projeto com todas as variáveis de ambiente necessárias:
   ```env
   MONGODB_URI=mongodb+srv://...
   MONGODB_DB_NAME=networking_group
@@ -1348,21 +1370,29 @@ Antes de iniciar a implementação das features pendentes, os seguintes problema
   NEXT_PUBLIC_APP_URL=http://localhost:3000
   ```
 
-### **15.3 Headers de Segurança (next.config.ts)**
+### **15.3 Headers de Segurança (next.config.ts)** ✅ **CONCLUÍDO**
 
-**Problema:** Headers de segurança não estão configurados conforme documentação.
+**Problema:** Headers de segurança não estavam configurados conforme documentação.
 
-**Correção necessária:**
-- Adicionar função `headers()` no `next.config.ts` com os headers de segurança listados na seção 8.3
+**Correção realizada:**
+- ✅ Adicionada função `headers()` no `next.config.ts` com os headers de segurança:
+  - X-DNS-Prefetch-Control
+  - Strict-Transport-Security
+  - X-Frame-Options
+  - X-Content-Type-Options
+  - X-XSS-Protection
 
-### **15.4 Inconsistência nos Imports TypeScript**
+### **15.4 Inconsistência nos Imports TypeScript** ✅ **CONCLUÍDO**
 
-**Problema:** Alguns arquivos usam `@/src/...` e outros `@/lib/...`. O `tsconfig.json` define `@/*` como `./*`, então há inconsistência.
+**Problema:** Alguns arquivos usavam `@/src/...` e outros `@/lib/...`. O `tsconfig.json` definia `@/*` como `./*`, então havia inconsistência.
 
-**Correção necessária:**
-- Opção 1: Ajustar `tsconfig.json` para que `@/*` aponte para `./src/*` e padronizar todos os imports para usar `@/...` (sem `src/`)
-- Opção 2: Manter `@/*` como `./*` e garantir que todos os imports usem `@/src/...` consistentemente
-- Revisar e padronizar todos os imports no projeto
+**Correção realizada:**
+- ✅ Ajustado `tsconfig.json` para que `@/*` aponte para `./src/*`
+- ✅ Padronizados todos os imports para usar `@/...` (sem `src/`):
+  - `@/src/types/...` → `@/types/...`
+  - `@/src/services/...` → `@/services/...`
+  - `@/src/hooks/...` → `@/hooks/...`
+- ✅ Revisados e corrigidos todos os imports no projeto (15 arquivos atualizados)
 
 ### **15.5 Estrutura de Pastas**
 
@@ -1391,10 +1421,10 @@ src/
 - [x] Configuração do Jest e React Testing Library
 - [ ] Configuração do ESLint e Prettier
 - [x] Configuração do TailwindCSS e ShadCN/UI
-- [ ] **Setup de variáveis de ambiente (.env.example)** - ⚠️ **PENDENTE: Criar arquivo**
-- [ ] **Configuração de headers de segurança** - ⚠️ **PENDENTE: Adicionar no next.config.ts**
-- [ ] **Correção de caminhos no jest.config.js** - ⚠️ **PENDENTE: Ajustar para estrutura src/**
-- [ ] **Padronização de imports TypeScript** - ⚠️ **PENDENTE: Ajustar paths e imports**
+- [x] **Setup de variáveis de ambiente (.env.example)** - ✅ **CONCLUÍDO**
+- [x] **Configuração de headers de segurança** - ✅ **CONCLUÍDO**
+- [x] **Correção de caminhos no jest.config.js** - ✅ **CONCLUÍDO**
+- [x] **Padronização de imports TypeScript** - ✅ **CONCLUÍDO**
 
 ### **Componentes UI Base (ATOMIC)**
 - [x] Button (variantes, tamanhos, loading, animações)
@@ -1417,29 +1447,34 @@ src/
   - [x] Testes unitários do formulário
   - [x] Testes de integração da API
 
-- [ ] **Área Administrativa - Gestão de Intenções**
-  - [ ] Listagem de intenções (`/admin/intents`)
-  - [ ] Filtros por status (pending, approved, rejected)
-  - [ ] Paginação
-  - [ ] Ações de aprovar/recusar
-  - [ ] Proteção com ADMIN_TOKEN
+- [x] **Área Administrativa - Gestão de Intenções**
+  - [x] Listagem de intenções (`/admin/intents`)
+  - [x] Filtros por status (pending, approved, rejected)
+  - [x] Paginação
+  - [x] Ações de aprovar/recusar
+  - [x] Proteção com ADMIN_TOKEN
+  - [x] Componentes: IntentionList, IntentionCard
+  - [x] Hook useIntentions atualizado
+  - [x] API GET /api/intentions (admin)
+  - [x] API PATCH /api/intentions/[id]/status
   - [ ] Testes de integração
 
-- [ ] **Sistema de Convites**
-  - [ ] Geração automática de token ao aprovar
+- [x] **Sistema de Convites**
+  - [x] Geração automática de token ao aprovar
   - [x] Repository de convites
   - [x] Service de convites
-  - [ ] API POST /api/invites
-  - [ ] API GET /api/invites/[token]
+  - [x] API POST /api/invites
+  - [x] API GET /api/invites/[token]
   - [x] Validação de token (expirado, usado)
   - [ ] Testes unitários e integração
 
-- [ ] **Cadastro Completo de Membros**
-  - [ ] Página de cadastro com token (`/register/[token]`)
-  - [ ] Validação de token antes de exibir formulário
-  - [ ] Formulário completo (telefone, linkedin, etc)
-  - [ ] API POST /api/members
-  - [ ] Marcar token como usado após cadastro
+- [x] **Cadastro Completo de Membros**
+  - [x] Página de cadastro com token (`/register/[token]`)
+  - [x] Validação de token antes de exibir formulário
+  - [x] Formulário completo (telefone, linkedin, área de atuação)
+  - [x] Componente: MemberForm
+  - [x] API POST /api/members
+  - [x] Marcar token como usado após cadastro
   - [ ] Testes E2E do fluxo completo
 
 ### **Sistema de Indicações (Opção A)**

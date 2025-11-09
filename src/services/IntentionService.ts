@@ -5,7 +5,7 @@ import {
   CriarIntencaoDTO,
   AtualizarStatusIntencaoDTO,
   IntentionStatus,
-} from '@/src/types/intention';
+} from '@/types/intention';
 import { z } from 'zod';
 
 // Schema de validação para criar intenção
@@ -65,6 +65,24 @@ export class IntentionService {
   ): Promise<Intention[]> {
     await this.initRepository();
     return await this.repository.buscarTodas(filtro);
+  }
+
+  /**
+   * Busca intenções com paginação
+   */
+  async buscarIntencoesComPaginacao(
+    filtro?: { status?: IntentionStatus },
+    pagina: number = 1,
+    limite: number = 20
+  ): Promise<{
+    intencoes: Intention[];
+    total: number;
+    pagina: number;
+    limite: number;
+    totalPaginas: number;
+  }> {
+    await this.initRepository();
+    return await this.repository.buscarComPaginacao(filtro, pagina, limite);
   }
 
   /**

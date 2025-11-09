@@ -1,6 +1,6 @@
 import { getDatabase } from '@/lib/mongodb';
 import { InviteRepository } from '@/lib/repositories/InviteRepository';
-import { Invite, CriarConviteDTO, ValidarConviteDTO } from '@/src/types/invite';
+import { Invite, CriarConviteDTO, ValidarConviteDTO } from '@/types/invite';
 import { randomBytes } from 'crypto';
 
 /**

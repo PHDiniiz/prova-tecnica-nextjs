@@ -1,5 +1,5 @@
 import { POST } from '../route';
-import { IntentionService } from '@/src/services/IntentionService';
+import { IntentionService } from '@/services/IntentionService';
 import { criarIntencaoFake } from '@/tests/helpers/faker';
 import { NextRequest } from 'next/server';
 

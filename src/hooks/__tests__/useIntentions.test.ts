@@ -2,7 +2,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode } from 'react';
 import { useIntentions } from '../useIntentions';
-import { CriarIntencaoDTO } from '@/src/types/intention';
+import { CriarIntencaoDTO } from '@/types/intention';
 
 // Mock do fetch global
 global.fetch = jest.fn();

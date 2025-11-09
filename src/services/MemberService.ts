@@ -1,7 +1,7 @@
 import { getDatabase } from '@/lib/mongodb';
 import { MemberRepository } from '@/lib/repositories/MemberRepository';
 import { InviteService } from './InviteService';
-import { Member, CriarMembroDTO } from '@/src/types/member';
+import { Member, CriarMembroDTO } from '@/types/member';
 import { z } from 'zod';
 
 // Schema de validação para criar membro

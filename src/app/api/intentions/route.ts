@@ -1,7 +1,60 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { IntentionService } from '@/src/services/IntentionService';
-import { CriarIntencaoDTO } from '@/src/types/intention';
+import { IntentionService } from '@/services/IntentionService';
+import { CriarIntencaoDTO, IntentionStatus } from '@/types/intention';
 import { ZodError } from 'zod';
+import { verificarAdminToken, respostaNaoAutorizado } from '@/lib/auth';
+
+/**
+ * API Route para listar intenções (admin apenas)
+ * GET /api/intentions
+ */
+export async function GET(request: NextRequest) {
+  try {
+    // Verifica autenticação admin
+    if (!verificarAdminToken(request)) {
+      return respostaNaoAutorizado();
+    }
+
+    const { searchParams } = new URL(request.url);
+    const status = searchParams.get('status') as IntentionStatus | null;
+    const pagina = parseInt(searchParams.get('page') || '1', 10);
+    const limite = parseInt(searchParams.get('limit') || '20', 10);
+
+    const service = new IntentionService();
+    const resultado = await service.buscarIntencoesComPaginacao(
+      status ? { status } : undefined,
+      pagina,
+      limite
+    );
+
+    return NextResponse.json(
+      {
+        success: true,
+        data: resultado.intencoes,
+        pagination: {
+          page: resultado.pagina,
+          limit: resultado.limite,
+          total: resultado.total,
+          totalPages: resultado.totalPaginas,
+        },
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('Erro ao listar intenções:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Erro ao processar sua solicitação',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Ocorreu um erro inesperado. Tente novamente mais tarde.',
+      },
+      { status: 500 }
+    );
+  }
+}
 
 /**
  * API Route para criar uma nova intenção

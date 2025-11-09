@@ -1,5 +1,5 @@
 import { Db, ObjectId } from 'mongodb';
-import { Invite } from '@/src/types/invite';
+import { Invite } from '@/types/invite';
 
 /**
  * Repositório para operações com convites no MongoDB

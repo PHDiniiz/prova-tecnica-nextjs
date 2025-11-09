@@ -5,7 +5,7 @@ import {
   CriarIndicacaoDTO,
   AtualizarStatusIndicacaoDTO,
   ReferralStatus,
-} from '@/src/types/referral';
+} from '@/types/referral';
 import { z } from 'zod';
 
 // Schema de validação para criar indicação

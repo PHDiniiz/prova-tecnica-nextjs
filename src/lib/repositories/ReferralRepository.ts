@@ -1,5 +1,5 @@
 import { Db, ObjectId } from 'mongodb';
-import { Referral, ReferralStatus } from '@/src/types/referral';
+import { Referral, ReferralStatus } from '@/types/referral';
 
 /**
  * Repositório para operações com indicações no MongoDB
