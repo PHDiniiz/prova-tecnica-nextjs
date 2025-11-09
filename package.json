@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "rm -rf .next && next dev",
-    "build": "rm -rf .next node_modules && pnpm install && next build",
+    "build": "rm -rf .next node_modules *.lock && pnpm install && next build",
     "start": "next start",
     "lint": "eslint",
     "test": "jest",
