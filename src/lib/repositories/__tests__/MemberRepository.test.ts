@@ -37,10 +37,14 @@ describe('MemberRepository', () => {
 
       const resultado = await repository.criar(membroSemId);
 
-      expect(resultado).toEqual({
-        ...membroSemId,
-        _id: '123',
-      });
+      expect(resultado).toEqual(
+        expect.objectContaining({
+          ...membroSemId,
+          _id: '123',
+          criadoEm: expect.any(Date),
+          atualizadoEm: expect.any(Date),
+        })
+      );
       expect(mockCollection.insertOne).toHaveBeenCalled();
     });
   });
