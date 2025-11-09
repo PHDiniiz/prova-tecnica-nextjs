@@ -81,8 +81,17 @@ O objetivo é digitalizar e otimizar a gestão de grupos de networking, eliminan
   - Marca token como usado após cadastro
   - Componente: MemberForm
 
-### 🚧 Em Progresso
-- [ ] Feature 7: Sistema de Indicações
+### ✅ Concluído (Atualizado - Dez 2024)
+- [x] **Feature 7: Sistema de Indicações**
+  - API POST /api/referrals (criar indicação)
+  - API GET /api/referrals (listar indicações feitas/recebidas com filtros)
+  - API PATCH /api/referrals/[id]/status (atualizar status - apenas destinatário)
+  - API GET /api/members (listar membros ativos - admin)
+  - Hook useReferrals com React Query
+  - Componentes: ReferralForm, ReferralList, ReferralCard, ReferralStatusBadge, ReferralStatusUpdate
+  - Página /referrals para gestão completa
+  - Validações de negócio (auto-indicação, membros ativos, transições de status)
+  - Correções de tipos TypeScript (ZodError.issues, ObjectId conversions)
 
 ### 📋 Pendente
 - [ ] Feature 8: Testes e Qualidade (cobertura ≥ 95%)
@@ -104,9 +113,9 @@ O objetivo é digitalizar e otimizar a gestão de grupos de networking, eliminan
 - Controle de **presença (check-in)** em reuniões.  
 
 ### **2.3 Geração de Negócios**
-- Criação e acompanhamento de **indicações de negócios** entre membros.  
-- Status: *pendente*, *em andamento*, *concluído*, *cancelado*.  
-- Registro de **“obrigados”**, agradecimentos públicos por negócios concluídos.  
+- ✅ Criação e acompanhamento de **indicações de negócios** entre membros.  
+- ✅ Status: *nova*, *em-contato*, *fechada*, *recusada*.  
+- ⏳ Registro de **"obrigados"**, agradecimentos públicos por negócios concluídos (pendente).  
 
 ### **2.4 Acompanhamento e Performance**
 - Registro de **reuniões 1:1** entre membros.  
@@ -1410,9 +1419,9 @@ src/
 │   │   ├── members/
 │   │   │   └── route.ts         # POST, GET
 │   │   └── referrals/
-│   │       ├── route.ts         # GET, POST
+│   │       ├── route.ts         # GET, POST ✅
 │   │       └── [id]/
-│   │           └── status/route.ts  # PATCH
+│   │           └── status/route.ts  # PATCH ✅
 │   │
 │   ├── layout.tsx               # Layout raiz
 │   ├── page.tsx                 # Homepage
@@ -1436,9 +1445,11 @@ src/
 │   │   │   ├── MemberForm.tsx
 │   │   │   └── MemberCard.tsx
 │   │   ├── referral/
-│   │   │   ├── ReferralForm.tsx
-│   │   │   ├── ReferralTable.tsx
-│   │   │   └── ReferralStatusBadge.tsx
+│   │   │   ├── ReferralForm.tsx        # ✅ Implementado
+│   │   │   ├── ReferralList.tsx        # ✅ Implementado
+│   │   │   ├── ReferralCard.tsx        # ✅ Implementado
+│   │   │   ├── ReferralStatusBadge.tsx # ✅ Implementado
+│   │   │   └── ReferralStatusUpdate.tsx # ✅ Implementado
 │   │   └── dashboard/
 │   │       ├── StatsCard.tsx
 │   │       └── PerformanceChart.tsx
@@ -1449,8 +1460,8 @@ src/
 │       └── DashboardLayout.tsx
 
 ├── hooks/                      # Custom Hooks
-│   ├── useIntentions.ts        # ✅ Implementado (criação) com testes
-│   ├── useReferrals.ts         # ⏳ Pendente
+│   ├── useIntentions.ts        # ✅ Implementado (criação e listagem) com testes
+│   ├── useReferrals.ts         # ✅ Implementado (criação, listagem, atualização)
 │   ├── useMembers.ts           # ⏳ Pendente
 │   └── useDashboard.ts         # ⏳ Pendente
 │
@@ -1758,9 +1769,9 @@ Cadastro completo de membro usando token de convite (público).
 
 ---
 
-### **6.3 Funcionalidade 3: Sistema de Indicações**
+### **6.3 Funcionalidade 3: Sistema de Indicações** ✅ **IMPLEMENTADO**
 
-#### **POST /api/referrals**
+#### **POST /api/referrals** ✅ **IMPLEMENTADO**
 Cria uma nova indicação de negócio (membro autenticado).
 
 **Headers:**
@@ -1795,8 +1806,8 @@ Authorization: Bearer {MEMBER_TOKEN}
 }
 ```
 
-#### **GET /api/referrals**
-Lista indicações do membro autenticado.
+#### **GET /api/referrals** ✅ **IMPLEMENTADO**
+Lista indicações do membro autenticado (feitas e recebidas com filtros).
 
 **Headers:**
 ```
@@ -1831,8 +1842,8 @@ Authorization: Bearer {MEMBER_TOKEN}
 }
 ```
 
-#### **PATCH /api/referrals/[id]/status**
-Atualiza o status de uma indicação (membro autenticado).
+#### **PATCH /api/referrals/[id]/status** ✅ **IMPLEMENTADO**
+Atualiza o status de uma indicação (apenas membro indicado/destinatário).
 
 **Headers:**
 ```
@@ -2602,7 +2613,7 @@ O sistema define três níveis de acesso com permissões específicas para cada 
 ### Implementado
 - ✅ Mobile First + Atomic Responsivity (componentes base)
 - ✅ Skeletons implementados (text, circular, rectangular)
-- ✅ Optimistic UI (parcial - IntentionForm)
+- ✅ Optimistic UI (IntentionForm, ReferralForm)
 - ✅ Refetch inteligente configurado (onFocus, onMount, staleTime: 5min)
 - ✅ Animações com Framer Motion (Button)
 
@@ -3032,6 +3043,7 @@ O projeto está em desenvolvimento ativo com a base sólida já implementada:
 - ✅ Fluxo de intenções públicas funcional
 - ✅ Camadas de arquitetura (Repositories, Services, Types)
 - ✅ Helpers de teste configurados
+- ✅ Sistema completo de indicações (APIs, componentes, hooks, página)
 
 ### **15.3 Correções de Configuração Concluídas**
 Todas as correções de configuração identificadas na seção 16 foram concluídas:
@@ -3040,11 +3052,23 @@ Todas as correções de configuração identificadas na seção 16 foram conclu�
 3. ✅ Adicionados headers de segurança no `next.config.ts`
 4. ✅ Padronizados imports TypeScript (ajustados paths e revisados imports)
 
+### **15.4 Sistema de Indicações Implementado (Dez 2024)**
+O sistema completo de indicações foi implementado com sucesso:
+1. ✅ APIs REST completas (POST, GET, PATCH)
+2. ✅ Hook useReferrals com React Query
+3. ✅ Componentes React completos (Form, List, Card, StatusBadge, StatusUpdate)
+4. ✅ Página /referrals para gestão completa
+5. ✅ Validações de negócio (auto-indicação, membros ativos, transições)
+6. ✅ Correções de tipos TypeScript (ZodError, ObjectId)
+7. ✅ Integração com sistema de membros existente
+
 ### Próximos Passos
 - ✅ **CONCLUÍDO:** Correções de configuração (seção 15)
 - ✅ **CONCLUÍDO:** Área administrativa para gestão de intenções
 - ✅ **CONCLUÍDO:** Sistema completo de convites e cadastro de membros
-- 🚧 Sistema de indicações de negócios
+- ✅ **CONCLUÍDO:** Sistema de indicações de negócios (core implementado)
+- 🚧 Sistema de "Obrigados" (agradecimentos públicos)
+- 🚧 Autenticação JWT para membros (substituir sistema temporário)
 - 📋 Testes com cobertura ≥ 95% (em progresso)
 - 📋 Refinamentos e otimizações
 
@@ -3185,31 +3209,34 @@ src/
   - [ ] Testes E2E do fluxo completo
 
 ### **Sistema de Indicações (Opção A)**
-- [ ] **Criação de Indicações**
-  - [ ] Formulário de indicação
-  - [ ] Seleção de membro indicado
-  - [ ] Campos: empresa, descrição, valor estimado
-  - [ ] API POST /api/referrals
+- [x] **Criação de Indicações**
+  - [x] Formulário de indicação (ReferralForm)
+  - [x] Seleção de membro indicado (dropdown com membros ativos)
+  - [x] Campos: empresa, descrição, valor estimado, observações
+  - [x] API POST /api/referrals
   - [ ] Testes unitários
 
-- [ ] **Gestão de Indicações**
-  - [ ] Página de indicações (`/admin/referrals` ou `/referrals`)
-  - [ ] Listagem de indicações feitas
-  - [ ] Listagem de indicações recebidas
-  - [ ] Filtros por status
-  - [ ] API GET /api/referrals
+- [x] **Gestão de Indicações**
+  - [x] Página de indicações (`/referrals`)
+  - [x] Listagem de indicações feitas
+  - [x] Listagem de indicações recebidas
+  - [x] Filtros por status e tipo (feitas/recebidas/ambas)
+  - [x] Paginação
+  - [x] API GET /api/referrals
   - [ ] Testes de integração
 
-- [ ] **Atualização de Status**
-  - [ ] Componente de atualização de status
-  - [ ] API PATCH /api/referrals/[id]/status
-  - [ ] Histórico de mudanças
+- [x] **Atualização de Status**
+  - [x] Componente de atualização de status (ReferralStatusUpdate)
+  - [x] API PATCH /api/referrals/[id]/status
+  - [x] Validação de transições de status
+  - [x] Apenas destinatário pode atualizar
+  - [ ] Histórico de mudanças (futuro)
   - [ ] Testes unitários
 
 - [ ] **Sistema de "Obrigados"**
-  - [ ] Formulário de agradecimento
+  - [ ] Formulário de agradecimento (ObrigadoForm)
   - [ ] API POST /api/obrigados
-  - [ ] Feed público de agradecimentos
+  - [ ] Feed público de agradecimentos (ObrigadosFeed)
   - [ ] Testes de integração
 
 ### **Dashboard de Performance (Opção B)**
@@ -3254,8 +3281,8 @@ src/
   - [ ] Testes de integração
 
 ### **Hooks Customizados**
-- [x] `useIntentions()` - Gerenciamento de intenções (criação implementada)
-- [ ] `useReferrals()` - Gerenciamento de indicações
+- [x] `useIntentions()` - Gerenciamento de intenções (criação e listagem implementadas)
+- [x] `useReferrals()` - Gerenciamento de indicações (criação, listagem, atualização de status)
 - [ ] `useMembers()` - Gerenciamento de membros
 - [ ] `useDashboard()` - Dados do dashboard
 - [x] Testes unitários do hook `useIntentions`
