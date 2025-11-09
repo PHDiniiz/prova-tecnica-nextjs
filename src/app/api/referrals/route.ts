@@ -20,9 +20,35 @@ function extrairMembroId(request: NextRequest): string | null {
 }
 
 /**
- * API Route para criar uma nova indicação
+ * API Route para criar uma nova indicação de negócio
+ * 
+ * @route POST /api/referrals
+ * @access Authenticated (requer Bearer token no header Authorization)
+ * 
+ * @param {CriarIndicacaoDTO} body - Dados da indicação
+ * @param {string} body.membroIndicadoId - ID do membro que receberá a indicação
+ * @param {string} body.empresaContato - Nome da empresa/contato (2-100 caracteres)
+ * @param {string} body.descricao - Descrição da oportunidade (10-1000 caracteres)
+ * @param {number} [body.valorEstimado] - Valor estimado (opcional, min: 1000, max: 10000000)
+ * @param {string} [body.observacoes] - Observações adicionais (opcional, max: 500 caracteres)
+ * 
+ * @returns {Promise<NextResponse>} Indicação criada com status 201
+ * 
+ * @throws {401} Se token de autenticação estiver ausente
+ * @throws {400} Se dados de validação estiverem inválidos
+ * @throws {403} Se membro estiver inativo
+ * @throws {404} Se membro indicado não for encontrado
+ * @throws {409} Se tentar auto-indicação
+ * 
+ * @example
  * POST /api/referrals
- * Requer autenticação: Bearer {membroId}
+ * Authorization: Bearer {membroId}
+ * {
+ *   "membroIndicadoId": "507f1f77bcf86cd799439013",
+ *   "empresaContato": "Empresa ABC",
+ *   "descricao": "Indicação de cliente potencial...",
+ *   "valorEstimado": 50000
+ * }
  */
 export async function POST(request: NextRequest) {
   try {
@@ -96,14 +122,22 @@ export async function POST(request: NextRequest) {
 
 /**
  * API Route para listar indicações do membro autenticado
- * GET /api/referrals
- * Requer autenticação: Bearer {membroId}
  * 
- * Query Parameters:
- * - tipo: 'feitas' | 'recebidas' | 'ambas' (default: 'ambas')
- * - status: 'nova' | 'em-contato' | 'fechada' | 'recusada' (opcional)
- * - page: número da página (default: 1)
- * - limit: itens por página (default: 20, max: 100)
+ * @route GET /api/referrals
+ * @access Authenticated (requer Bearer token no header Authorization)
+ * 
+ * @param {string} [tipo] - Tipo de indicações: 'feitas' | 'recebidas' | 'ambas' (default: 'ambas')
+ * @param {ReferralStatus} [status] - Filtro por status: 'nova' | 'em-contato' | 'fechada' | 'recusada'
+ * @param {number} [page] - Número da página (default: 1)
+ * @param {number} [limit] - Itens por página (default: 20, max: 100)
+ * 
+ * @returns {Promise<NextResponse>} Lista de indicações (feitas e recebidas) com paginação
+ * 
+ * @throws {401} Se token de autenticação estiver ausente
+ * 
+ * @example
+ * GET /api/referrals?tipo=feitas&status=nova&page=1&limit=20
+ * Authorization: Bearer {membroId}
  */
 export async function GET(request: NextRequest) {
   try {

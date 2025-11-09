@@ -53,6 +53,8 @@ export function IntentionForm() {
     reset: resetForm,
   } = useForm<IntentionFormData>({
     resolver: zodResolver(intentionFormSchema),
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
     defaultValues: {
       nome: '',
       email: '',

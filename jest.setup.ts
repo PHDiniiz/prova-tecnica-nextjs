@@ -2,26 +2,41 @@
 import '@testing-library/jest-dom';
 
 // Mock do MongoDB para evitar problemas com ESM
-jest.mock('mongodb', () => ({
-  MongoClient: jest.fn().mockImplementation(() => ({
-    connect: jest.fn().mockResolvedValue(undefined),
-    db: jest.fn().mockReturnValue({
-      collection: jest.fn().mockReturnValue({
-        findOne: jest.fn(),
-        find: jest.fn().mockReturnValue({
-          toArray: jest.fn().mockResolvedValue([]),
+jest.mock('mongodb', () => {
+  // Mock do ObjectId
+  const MockObjectId = jest.fn((id?: string) => {
+    const obj = {
+      toString: () => id || '507f1f77bcf86cd799439011',
+      toHexString: () => id || '507f1f77bcf86cd799439011',
+    };
+    return obj;
+  });
+
+  return {
+    MongoClient: jest.fn().mockImplementation(() => ({
+      connect: jest.fn().mockResolvedValue(undefined),
+      db: jest.fn().mockReturnValue({
+        collection: jest.fn().mockReturnValue({
+          findOne: jest.fn(),
+          find: jest.fn().mockReturnValue({
+            toArray: jest.fn().mockResolvedValue([]),
+          }),
+          insertOne: jest.fn(),
+          updateOne: jest.fn(),
+          deleteOne: jest.fn(),
+          findOneAndUpdate: jest.fn(),
+          countDocuments: jest.fn(),
         }),
-        insertOne: jest.fn(),
-        updateOne: jest.fn(),
-        deleteOne: jest.fn(),
+        admin: jest.fn().mockReturnValue({
+          ping: jest.fn().mockResolvedValue({}),
+        }),
       }),
-      admin: jest.fn().mockReturnValue({
-        ping: jest.fn().mockResolvedValue({}),
-      }),
-    }),
-    close: jest.fn().mockResolvedValue(undefined),
-  })),
-}));
+      close: jest.fn().mockResolvedValue(undefined),
+    })),
+    ObjectId: MockObjectId,
+    Db: jest.fn(),
+  };
+});
 
 // Mock do @faker-js/faker para evitar problemas com ESM
 jest.mock('@faker-js/faker', () => {

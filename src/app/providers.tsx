@@ -2,10 +2,11 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode, useState } from 'react';
+import { ToastProvider } from '@/components/ui/toast';
 
 /**
- * Provider do React Query
- * Configura o QueryClient com refetch inteligente
+ * Provider do React Query e Toast
+ * Configura o QueryClient com refetch inteligente e sistema de notificações
  */
 export function Providers({ children }: { children: ReactNode }) {
   // Cria o QueryClient uma vez e reutiliza
@@ -36,7 +37,9 @@ export function Providers({ children }: { children: ReactNode }) {
   );
 
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>{children}</ToastProvider>
+    </QueryClientProvider>
   );
 }
 

@@ -72,17 +72,13 @@ describe('IntentionForm', () => {
     await user.type(screen.getByLabelText(/empresa/i), 'Empresa Teste');
     await user.type(screen.getByLabelText(/motivo/i), 'Quero participar do grupo de networking');
 
-    // Digita email inválido
+    // Digita email inválido e sai do campo para triggerar validação no blur
     const emailInput = screen.getByLabelText(/email/i) as HTMLInputElement;
     await user.clear(emailInput);
     await user.type(emailInput, 'email-invalido');
+    await user.tab(); // Sair do campo para triggerar validação onBlur
 
-    // Tenta submeter o formulário (isso deve triggerar a validação)
-    const submitButton = screen.getByRole('button', { name: /enviar solicitação/i });
-    await user.click(submitButton);
-
-    // Aguarda a mensagem de erro aparecer após a validação
-    // O react-hook-form valida no onSubmit e atualiza o formState.errors
+    // Aguarda a mensagem de erro aparecer após a validação no blur
     await waitFor(
       () => {
         const errorMessage = screen.getByText(/Email inválido/i);
@@ -90,6 +86,10 @@ describe('IntentionForm', () => {
       },
       { timeout: 3000 }
     );
+
+    // Tenta submeter o formulário (deve falhar devido à validação)
+    const submitButton = screen.getByRole('button', { name: /enviar solicitação/i });
+    await user.click(submitButton);
 
     // Verifica que o mock não foi chamado (formulário não foi submetido devido à validação)
     expect(mockCriarIntencao).not.toHaveBeenCalled();

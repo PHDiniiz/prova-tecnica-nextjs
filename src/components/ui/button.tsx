@@ -4,13 +4,37 @@ import { cn } from '@/lib/utils';
 import { motion, HTMLMotionProps } from 'framer-motion';
 import React, { forwardRef, ReactNode } from 'react';
 
+/**
+ * Props do componente Button
+ */
 interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'onDrag' | 'children'> {
+  /** Variante visual do botão */
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  /** Exibe spinner de loading e desabilita o botão */
   isLoading?: boolean;
+  /** Tamanho do botão */
   size?: 'sm' | 'md' | 'lg';
+  /** Conteúdo do botão */
   children?: ReactNode;
 }
 
+/**
+ * Componente Button
+ * 
+ * Botão reutilizável com variantes, tamanhos e estados de loading.
+ * Inclui animações com Framer Motion.
+ * 
+ * @example
+ * ```tsx
+ * <Button variant="primary" size="md" onClick={handleClick}>
+ *   Clique aqui
+ * </Button>
+ * 
+ * <Button variant="primary" isLoading={isSubmitting}>
+ *   Enviando...
+ * </Button>
+ * ```
+ */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {

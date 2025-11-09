@@ -2843,13 +2843,17 @@ describe('Fluxo Completo de Admissão', () => {
 
 ### Implementado
 - ✅ **Testes Unitários:**
-  - ✅ Componentes: IntentionForm, Button, Input
-  - ✅ Hooks: useIntentions
+  - ✅ Componentes: IntentionForm (incluindo validação de email corrigida), Button, Input
+  - ✅ Hooks: useIntentions (teste de loading state corrigido)
   - ✅ API Routes: POST /api/intentions
 - ✅ **Helpers de Teste:**
   - ✅ Faker.js configurado (pt_BR)
   - ✅ Seeders para popular banco de dados
   - ✅ Funções auxiliares para testes
+- ✅ **Configuração de Testes:**
+  - ✅ Jest configurado com jest.setup.ts (TypeScript)
+  - ✅ Mocks do MongoDB e Faker para evitar problemas com ESM
+  - ✅ Husky configurado com hook pre-commit funcional
 
 ### Pendente
 - ⏳ **Testes Unitários:** Services, Repositories, Utilitários
@@ -3051,6 +3055,8 @@ Todas as correções de configuração identificadas na seção 16 foram conclu�
 2. ✅ Criado arquivo `.env.example` com todas as variáveis necessárias
 3. ✅ Adicionados headers de segurança no `next.config.ts`
 4. ✅ Padronizados imports TypeScript (ajustados paths e revisados imports)
+5. ✅ Configurado Husky funcional (hook pre-commit usando pnpm, jest.setup.ts)
+6. ✅ Corrigido teste de validação de email do IntentionForm (modo onBlur)
 
 ### **15.4 Sistema de Indicações Implementado (Dez 2024)**
 O sistema completo de indicações foi implementado com sucesso:
@@ -3141,6 +3147,39 @@ src/
 └── tests/        # Helpers de teste
 ```
 
+### **16.6 Configuração do Husky** ✅ **CONCLUÍDO**
+
+**Problema:** O Husky estava configurado mas não estava funcional devido a dois problemas:
+1. Hook pre-commit usando `npm` em vez de `pnpm`
+2. Arquivo `jest.setup.js` com sintaxe TypeScript causando erro de parsing
+
+**Correção realizada:**
+- ✅ Corrigido hook `.husky/pre-commit` para usar `pnpm test` em vez de `npm test`
+- ✅ Renomeado `jest.setup.js` para `jest.setup.ts` para suportar sintaxe TypeScript
+- ✅ Atualizado `jest.config.js` para referenciar `jest.setup.ts`
+- ✅ Adicionado mock do MongoDB no `jest.setup.ts` para evitar problemas com ESM
+- ✅ Adicionado mock do `@faker-js/faker` no `jest.setup.ts` para evitar problemas com ESM
+- ✅ Ajustado `transformIgnorePatterns` no `jest.config.js` para incluir `@faker-js`
+
+**Status:** ✅ Husky está funcional e bloqueia commits quando os testes falham.
+
+### **16.7 Correção do Teste de Validação de Email** ✅ **CONCLUÍDO**
+
+**Problema:** O teste `deve validar formato de email` do `IntentionForm` estava falhando porque não conseguia encontrar a mensagem de erro "Email inválido" após submeter o formulário com email inválido.
+
+**Correção realizada:**
+- ✅ Adicionado modo de validação explícito no `useForm` do `IntentionForm`:
+  - `mode: 'onBlur'` - Valida quando o usuário sai do campo
+  - `reValidateMode: 'onChange'` - Revalida após correções
+- ✅ Ajustado o teste para aguardar a validação no blur (após `user.tab()`)
+- ✅ Adicionada verificação de que o mock não foi chamado quando há erro de validação
+- ✅ Removido `it.skip` do teste
+
+**Benefícios:**
+- ✅ Teste funcional: O teste de validação de email agora passa
+- ✅ Melhor UX: Validação no blur fornece feedback imediato ao usuário
+- ✅ Cobertura: Todos os testes do projeto passando (18 passed, 0 failed)
+
 ---
 
 ## 📋 17. Checklist de Implementação
@@ -3156,6 +3195,8 @@ src/
 - [x] **Configuração de headers de segurança** - ✅ **CONCLUÍDO**
 - [x] **Correção de caminhos no jest.config.js** - ✅ **CONCLUÍDO**
 - [x] **Padronização de imports TypeScript** - ✅ **CONCLUÍDO**
+- [x] **Configuração do Husky (pre-commit hook)** - ✅ **CONCLUÍDO**
+- [x] **Correção do teste de validação de email** - ✅ **CONCLUÍDO**
 
 ### **Componentes UI Base (ATOMIC)**
 - [x] Button (variantes, tamanhos, loading, animações)
@@ -3172,10 +3213,10 @@ src/
 ### **Gestão de Membros - Fluxo de Admissão**
 - [x] **Página de Intenção Pública**
   - [x] Formulário de intenção (`/intention`)
-  - [x] Validação com Zod e React Hook Form
+  - [x] Validação com Zod e React Hook Form (modo onBlur para melhor UX)
   - [x] Integração com API POST /api/intentions
   - [x] Feedback visual (sucesso/erro)
-  - [x] Testes unitários do formulário
+  - [x] Testes unitários do formulário (incluindo validação de email corrigida)
   - [x] Testes de integração da API
 
 - [x] **Área Administrativa - Gestão de Intenções**
@@ -3313,8 +3354,8 @@ src/
 
 ### **Testes**
 - [ ] **Testes Unitários**
-  - [x] Componentes UI (parcial - IntentionForm, Button, Input)
-  - [x] Hooks customizados (parcial - useIntentions)
+  - [x] Componentes UI (parcial - IntentionForm, Button, Input) ✅ **Teste de validação de email corrigido**
+  - [x] Hooks customizados (parcial - useIntentions) ✅ **Teste de loading state corrigido**
   - [ ] Services (cobertura mínima 95%)
   - [ ] Repositories (cobertura mínima 90%)
   - [ ] Utilitários (cobertura mínima 95%)

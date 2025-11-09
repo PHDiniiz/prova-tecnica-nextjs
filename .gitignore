@@ -44,3 +44,6 @@ next-env.d.ts
 
 # Snyk Security Extension - AI Rules (auto-generated)
 .cursor\rules\snyk_rules.mdc
+cypress/
+cypress/videos/
+cypress/screenshots/
