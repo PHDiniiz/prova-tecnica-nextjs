@@ -118,6 +118,54 @@ O objetivo é digitalizar e otimizar a gestão de grupos de networking, eliminan
 
 ---
 
+## ⚙️ 2.6 Regras de Negócio Detalhadas
+
+Este documento padroniza todas as regras de negócio e o fluxo funcional da aplicação para garantir clareza, consistência e escalabilidade. O sistema segue princípios de **Clean Architecture**, **Atomic Design**, **UI Otimista** e **Realtime Refetch**.
+
+### **2.6.1 Módulo de Gestão de Membros**
+
+#### **Regras de Negócio**
+- O e-mail deve ser único no sistema.
+- Uma intenção só pode ser aprovada uma vez.
+- Tokens expiram após 7 dias.
+- Admins podem excluir intenções recusadas após 30 dias.
+- Campos obrigatórios devem ser validados com Zod no frontend e backend.
+- Após o cadastro completo, é criado um registro em `members` com `isActive: true`.
+
+### **2.6.2 Comunicação e Engajamento**
+
+#### **Regras de Negócio**
+- Somente membros ativos podem dar check-in.
+- Cada membro pode registrar apenas 1 presença por evento.
+- Avisos antigos (>60 dias) são arquivados automaticamente.
+
+### **2.6.3 Módulo de Geração de Negócios**
+
+#### **Regras de Negócio**
+- Apenas membros ativos podem criar ou receber indicações.
+- O valor da indicação deve ser numérico positivo.
+- Alterações de status geram logs automáticos (`referral_logs`).
+- Um "obrigado" só pode ser criado após o status `done`.
+
+### **2.6.4 Acompanhamento e Performance**
+
+#### **Regras de Negócio**
+- Dados devem ser agrupados por mês e filtráveis.
+- Relatórios devem refletir apenas membros ativos.
+- O sistema armazena snapshots mensais de indicadores para histórico.
+
+### **2.6.5 Módulo Financeiro**
+
+#### **Regras de Negócio**
+- O valor da mensalidade é fixo por grupo (configurável).
+- Geração automática no 1º dia útil do mês.
+- Bloqueio automático após 2 atrasos consecutivos.
+- Admins podem reativar manualmente um membro inadimplente.
+- Se após 15 dias continuar `pending`, status muda para `overdue`.
+- Membros com 2 mensalidades vencidas ficam com `isActive: false`.
+
+---
+
 ## 🏗️ 3. Arquitetura da Solução
 
 ```mermaid
@@ -1088,6 +1136,86 @@ sequenceDiagram
     F->>M: Check-in realizado
 ```
 
+### **7.4 Fluxo de Intenção de Participação (Detalhado)**
+
+**Passo a passo:**
+1. Visitante acessa o formulário público de intenção.
+2. Preenche os campos obrigatórios: **nome, e-mail, empresa, cargo, motivo de interesse**.
+3. O sistema valida os dados e registra a intenção no banco (`status: pending`).
+4. Um e-mail simulado (ou log interno) confirma o recebimento.
+5. O administrador visualiza a intenção no painel e pode **aprovar** ou **recusar**.
+6. Ao aprovar:
+   - O sistema gera um **token único** (UUID).
+   - O status muda para `approved`.
+   - Um link de convite é criado (`/register?token=xxxx`).
+7. O convidado acessa o link e completa seu cadastro.
+8. Após o cadastro, é criado um registro em `members` com `isActive: true`.
+
+### **7.5 Fluxo de Avisos e Comunicados**
+
+**Passo a passo:**
+1. Administradores criam comunicados com **título e mensagem**.
+2. Todos os membros ativos visualizam o comunicado em tempo real via TanStack Query (refetch automático).
+3. Os comunicados são ordenados por data de criação (desc).
+
+### **7.6 Fluxo de Presença (Check-in) - Detalhado**
+
+**Passo a passo:**
+1. Admin cria uma reunião (data, local, tema).
+2. Membros marcam presença clicando em "Check-in".
+3. O sistema salva o registro em `meetings` com `present: true`.
+4. O admin pode exportar relatório de presença.
+
+### **7.7 Fluxo de Indicações (Detalhado)**
+
+**Passo a passo:**
+1. Membro logado cria uma **indicação** para outro membro.
+2. Preenche: **para quem**, **tipo de negócio**, **valor estimado**, **descrição**.
+3. A indicação é salva com `status: pending`.
+4. O destinatário pode alterar o status: `in_progress`, `done`, `canceled`.
+5. Ao marcar como `done`, o sistema habilita o campo **"obrigado"** para o remetente.
+6. O dashboard reflete automaticamente via refetch otimista.
+
+### **7.8 Fluxo do Dashboard**
+
+**Passo a passo:**
+1. Ao acessar o dashboard, o sistema consulta dados agregados:
+   - Número de membros ativos
+   - Total de indicações (mês)
+   - Total de "obrigados" (mês)
+   - Taxa de participação em reuniões
+2. Os dados são atualizados em tempo real (refetch automático a cada 5s ou após mutation).
+
+### **7.9 Fluxo de Relatórios**
+
+**Passo a passo:**
+1. Admin define período (semanal, mensal, acumulado).
+2. O sistema compila dados de `referrals`, `meetings`, `payments` e `members`.
+3. Gera relatórios exportáveis (PDF e CSV).
+
+### **7.10 Fluxo de Mensalidades**
+
+**Passo a passo:**
+1. Sistema gera mensalidades automaticamente todo início de mês.
+2. Cada mensalidade tem status `pending` até o pagamento.
+3. Após confirmação (manual ou webhook simulado), status muda para `paid`.
+4. Se após 15 dias continuar `pending`, status muda para `overdue`.
+5. Membros com 2 mensalidades vencidas ficam com `isActive: false`.
+
+### **7.11 Fluxo Resumido Geral**
+
+```mermaid
+graph LR
+A[Usuário envia intenção] --> B[Admin avalia intenção]
+B -->|Aprovado| C[Token e convite gerado]
+C --> D[Usuário realiza cadastro completo]
+D --> E[Torna-se Membro Ativo]
+E --> F[Criar indicações, participar de reuniões]
+F --> G[Dashboard e Relatórios em tempo real]
+G --> H[Mensalidades e status financeiro]
+H --> I[Admin monitora desempenho e engajamento]
+```
+
 ---
 
 ## 🔒 8. Autenticação e Segurança
@@ -1235,6 +1363,45 @@ NEXT_PUBLIC_APP_URL=https://app.com
 
 ---
 
+## 🔐 8.8 Acesso e Permissões
+
+O sistema define três níveis de acesso com permissões específicas para cada função:
+
+| Função | Permissões |
+|--------|-------------|
+| **Admin** | Acesso total a todos os módulos e relatórios |
+| **Membro** | Pode criar indicações, visualizar comunicados e registrar presença |
+| **Convidado** | Pode apenas preencher intenção de participação |
+
+### **Permissões Detalhadas por Módulo**
+
+#### **Módulo de Gestão de Membros**
+- **Admin:** Aprovar/recusar intenções, gerar convites, listar membros, reativar membros inadimplentes
+- **Membro:** Visualizar próprio perfil, atualizar dados pessoais
+- **Convidado:** Submeter intenção de participação
+
+#### **Módulo de Comunicação e Engajamento**
+- **Admin:** Criar avisos e comunicados, criar reuniões, exportar relatórios de presença
+- **Membro:** Visualizar avisos, realizar check-in em reuniões
+- **Convidado:** Sem acesso
+
+#### **Módulo de Geração de Negócios**
+- **Admin:** Visualizar todas as indicações, gerar relatórios
+- **Membro:** Criar indicações, receber indicações, atualizar status de indicações recebidas, criar "obrigados"
+- **Convidado:** Sem acesso
+
+#### **Módulo de Acompanhamento e Performance**
+- **Admin:** Acesso completo ao dashboard, visualizar todos os relatórios, exportar dados
+- **Membro:** Visualizar dashboard pessoal, visualizar próprias métricas
+- **Convidado:** Sem acesso
+
+#### **Módulo Financeiro**
+- **Admin:** Visualizar todos os pagamentos, atualizar status de pagamento, gerar relatórios financeiros
+- **Membro:** Visualizar próprias mensalidades e histórico de pagamentos
+- **Convidado:** Sem acesso
+
+---
+
 ## 💡 9. Requisitos Técnicos
 
 ### Dependências Principais
@@ -1270,7 +1437,82 @@ NEXT_PUBLIC_APP_URL=https://app.com
 
 ---
 
+## 🔄 10.1 Realtime e Reatividade
+
+O sistema implementa atualizações em tempo real e reatividade através de estratégias específicas:
+
+### **10.1.1 Refetch Automático em Mutações**
+- Todas as mutações (POST, PATCH, DELETE) disparam refetch via TanStack Query
+- Garante que a UI sempre reflita o estado mais recente do servidor
+- Implementado através de `invalidateQueries` após operações bem-sucedidas
+
+### **10.1.2 Cache e TTL**
+- Dados críticos (intents, referrals, payments) têm cache TTL de 5 segundos
+- Balanceia performance e atualização em tempo real
+- Configurado via `staleTime` no TanStack Query
+
+### **10.1.3 UI Otimista**
+- Garante resposta instantânea antes da confirmação do backend
+- Melhora a percepção de performance pelo usuário
+- Implementado através de `optimisticUpdate` no TanStack Query
+- Em caso de erro, a UI reverte automaticamente para o estado anterior
+
+### **10.1.4 Refetch Inteligente**
+- **onFocus:** Refetch automático quando a janela recebe foco
+- **onMount:** Refetch ao montar componentes
+- **onInterval:** Refetch periódico a cada 5 segundos para dados críticos
+- Configurado globalmente no `QueryClient` do TanStack Query
+
+### **10.1.5 WebSocket (Futuro)**
+- WebSocket opcional para futuras atualizações instantâneas de avisos
+- Permite notificações em tempo real sem polling
+- Planejado para implementação futura quando necessário
+
+---
+
 ## 🔍 11. Testes
+
+### **11.1 Regras de Testes**
+
+O sistema segue regras rigorosas de testes para garantir qualidade e confiabilidade:
+
+- **Cobertura mínima global:** 95%  
+- **Unit Tests:** regras de negócio, validações e componentes atômicos  
+- **Integration Tests:** APIs (intents, members, referrals, payments)  
+- **E2E Tests:** fluxo completo (Cypress)  
+- **Mocks:** MSW + Mongo Memory Server  
+- **CI/CD:** bloqueia merge se cobertura <95%
+
+### **11.2 Estratégia de Testes**
+
+#### **Testes Unitários**
+Focam em testar componentes isolados e lógica de negócio:
+- **Componentes:** Testes de renderização, interações do usuário, validações de formulários
+- **Hooks:** Testes de lógica de estado, chamadas de API, cache
+- **Services:** Testes de regras de negócio, validações, transformações de dados
+- **Repositories:** Testes de queries, operações CRUD, validações de dados
+- **Utilitários:** Testes de funções puras, formatação, cálculos
+
+#### **Testes de Integração**
+Validam o funcionamento completo de fluxos:
+- Fluxo completo de admissão (intenção → aprovação → cadastro)
+- Fluxo de criação de indicação
+- Fluxo de aprovação de intenção
+- API Routes principais com validação end-to-end
+
+#### **Testes E2E (Cypress)**
+Cobrem os fluxos críticos do sistema:
+- Fluxo completo de admissão (intenção → aprovação → cadastro)
+- Fluxo de indicação de negócios
+- Dashboard administrativo
+- Cobertura mínima de 80% dos fluxos críticos
+
+### **11.3 Ferramentas e Mocks**
+
+- **MSW (Mock Service Worker):** Para mockar chamadas de API em testes
+- **Mongo Memory Server:** Para testes de integração com banco de dados isolado
+- **Faker.js (pt_BR):** Para geração de dados de teste realistas
+- **Jest + React Testing Library:** Para testes unitários e de componentes
 
 ### Implementado
 - ✅ **Testes Unitários:**
@@ -1318,7 +1560,15 @@ NEXT_PUBLIC_APP_URL=https://app.com
 ## ✅ 14. Conclusão
 Este documento define uma base sólida para a implementação de um sistema moderno, escalável e responsivo, aplicando os princípios de **Clean Code**, **Clean Architecture**, **Atomic Design**, **UI Otimista** e **Realtime Refetch**.  
 
-### Progresso Atual
+### **14.1 Benefícios das Regras e Fluxos Definidos**
+
+As regras e fluxos definidos asseguram:
+- **Clareza nas responsabilidades e etapas:** Cada módulo possui regras de negócio claras e fluxos bem documentados, facilitando a manutenção e evolução do sistema.
+- **Atualizações em tempo real e UX otimista:** O sistema garante que os usuários sempre vejam dados atualizados através de refetch automático e UI otimista, proporcionando uma experiência fluida e responsiva.
+- **Validações consistentes e controle administrativo robusto:** Todas as entradas são validadas com Zod no frontend e backend, garantindo integridade dos dados e segurança.
+- **Base sólida para evolução futura:** A arquitetura permite fácil adição de funcionalidades como notificações, gamificação e planos pagos sem necessidade de refatoração significativa.
+
+### **14.2 Progresso Atual**
 O projeto está em desenvolvimento ativo com a base sólida já implementada:
 - ✅ Infraestrutura completa (MongoDB, React Query, Jest)
 - ✅ Componentes UI base (Button, Input, Textarea, Card, Badge, Skeleton)
