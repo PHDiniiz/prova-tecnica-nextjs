@@ -116,7 +116,7 @@ export function IntentionList({ adminToken }: IntentionListProps) {
             setStatusFiltro(undefined);
             setPagina(1);
           }}
-          variant={statusFiltro === undefined ? 'default' : 'outline'}
+          variant={statusFiltro === undefined ? 'primary' : 'outline'}
         >
           Todas
         </Button>
@@ -125,7 +125,7 @@ export function IntentionList({ adminToken }: IntentionListProps) {
             setStatusFiltro('pending');
             setPagina(1);
           }}
-          variant={statusFiltro === 'pending' ? 'default' : 'outline'}
+          variant={statusFiltro === 'pending' ? 'primary' : 'outline'}
         >
           Pendentes
         </Button>
@@ -134,7 +134,7 @@ export function IntentionList({ adminToken }: IntentionListProps) {
             setStatusFiltro('approved');
             setPagina(1);
           }}
-          variant={statusFiltro === 'approved' ? 'default' : 'outline'}
+          variant={statusFiltro === 'approved' ? 'primary' : 'outline'}
         >
           Aprovadas
         </Button>
@@ -143,7 +143,7 @@ export function IntentionList({ adminToken }: IntentionListProps) {
             setStatusFiltro('rejected');
             setPagina(1);
           }}
-          variant={statusFiltro === 'rejected' ? 'default' : 'outline'}
+          variant={statusFiltro === 'rejected' ? 'primary' : 'outline'}
         >
           Recusadas
         </Button>

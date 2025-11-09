@@ -23,7 +23,7 @@ const atualizarStatusSchema = {
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verifica autenticação admin
@@ -31,7 +31,7 @@ export async function PATCH(
       return respostaNaoAutorizado();
     }
 
-    const { id } = params;
+    const { id } = await params;
     const body: AtualizarStatusIntencaoDTO = await request.json();
 
     // Valida o status
@@ -96,7 +96,7 @@ export async function PATCH(
         {
           success: false,
           error: 'Dados inválidos',
-          details: error.errors.map((err) => ({
+          details: error.issues.map((err) => ({
             path: err.path.join('.'),
             message: err.message,
           })),

@@ -1,10 +1,11 @@
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
-import { ButtonHTMLAttributes } from "react";
+import { motion, HTMLMotionProps } from "framer-motion";
+import { ReactNode } from "react";
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'onDrag' | 'children'> {
   variant?: "primary" | "secondary" | "outline";
   isLoading?: boolean;
+  children?: ReactNode;
 }
 
 export const Button = ({ variant = "primary", isLoading = false, className, children, ...props }: ButtonProps) => {

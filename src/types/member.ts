@@ -7,6 +7,7 @@ export interface Member {
   email: string;
   telefone?: string;
   empresa: string;
+  cargo?: string;
   linkedin?: string;
   areaAtuacao?: string;
   intencaoId?: string | null;
@@ -23,6 +24,7 @@ export interface CriarMembroDTO {
   email: string;
   telefone?: string;
   empresa: string;
+  cargo?: string;
   linkedin?: string;
   areaAtuacao?: string;
   intencaoId?: string;

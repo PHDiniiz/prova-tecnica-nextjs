@@ -81,7 +81,7 @@ export class IntentionRepository {
     try {
       const intencao = await this.db
         .collection<Intention>('intentions')
-        .findOne({ _id: new ObjectId(id) });
+        .findOne({ _id: new ObjectId(id) as any });
 
       if (!intencao) return null;
 
@@ -132,7 +132,7 @@ export class IntentionRepository {
       const result = await this.db
         .collection<Intention>('intentions')
         .findOneAndUpdate(
-          { _id: new ObjectId(id) },
+          { _id: new ObjectId(id) as any },
           {
             $set: {
               status,

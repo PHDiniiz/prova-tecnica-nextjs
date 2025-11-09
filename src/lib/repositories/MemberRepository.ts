@@ -35,7 +35,7 @@ export class MemberRepository {
     try {
       const membro = await this.db
         .collection<Member>('members')
-        .findOne({ _id: new ObjectId(id) });
+        .findOne({ _id: new ObjectId(id) as any });
 
       if (!membro) return null;
 

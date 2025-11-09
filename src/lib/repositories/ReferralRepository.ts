@@ -50,7 +50,7 @@ export class ReferralRepository {
     try {
       const indicacao = await this.db
         .collection<Referral>('referrals')
-        .findOne({ _id: new ObjectId(id) });
+        .findOne({ _id: new ObjectId(id) as any });
 
       if (!indicacao) return null;
 
@@ -111,7 +111,7 @@ export class ReferralRepository {
       const result = await this.db
         .collection<Referral>('referrals')
         .findOneAndUpdate(
-          { _id: new ObjectId(id) },
+          { _id: new ObjectId(id) as any },
           {
             $set: updateData,
           },
