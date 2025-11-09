@@ -21,6 +21,7 @@
 *.pem
 .*/
 !.husky/
+!.github/
 
 # debug
 npm-debug.log*
