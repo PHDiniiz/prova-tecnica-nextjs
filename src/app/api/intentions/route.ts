@@ -6,7 +6,19 @@ import { verificarAdminToken, respostaNaoAutorizado } from '@/lib/auth';
 
 /**
  * API Route para listar intenções (admin apenas)
- * GET /api/intentions
+ * 
+ * @route GET /api/intentions
+ * @access Admin (requer ADMIN_TOKEN no header Authorization)
+ * 
+ * @param {string} status - Filtro por status: 'pending' | 'approved' | 'rejected' (opcional)
+ * @param {number} page - Número da página (default: 1)
+ * @param {number} limit - Itens por página (default: 20)
+ * 
+ * @returns {Promise<NextResponse>} Lista de intenções com paginação
+ * 
+ * @example
+ * GET /api/intentions?status=pending&page=1&limit=20
+ * Authorization: Bearer {ADMIN_TOKEN}
  */
 export async function GET(request: NextRequest) {
   try {
@@ -57,8 +69,29 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * API Route para criar uma nova intenção
+ * API Route para criar uma nova intenção de participação
+ * 
+ * @route POST /api/intentions
+ * @access Public
+ * 
+ * @param {CriarIntencaoDTO} body - Dados da intenção
+ * @param {string} body.nome - Nome completo (2-100 caracteres)
+ * @param {string} body.email - Email válido e único
+ * @param {string} body.empresa - Nome da empresa (2-100 caracteres)
+ * @param {string} [body.cargo] - Cargo/posição (opcional, max 100 caracteres)
+ * @param {string} body.motivo - Motivo de interesse (10-500 caracteres)
+ * 
+ * @returns {Promise<NextResponse>} Intenção criada com status 201
+ * 
+ * @example
  * POST /api/intentions
+ * {
+ *   "nome": "João Silva",
+ *   "email": "joao@empresa.com",
+ *   "empresa": "Empresa XYZ",
+ *   "cargo": "Diretor Comercial",
+ *   "motivo": "Desejo participar do grupo para expandir minha rede..."
+ * }
  */
 export async function POST(request: NextRequest) {
   try {
@@ -82,7 +115,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: 'Dados inválidos',
-          details: error.errors.map((err) => ({
+          details: error.issues.map((err) => ({
             path: err.path.join('.'),
             message: err.message,
           })),

@@ -19,6 +19,8 @@
 # misc
 .DS_Store
 *.pem
+.*/
+!.husky/
 
 # debug
 npm-debug.log*
@@ -29,7 +31,6 @@ yarn-error.log*
 #.env
 .env.local
 .env*.local
-!env.example
 
 # vercel
 .vercel
@@ -40,3 +41,9 @@ next-env.d.ts
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+# Snyk Security Extension - AI Rules (auto-generated)
+.cursor\rules\snyk_rules.mdc
+cypress/
+cypress/videos/
+cypress/screenshots/

@@ -75,12 +75,6 @@ export function IntentionCard({
               <p className="text-sm font-medium text-gray-700">Empresa</p>
               <p className="text-sm text-gray-900">{intencao.empresa}</p>
             </div>
-            {intencao.cargo && (
-              <div>
-                <p className="text-sm font-medium text-gray-700">Cargo</p>
-                <p className="text-sm text-gray-900">{intencao.cargo}</p>
-              </div>
-            )}
             <div>
               <p className="text-sm font-medium text-gray-700">Motivo</p>
               <p className="text-sm text-gray-900">{intencao.motivo}</p>

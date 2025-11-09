@@ -1,7 +1,8 @@
 import { faker } from '@faker-js/faker';
 
 // Configura o Faker para português brasileiro
-faker.locale = 'pt_BR';
+// Nota: Na versão 10 do faker, a configuração de locale é feita via import
+// Se necessário, use: import { faker } from '@faker-js/faker/locale/pt_BR';
 
 /**
  * Gera uma intenção fake completa
@@ -27,7 +28,7 @@ export function criarMembroFake(intencaoId?: string, ativo: boolean = true) {
     email: faker.internet.email(),
     telefone: faker.phone.number(),
     empresa: faker.company.name(),
-    linkedin: `https://linkedin.com/in/${faker.internet.userName()}`,
+    linkedin: `https://linkedin.com/in/${faker.internet.username()}`,
     areaAtuacao: faker.person.jobTitle(),
     intencaoId: intencaoId || null,
     ativo,

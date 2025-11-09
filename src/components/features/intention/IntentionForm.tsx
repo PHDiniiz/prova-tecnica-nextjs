@@ -37,8 +37,14 @@ type IntentionFormData = z.infer<typeof intentionFormSchema>;
  * Componente de formulário para criar intenção de participação
  */
 export function IntentionForm() {
-  const { criarIntencao, isCreating, isSuccess, isError, error, reset } =
-    useIntentions();
+  const {
+    criarIntencao,
+    isCreating,
+    isCreateSuccess,
+    isCreateError,
+    createError,
+    resetCreate,
+  } = useIntentions();
 
   const {
     register,
@@ -47,6 +53,8 @@ export function IntentionForm() {
     reset: resetForm,
   } = useForm<IntentionFormData>({
     resolver: zodResolver(intentionFormSchema),
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
     defaultValues: {
       nome: '',
       email: '',
@@ -82,8 +90,8 @@ export function IntentionForm() {
    * Handler para resetar o estado de sucesso
    */
   const handleResetSuccess = useCallback(() => {
-    reset();
-  }, [reset]);
+    resetCreate();
+  }, [resetCreate]);
 
   return (
     <Card variant="default" className="w-full max-w-2xl mx-auto">
@@ -97,7 +105,7 @@ export function IntentionForm() {
         </p>
       </CardHeader>
       <CardContent>
-        {isSuccess && (
+        {isCreateSuccess && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -118,14 +126,14 @@ export function IntentionForm() {
           </motion.div>
         )}
 
-        {isError && error && (
+        {isCreateError && createError && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg"
           >
             <p className="text-red-800 font-medium">
-              ✗ {error.message || 'Erro ao criar intenção. Tente novamente.'}
+              ✗ {createError.message || 'Erro ao criar intenção. Tente novamente.'}
             </p>
           </motion.div>
         )}
@@ -136,7 +144,7 @@ export function IntentionForm() {
             placeholder="Seu nome completo"
             error={errors.nome?.message}
             {...register('nome')}
-            disabled={isCreating || isSuccess}
+            disabled={isCreating || isCreateSuccess}
           />
 
           <Input
@@ -146,7 +154,7 @@ export function IntentionForm() {
             error={errors.email?.message}
             helperText="Usaremos este email para contato"
             {...register('email')}
-            disabled={isCreating || isSuccess}
+            disabled={isCreating || isCreateSuccess}
           />
 
           <Input
@@ -154,7 +162,7 @@ export function IntentionForm() {
             placeholder="Nome da sua empresa"
             error={errors.empresa?.message}
             {...register('empresa')}
-            disabled={isCreating || isSuccess}
+            disabled={isCreating || isCreateSuccess}
           />
 
           <Textarea
@@ -164,7 +172,7 @@ export function IntentionForm() {
             helperText="Mínimo de 10 caracteres"
             rows={6}
             {...register('motivo')}
-            disabled={isCreating || isSuccess}
+            disabled={isCreating || isCreateSuccess}
           />
 
           <div className="pt-4">
@@ -173,7 +181,7 @@ export function IntentionForm() {
               variant="primary"
               size="lg"
               isLoading={isCreating}
-              disabled={isSuccess}
+              disabled={isCreateSuccess}
               className="w-full"
             >
               {isCreating ? 'Enviando...' : 'Enviar Solicitação'}

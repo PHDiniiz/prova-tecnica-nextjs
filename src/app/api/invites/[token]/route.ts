@@ -8,10 +8,10 @@ import { IntentionService } from '@/services/IntentionService';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { token: string } }
+  { params }: { params: Promise<{ token: string }> }
 ) {
   try {
-    const { token } = params;
+    const { token } = await params;
 
     if (!token) {
       return NextResponse.json(
@@ -63,7 +63,7 @@ export async function GET(
             nome: intencao.nome,
             email: intencao.email,
             empresa: intencao.empresa,
-            cargo: intencao.cargo,
+            motivo: intencao.motivo,
           },
         },
       },

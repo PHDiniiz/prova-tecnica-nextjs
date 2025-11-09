@@ -20,6 +20,7 @@ const criarIndicacaoSchema = z.object({
     .min(1000, 'Valor estimado deve ser no mínimo R$ 1.000')
     .max(10000000, 'Valor estimado deve ser no máximo R$ 10.000.000')
     .optional(),
+  observacoes: z.string().max(500, 'Observações deve ter no máximo 500 caracteres').optional(),
 });
 
 /**

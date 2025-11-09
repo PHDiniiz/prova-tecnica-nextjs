@@ -27,6 +27,7 @@ export interface CriarIndicacaoDTO {
   empresaContato: string;
   descricao: string;
   valorEstimado?: number;
+  observacoes?: string;
 }
 
 /**

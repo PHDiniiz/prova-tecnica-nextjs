@@ -46,6 +46,8 @@ const memberFormSchema = z.object({
     .or(z.literal('')),
 });
 
+type MemberFormData = z.infer<typeof memberFormSchema>;
+
 interface MemberFormProps {
   initialData?: {
     nome: string;
@@ -69,7 +71,7 @@ export function MemberForm({
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<CriarMembroDTO>({
+  } = useForm<MemberFormData>({
     resolver: zodResolver(memberFormSchema),
     defaultValues: useMemo(
       () => ({
@@ -86,9 +88,10 @@ export function MemberForm({
   });
 
   const onSubmitForm = useCallback(
-    async (data: CriarMembroDTO) => {
-      // Remove campos vazios
-      const cleanedData: CriarMembroDTO = {
+    async (data: MemberFormData) => {
+      // Remove campos vazios e converte para CriarMembroDTO
+      // Nota: token e intencaoId devem ser fornecidos pelo componente pai
+      const cleanedData: Partial<CriarMembroDTO> = {
         nome: data.nome,
         email: data.email,
         empresa: data.empresa,
@@ -97,7 +100,8 @@ export function MemberForm({
         ...(data.linkedin && { linkedin: data.linkedin }),
         ...(data.areaAtuacao && { areaAtuacao: data.areaAtuacao }),
       };
-      await onSubmit(cleanedData);
+      // O componente pai deve adicionar token e intencaoId antes de chamar onSubmit
+      await onSubmit(cleanedData as CriarMembroDTO);
     },
     [onSubmit]
   );

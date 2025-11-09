@@ -99,26 +99,21 @@ describe('useIntentions', () => {
       await expect(result.current.criarIntencao(dto)).rejects.toThrow();
     });
 
-    expect(result.current.isError).toBe(true);
+    expect(result.current.isCreateError).toBe(true);
   });
 
   it('deve mostrar estado de loading durante a criação', async () => {
+    let resolvePromise: (value: any) => void;
+    const promise = new Promise((resolve) => {
+      resolvePromise = resolve;
+    });
+
     (global.fetch as jest.Mock).mockImplementationOnce(
       () =>
-        new Promise((resolve) =>
-          setTimeout(
-            () =>
-              resolve({
-                ok: true,
-                json: async () => ({
-                  success: true,
-                  data: {},
-                  message: 'Sucesso',
-                }),
-              }),
-            100
-          )
-        )
+        promise.then((value) => ({
+          ok: true,
+          json: async () => value,
+        }))
     );
 
     const { result } = renderHook(() => useIntentions(), {
@@ -132,11 +127,21 @@ describe('useIntentions', () => {
       motivo: 'Quero participar do grupo',
     };
 
-    const promise = result.current.criarIntencao(dto);
+    const mutationPromise = result.current.criarIntencao(dto);
 
-    expect(result.current.isCreating).toBe(true);
+    // Aguarda que a mutation inicie
+    await waitFor(() => {
+      expect(result.current.isCreating).toBe(true);
+    });
 
-    await promise;
+    // Resolve a promise
+    resolvePromise!({
+      success: true,
+      data: {},
+      message: 'Sucesso',
+    });
+
+    await mutationPromise;
 
     await waitFor(() => {
       expect(result.current.isCreating).toBe(false);

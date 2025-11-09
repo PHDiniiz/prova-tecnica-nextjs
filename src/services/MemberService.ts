@@ -101,5 +101,13 @@ export class MemberService {
     await this.initRepository();
     return await this.repository.buscarPorId(id);
   }
+
+  /**
+   * Busca membros ativos
+   */
+  async buscarMembrosAtivos(): Promise<Member[]> {
+    await this.initRepository();
+    return await this.repository.buscarAtivos();
+  }
 }
 

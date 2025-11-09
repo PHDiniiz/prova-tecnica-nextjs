@@ -48,7 +48,7 @@ export async function conectarMongoDB(): Promise<MongoConnection> {
     await client.connect();
     
     // Pega o nome do banco da URI ou usa um padrão
-    const dbName = process.env.MONGODB_DB_NAME || 'networking-platform';
+    const dbName = 'ag-sistemas';
     const db = client.db(dbName);
 
     // Cacheia a conexão para reutilizar
