@@ -21,7 +21,7 @@ export function criarIntencaoFake() {
 /**
  * Gera um membro fake completo
  */
-export function criarMembroFake(intencaoId?: string) {
+export function criarMembroFake(intencaoId?: string, ativo: boolean = true) {
   return {
     nome: faker.person.fullName(),
     email: faker.internet.email(),
@@ -30,6 +30,7 @@ export function criarMembroFake(intencaoId?: string) {
     linkedin: `https://linkedin.com/in/${faker.internet.userName()}`,
     areaAtuacao: faker.person.jobTitle(),
     intencaoId: intencaoId || null,
+    ativo,
     criadoEm: new Date(),
     atualizadoEm: new Date(),
   };
@@ -51,13 +52,18 @@ export function criarConviteFake(intencaoId: string) {
 /**
  * Gera uma indicação fake
  */
-export function criarIndicacaoFake(membroIndicadorId: string, membroIndicadoId: string) {
+export function criarIndicacaoFake(
+  membroIndicadorId: string,
+  membroIndicadoId: string,
+  valorEstimado?: number
+) {
   return {
     membroIndicadorId,
     membroIndicadoId,
     empresaContato: faker.company.name(),
     descricao: faker.lorem.paragraph(),
     status: 'nova' as const,
+    valorEstimado: valorEstimado || faker.number.int({ min: 1000, max: 10000000 }),
     criadoEm: new Date(),
     atualizadoEm: new Date(),
   };

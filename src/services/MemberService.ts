@@ -73,6 +73,7 @@ export class MemberService {
       linkedin: dadosValidados.linkedin,
       areaAtuacao: dadosValidados.areaAtuacao,
       intencaoId: convite.intencaoId,
+      ativo: true,
       criadoEm: new Date(),
       atualizadoEm: new Date(),
     };
