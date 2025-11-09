@@ -118,6 +118,44 @@ O objetivo é digitalizar e otimizar a gestão de grupos de networking, eliminan
 
 ---
 
+## 🧩 Módulo Opcional escolhido: Opção A - Sistema de Indicações
+
+### 🎯 Objetivo
+
+Implementar um sistema completo de **indicações de negócios entre membros**, fortalecendo o networking e a geração de oportunidades dentro do grupo.
+
+---
+
+### 🧭 Fluxo de Funcionamento
+
+1. Membro logado acessa o menu "Indicações" no dashboard.  
+
+2. Cria nova indicação informando:
+
+   - Destinatário (membro alvo)
+
+   - Tipo de negócio / serviço
+
+   - Descrição ou observação
+
+   - Valor estimado (opcional)
+
+3. O sistema registra a indicação com `status: "pending"` e notifica o destinatário.  
+
+4. O destinatário pode alterar o status para:
+
+   - in_progress → negociação iniciada  
+
+   - done → negócio fechado com sucesso  
+
+   - canceled → indicação cancelada  
+
+5. Ao marcar como done, o remetente pode registrar um "obrigado público".  
+
+6. Todos os agradecimentos são exibidos em um feed de atividades dentro da comunidade.  
+
+---
+
 ## ⚙️ 2.6 Regras de Negócio Detalhadas
 
 Este documento padroniza todas as regras de negócio e o fluxo funcional da aplicação para garantir clareza, consistência e escalabilidade. O sistema segue princípios de **Clean Architecture**, **Atomic Design**, **UI Otimista** e **Realtime Refetch**.
@@ -1383,7 +1421,7 @@ const CriarIntencaoSchema = z.object({
 | Campo | Regras | Exemplo |
 |-------|--------|---------|
 | **Nome** | 2-100 caracteres, apenas letras, espaços e acentos | "João Silva" |
-| **Email** | Formato email válido, único no sistema | "joao@empresa.com" |
+| **Email** | Formato email válido, único no sistema | "joao@empresa.comz" |
 | **Empresa** | 2-100 caracteres | "Empresa XYZ Ltda" |
 | **Cargo** | Máximo 100 caracteres (opcional) | "Diretor Comercial" |
 | **Motivo/Descrição** | 10-500 caracteres para intenções, 10-1000 para indicações | Mínimo 10 caracteres |
