@@ -164,7 +164,7 @@ describe('GET /api/dashboard', () => {
     });
 
     const response = await GET(request);
-    await response.json();
+    const data = await response.json();
 
     expect(response.status).toBe(200);
     expect(mockService.obterDashboard).toHaveBeenCalledWith({
@@ -216,7 +216,7 @@ describe('GET /api/dashboard', () => {
     );
 
     const response = await GET(request);
-    await response.json();
+    const data = await response.json();
 
     expect(response.status).toBe(200);
     expect(mockService.obterDashboard).toHaveBeenCalledWith({

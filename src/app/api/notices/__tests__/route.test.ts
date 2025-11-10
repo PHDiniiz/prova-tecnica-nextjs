@@ -83,8 +83,6 @@ describe('GET /api/notices', () => {
         conteudo: 'Conteúdo do aviso',
         tipo: 'info' as const,
         ativo: true,
-        criadoEm: new Date(),
-        atualizadoEm: new Date(),
       },
     ];
 
@@ -115,7 +113,7 @@ describe('GET /api/notices', () => {
     });
 
     const response = await GET(request);
-    await response.json();
+    const data = await response.json();
 
     expect(response.status).toBe(200);
     expect(mockService.listarAvisos).toHaveBeenCalled();
@@ -158,8 +156,6 @@ describe('POST /api/notices', () => {
       conteudo: 'Conteúdo do aviso',
       tipo: 'info' as const,
       ativo: true,
-      criadoEm: new Date(),
-      atualizadoEm: new Date(),
     };
 
     mockService.criarAviso.mockResolvedValueOnce(avisoCriado);

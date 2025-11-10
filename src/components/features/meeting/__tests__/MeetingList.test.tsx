@@ -4,13 +4,13 @@
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MeetingList } from '../MeetingList';
-// import { useMeetings } from '@/hooks/useMeetings';
-
-const mockUseMeetings = jest.fn();
+import { useMeetings } from '@/hooks/useMeetings';
 
 jest.mock('@/hooks/useMeetings', () => ({
-  useMeetings: () => mockUseMeetings(),
+  useMeetings: jest.fn(),
 }));
+
+const { useMeetings: mockUseMeetings } = require('@/hooks/useMeetings');
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -78,8 +78,7 @@ describe('MeetingList', () => {
       { wrapper: createWrapper() }
     );
 
-    // O componente mostra a mensagem do erro ou "Erro ao carregar reuniões"
-    expect(screen.getByText(/erro ao carregar/i)).toBeInTheDocument();
+    expect(screen.getByText(/erro ao carregar reuniões/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /tentar novamente/i })).toBeInTheDocument();
   });
 });

@@ -1,122 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
-import { getDatabase } from '@/lib/mongodb';
-import { TokenRepository } from '@/lib/repositories/TokenRepository';
+import jwt, { SignOptions } from 'jsonwebtoken';
+import {
+  AccessTokenPayload,
+  RefreshTokenPayload,
+  DecodedToken,
+} from '@/types/auth';
 
-export interface AccessTokenPayload {
-  membroId: string;
-  email: string;
-  isActive: boolean;
-  type?: 'access';
-}
-
-export interface RefreshTokenPayload {
-  membroId: string;
-  email: string;
-  type?: 'refresh';
-}
-
-export interface DecodedToken {
-  membroId: string;
-  email: string;
-  isActive?: boolean;
-  type?: 'access' | 'refresh';
-  iat?: number;
-  exp?: number;
-}
-
-export function gerarAccessToken(payload: AccessTokenPayload): string {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    throw new Error('JWT_SECRET não configurado');
-  }
-  const expiresIn = process.env.JWT_ACCESS_EXPIRES_IN || '15m';
-  return jwt.sign(
-    { ...payload, type: 'access' },
-    secret as jwt.Secret,
-    { expiresIn }
-  );
-}
-
-export function gerarRefreshToken(payload: RefreshTokenPayload): string {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    throw new Error('JWT_SECRET não configurado');
-  }
-  const expiresIn = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
-  return jwt.sign(
-    { ...payload, type: 'refresh' },
-    secret as jwt.Secret,
-    { expiresIn }
-  );
-}
-
-export function verificarToken(token: string): DecodedToken | null {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) return null;
-  try {
-    const decoded = jwt.verify(token, secret as string) as DecodedToken;
-    if (decoded.type !== 'access') return null;
-    return decoded;
-  } catch {
-    return null;
-  }
-}
-
-export function verificarRefreshToken(token: string): DecodedToken | null {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) return null;
-  try {
-    const decoded = jwt.verify(token, secret as string) as DecodedToken;
-    if (decoded.type !== 'refresh') return null;
-    return decoded;
-  } catch {
-    return null;
-  }
-}
-
-export async function verificarTokenComBlacklist(
-  token: string
-): Promise<DecodedToken | null> {
-  const decoded = verificarToken(token);
-  if (!decoded || !decoded.membroId) return null;
-  const db = await getDatabase();
-  const tokenRepository = new TokenRepository(db);
-  const estaNaBlacklist = await tokenRepository.estaNaBlacklist(token);
-  if (estaNaBlacklist) return null;
-  return decoded;
-}
-
-export async function extrairMembroIdDoToken(
-  request: NextRequest
-): Promise<string | null> {
-  const authHeader = request.headers.get('Authorization');
-  const token = authHeader?.replace('Bearer ', '');
-  if (!token) return null;
-  const decoded = await verificarTokenComBlacklist(token);
-  return decoded?.membroId || null;
-}
-
-export function extrairInfoDoToken(
-  request: NextRequest
-): DecodedToken | null {
-  const authHeader = request.headers.get('Authorization');
-  const token = authHeader?.replace('Bearer ', '');
-  if (!token) return null;
-  return verificarToken(token);
-}
-
+/**
+ * Verifica se o token de autenticação admin é válido
+ */
 export function verificarAdminToken(request: NextRequest): boolean {
   const authHeader = request.headers.get('Authorization');
   const token = authHeader?.replace('Bearer ', '');
+
   const adminToken = process.env.ADMIN_TOKEN;
+
   if (!adminToken) {
     console.error('ADMIN_TOKEN não configurado nas variáveis de ambiente');
     return false;
   }
+
   return token === adminToken;
 }
 
+/**
+ * Retorna uma resposta de erro de autenticação
+ */
 export function respostaNaoAutorizado() {
   return NextResponse.json(
     {
@@ -127,3 +36,159 @@ export function respostaNaoAutorizado() {
     { status: 401 }
   );
 }
+
+/**
+ * Obtém o secret JWT das variáveis de ambiente
+ */
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET não configurado nas variáveis de ambiente');
+  }
+  return secret;
+}
+
+/**
+ * Gera um access token JWT (15 minutos)
+ */
+export function gerarAccessToken(payload: {
+  membroId: string;
+  email: string;
+  isActive: boolean;
+}): string {
+  try {
+    const tokenPayload: AccessTokenPayload = {
+      ...payload,
+      type: 'access',
+    };
+
+    const expiresIn = process.env.JWT_ACCESS_EXPIRES_IN || '15m';
+    const secret = getJwtSecret();
+
+    return jwt.sign(tokenPayload, secret, {
+      expiresIn,
+    } as SignOptions);
+  } catch (error) {
+    console.error('Erro ao gerar access token:', error);
+    throw new Error('Não foi possível gerar o token de acesso');
+  }
+}
+
+/**
+ * Gera um refresh token JWT (7 dias)
+ */
+export function gerarRefreshToken(payload: {
+  membroId: string;
+  email: string;
+}): string {
+  try {
+    const tokenPayload: RefreshTokenPayload = {
+      ...payload,
+      type: 'refresh',
+    };
+
+    const expiresIn = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
+    const secret = getJwtSecret();
+
+    return jwt.sign(tokenPayload, secret, {
+      expiresIn,
+    } as SignOptions);
+  } catch (error) {
+    console.error('Erro ao gerar refresh token:', error);
+    throw new Error('Não foi possível gerar o refresh token');
+  }
+}
+
+/**
+ * Verifica e decodifica um token JWT
+ */
+export function verificarToken(token: string): DecodedToken | null {
+  try {
+    const secret = getJwtSecret();
+    const decoded = jwt.verify(token, secret) as DecodedToken;
+
+    // Verifica se é um access token
+    if (decoded.type !== 'access') {
+      return null;
+    }
+
+    return decoded;
+  } catch (error) {
+    // Token inválido ou expirado
+    return null;
+  }
+}
+
+/**
+ * Verifica e decodifica um refresh token JWT
+ */
+export function verificarRefreshToken(token: string): RefreshTokenPayload | null {
+  try {
+    const secret = getJwtSecret();
+    const decoded = jwt.verify(token, secret) as RefreshTokenPayload;
+
+    // Verifica se é um refresh token
+    if (decoded.type !== 'refresh') {
+      return null;
+    }
+
+    return decoded;
+  } catch (error) {
+    // Token inválido ou expirado
+    return null;
+  }
+}
+
+/**
+ * Extrai o membroId do token JWT do header Authorization
+ */
+export function extrairMembroIdDoToken(
+  request: NextRequest
+): string | null {
+  try {
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader) {
+      return null;
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    if (!token) {
+      return null;
+    }
+
+    const decoded = verificarToken(token);
+    if (!decoded || !decoded.membroId) {
+      return null;
+    }
+
+    return decoded.membroId;
+  } catch (error) {
+    console.error('Erro ao extrair membroId do token:', error);
+    return null;
+  }
+}
+
+/**
+ * Extrai informações completas do token JWT do header Authorization
+ */
+export function extrairInfoDoToken(
+  request: NextRequest
+): DecodedToken | null {
+  try {
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader) {
+      return null;
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    if (!token) {
+      return null;
+    }
+
+    return verificarToken(token);
+  } catch (error) {
+    console.error('Erro ao extrair informações do token:', error);
+    return null;
+  }
+}
+

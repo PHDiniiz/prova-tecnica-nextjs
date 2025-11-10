@@ -4,13 +4,13 @@
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NoticeList } from '../NoticeList';
-// import { useNotices } from '@/hooks/useNotices';
-
-const mockUseNotices = jest.fn();
+import { useNotices } from '@/hooks/useNotices';
 
 jest.mock('@/hooks/useNotices', () => ({
-  useNotices: () => mockUseNotices(),
+  useNotices: jest.fn(),
 }));
+
+const { useNotices: mockUseNotices } = require('@/hooks/useNotices');
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -37,12 +37,9 @@ describe('NoticeList', () => {
       error: null,
     });
 
-    const { container } = render(<NoticeList publico={true} />, {
-      wrapper: createWrapper(),
-    });
+    render(<NoticeList publico={true} />, { wrapper: createWrapper() });
 
-    // Verifica se há elementos Skeleton renderizados
-    const skeletons = container.querySelectorAll('[class*="animate-pulse"], [class*="bg-gray"]');
+    const skeletons = document.querySelectorAll('[class*="skeleton"]');
     expect(skeletons.length).toBeGreaterThan(0);
   });
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { CriarObrigadoDTO } from '@/types/obrigado';
+import { Obrigado, CriarObrigadoDTO } from '@/types/obrigado';
 
 /**
  * Hook para buscar agradecimentos públicos (obrigados)
@@ -39,9 +39,7 @@ export function useObrigados(filtro?: {
       const data = await response.json();
       return data;
     },
-    staleTime: 1000 * 60, // 1 minuto (dados públicos)
-    gcTime: 1000 * 60 * 5, // 5 minutos no cache
-    refetchOnWindowFocus: true,
+    staleTime: 1000 * 60 * 5, // 5 minutos
   });
 }
 

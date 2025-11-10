@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDatabase } from '@/lib/mongodb';
 import { MemberRepository } from '@/lib/repositories/MemberRepository';
 import { gerarAccessToken, gerarRefreshToken } from '@/lib/auth';
-import { loginRateLimiter } from '@/lib/middleware/rateLimit';
 import { LoginDTO, LoginResponse } from '@/types/auth';
 import { z } from 'zod';
 import { ZodError } from 'zod';
@@ -30,23 +29,10 @@ const loginSchema = z.object({
  */
 export async function POST(request: NextRequest) {
   try {
-    // Aplicar rate limiting por IP
-    const ip =
-      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-      request.headers.get('x-real-ip') ||
-      'unknown';
-
-    const ipLimit = await loginRateLimiter.middleware(request, () => `login:ip:${ip}`);
-    if (ipLimit) return ipLimit;
-
     const body: LoginDTO = await request.json();
 
     // Validação dos dados
     const validatedData = loginSchema.parse(body);
-
-    // Rate limit por email (após validar email)
-    const emailLimit = await loginRateLimiter.middleware(request, () => `login:email:${validatedData.email}`);
-    if (emailLimit) return emailLimit;
 
     // Busca o membro no banco
     const db = await getDatabase();

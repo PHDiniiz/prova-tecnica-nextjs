@@ -6,6 +6,7 @@ import { NoticeCard } from './NoticeCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useNotices } from '@/hooks/useNotices';
+import { cn } from '@/lib/utils';
 
 /**
  * Props do componente NoticeList

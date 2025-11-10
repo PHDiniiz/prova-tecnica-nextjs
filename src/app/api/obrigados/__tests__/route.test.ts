@@ -9,25 +9,6 @@ import { ObjectId } from 'mongodb';
 // Mock do ObrigadoService
 jest.mock('@/services/ObrigadoService');
 
-// Mock da função de autenticação
-jest.mock('@/lib/auth', () => ({
-  extrairMembroIdDoToken: jest.fn(async (request: NextRequest) => {
-    const authHeader = request.headers.get('Authorization');
-    if (authHeader?.includes('Bearer membro-token-123')) {
-      return 'membro-token-123';
-    }
-    return null;
-  }),
-  respostaNaoAutorizado: jest.fn(() => ({
-    json: async () => ({
-      success: false,
-      error: 'Não autorizado',
-      message: 'Token de autenticação inválido ou ausente',
-    }),
-    status: 401,
-  })),
-}));
-
 // Mock do NextRequest para testes
 jest.mock('next/server', () => ({
   NextRequest: class NextRequest {
@@ -311,7 +292,7 @@ describe('GET /api/obrigados', () => {
     });
 
     const response = await GET(request);
-    await response.json();
+    const data = await response.json();
 
     expect(response.status).toBe(200);
     expect(mockService.buscarComPaginacao).toHaveBeenCalledWith({}, 1, 100);

@@ -4,28 +4,10 @@
 import { GET, POST } from '../route';
 import { ReferralService } from '@/services/ReferralService';
 import { NextRequest } from 'next/server';
+import { BusinessError } from '@/lib/errors/BusinessError';
 
 // Mock do ReferralService
 jest.mock('@/services/ReferralService');
-
-// Mock da função de autenticação
-jest.mock('@/lib/auth', () => ({
-  extrairMembroIdDoToken: jest.fn(async (request: NextRequest) => {
-    const authHeader = request.headers.get('Authorization');
-    if (authHeader?.includes('Bearer membro-token-123')) {
-      return 'membro-token-123';
-    }
-    return null;
-  }),
-  respostaNaoAutorizado: jest.fn(() => ({
-    json: async () => ({
-      success: false,
-      error: 'Não autorizado',
-      message: 'Token de autenticação inválido ou ausente',
-    }),
-    status: 401,
-  })),
-}));
 
 // Mock do NextRequest para testes
 jest.mock('next/server', () => ({
@@ -141,8 +123,6 @@ describe('POST /api/referrals', () => {
       empresaContato: 'Empresa ABC',
       descricao: 'Indicação de negócio',
       status: 'nova' as const,
-      criadoEm: new Date(),
-      atualizadoEm: new Date(),
     };
 
     mockService.criarIndicacao.mockResolvedValueOnce(indicacaoCriada);

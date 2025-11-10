@@ -1,7 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDatabase } from '@/lib/mongodb';
-import { TokenRepository } from '@/lib/repositories/TokenRepository';
-import { extrairInfoDoToken } from '@/lib/auth';
 
 /**
  * API Route para logout de membros
@@ -11,37 +8,18 @@ import { extrairInfoDoToken } from '@/lib/auth';
  * 
  * @returns {object} - Confirmação de logout
  * 
- * @note Implementação completa com blacklist:
- * - Invalida o access token no banco de dados (blacklist)
- * - Limpa cookies httpOnly (futuro)
- * - Registra o logout para auditoria (futuro)
+ * @note Em uma implementação completa, aqui poderíamos:
+ * - Invalidar o refresh token no banco de dados (blacklist)
+ * - Limpar cookies httpOnly
+ * - Registrar o logout para auditoria
+ * 
+ * Por enquanto, o logout é apenas informativo, pois os tokens JWT
+ * são stateless. O cliente deve remover os tokens do storage.
  */
 export async function POST(request: NextRequest) {
   try {
-    // Extrai informações do token (se existir)
-    const tokenInfo = extrairInfoDoToken(request);
-    
-    if (tokenInfo && tokenInfo.membroId) {
-      // Adiciona access token à blacklist
-      const db = await getDatabase();
-      const tokenRepository = new TokenRepository(db);
-      
-      const authHeader = request.headers.get('Authorization');
-      const accessToken = authHeader?.replace('Bearer ', '');
-      
-      if (accessToken) {
-        // Calcula expiração do token (15 minutos padrão)
-        const expiraEm = new Date();
-        expiraEm.setMinutes(expiraEm.getMinutes() + 15);
-        
-        await tokenRepository.adicionarBlacklist(
-          accessToken,
-          tokenInfo.membroId,
-          'access',
-          expiraEm
-        );
-      }
-    }
+    // Em uma implementação futura, poderíamos invalidar o refresh token
+    // em uma blacklist no banco de dados
 
     return NextResponse.json(
       {

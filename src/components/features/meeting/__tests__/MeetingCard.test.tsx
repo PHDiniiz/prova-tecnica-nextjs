@@ -2,25 +2,8 @@
 /// <reference types="@testing-library/jest-dom" />
 
 import { render, screen } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ToastProvider } from '@/components/ui/toast';
 import { MeetingCard } from '../MeetingCard';
 import { Meeting } from '@/types/meeting';
-
-function createWrapper() {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  });
-
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      <ToastProvider>{children}</ToastProvider>
-    </QueryClientProvider>
-  );
-}
 
 describe('MeetingCard', () => {
   const mockMeeting: Meeting = {
@@ -41,8 +24,7 @@ describe('MeetingCard', () => {
         meeting={mockMeeting}
         membroId="membro-1"
         membroToken="token-123"
-      />,
-      { wrapper: createWrapper() }
+      />
     );
 
     expect(screen.getByText(/reunião 1:1/i)).toBeInTheDocument();
@@ -66,8 +48,8 @@ describe('MeetingCard', () => {
     const meetingCompleto: Meeting = {
       ...mockMeeting,
       checkIns: [
-        { membroId: 'membro-1', dataCheckIn: new Date(), presente: true },
-        { membroId: 'membro-2', dataCheckIn: new Date(), presente: true },
+        { membroId: 'membro-1', presente: true },
+        { membroId: 'membro-2', presente: true },
       ],
     };
 
@@ -86,8 +68,8 @@ describe('MeetingCard', () => {
     const meetingComCheckIns: Meeting = {
       ...mockMeeting,
       checkIns: [
-        { membroId: 'membro-1', dataCheckIn: new Date(), presente: true },
-        { membroId: 'membro-2', dataCheckIn: new Date(), presente: false },
+        { membroId: 'membro-1', presente: true },
+        { membroId: 'membro-2', presente: false },
       ],
     };
 

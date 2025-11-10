@@ -50,7 +50,7 @@ export function useIntentions() {
   /**
    * Query para listar intenções (admin)
    */
-  const useListarIntencoes = (
+  const listarIntencoes = (
     status?: IntentionStatus,
     pagina: number = 1,
     limite: number = 20,
@@ -165,7 +165,7 @@ export function useIntentions() {
     createError: criarIntencao.error,
     resetCreate: criarIntencao.reset,
     // Listar intenções
-    listarIntencoes: useListarIntencoes,
+    listarIntencoes,
     // Atualizar status
     atualizarStatus: atualizarStatus.mutateAsync,
     isUpdatingStatus: atualizarStatus.isPending,

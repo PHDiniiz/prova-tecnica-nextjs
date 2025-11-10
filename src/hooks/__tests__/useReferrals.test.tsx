@@ -191,7 +191,6 @@ describe('useReferrals', () => {
 
       const dto: CriarIndicacaoDTO = {
         membroIndicadoId: 'membro-2',
-        empresaContato: 'Empresa ABC',
         descricao: 'Indicação de negócio',
         valorEstimado: 10000,
       };
@@ -226,7 +225,6 @@ describe('useReferrals', () => {
 
       const dto: CriarIndicacaoDTO = {
         membroIndicadoId: 'membro-2',
-        empresaContato: 'Empresa ABC',
         descricao: 'Indicação de negócio',
         valorEstimado: 10000,
       };
@@ -260,7 +258,6 @@ describe('useReferrals', () => {
 
       const dto: CriarIndicacaoDTO = {
         membroIndicadoId: 'membro-2',
-        empresaContato: 'Empresa ABC',
         descricao: 'Indicação de negócio',
         valorEstimado: 10000,
       };

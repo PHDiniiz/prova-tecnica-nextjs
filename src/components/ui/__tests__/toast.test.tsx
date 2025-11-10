@@ -7,7 +7,7 @@ import { ToastProvider, useToast } from '../toast';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Componente de teste que usa o hook useToast
-const TestComponent = () => {
+function TestComponent() {
   const { addToast, removeToast, toasts } = useToast();
 
   return (
@@ -21,8 +21,7 @@ const TestComponent = () => {
       <div data-testid="toast-count">{toasts.length}</div>
     </div>
   );
-};
-TestComponent.displayName = 'TestComponent';
+}
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -116,7 +115,7 @@ describe('Toast Component', () => {
   });
 
   it('deve renderizar diferentes variantes de toast', async () => {
-    const VariantTestComponent = () => {
+    function VariantTestComponent() {
       const { addToast } = useToast();
       return (
         <div>
@@ -131,8 +130,7 @@ describe('Toast Component', () => {
           </button>
         </div>
       );
-    };
-    VariantTestComponent.displayName = 'VariantTestComponent';
+    }
 
     const user = userEvent.setup({ delay: null });
     render(<VariantTestComponent />, { wrapper: createWrapper() });

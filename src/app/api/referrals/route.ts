@@ -3,21 +3,7 @@ import { ReferralService } from '@/services/ReferralService';
 import { CriarIndicacaoDTO, ReferralStatus } from '@/types/referral';
 import { ZodError } from 'zod';
 import { BusinessError } from '@/lib/errors/BusinessError';
-
-/**
- * Extrai o membroId do header Authorization
- * Por enquanto aceita: Bearer {membroId}
- * TODO: Implementar JWT para autenticação real
- */
-function extrairMembroId(request: NextRequest): string | null {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader) return null;
-  
-  const token = authHeader.replace('Bearer ', '');
-  // Por enquanto, aceita o membroId diretamente
-  // TODO: Validar JWT e extrair membroId do payload
-  return token || null;
-}
+import { extrairMembroIdDoToken, respostaNaoAutorizado } from '@/lib/auth';
 
 /**
  * API Route para criar uma nova indicação de negócio
@@ -52,17 +38,10 @@ function extrairMembroId(request: NextRequest): string | null {
  */
 export async function POST(request: NextRequest) {
   try {
-    const membroId = extrairMembroId(request);
+    const membroId = extrairMembroIdDoToken(request);
     
     if (!membroId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Não autorizado',
-          message: 'Token de autenticação ausente',
-        },
-        { status: 401 }
-      );
+      return respostaNaoAutorizado();
     }
 
     const body: CriarIndicacaoDTO = await request.json();
@@ -141,17 +120,10 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
-    const membroId = extrairMembroId(request);
+    const membroId = extrairMembroIdDoToken(request);
     
     if (!membroId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Não autorizado',
-          message: 'Token de autenticação ausente',
-        },
-        { status: 401 }
-      );
+      return respostaNaoAutorizado();
     }
 
     const { searchParams } = new URL(request.url);

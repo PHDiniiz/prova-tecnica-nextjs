@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { Meeting } from '@/types/meeting';
 import { MeetingCard } from './MeetingCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -34,7 +35,7 @@ export function MeetingList({
   membroToken,
   onCheckInSuccess,
 }: MeetingListProps) {
-  const [filtros] = useState<MeetingFiltros>({
+  const [filtros, setFiltros] = useState<MeetingFiltros>({
     membroId,
   });
 

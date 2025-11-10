@@ -22,9 +22,9 @@ export function Providers({ children }: { children: ReactNode }) {
             // Não refetch em reconnect por padrão (pode ser sobrescrito)
             refetchOnReconnect: false,
             // Tempo que os dados ficam "frescos" antes de serem considerados stale
-            staleTime: 1000 * 60 * 5, // 5 minutos (padrão)
+            staleTime: 1000 * 60 * 5, // 5 minutos
             // Tempo que os dados ficam no cache após não serem usados
-            gcTime: 1000 * 60 * 30, // 30 minutos (aumentado de 10 para melhor performance)
+            gcTime: 1000 * 60 * 10, // 10 minutos (antes era cacheTime)
             // Retry automático em caso de erro
             retry: 1,
           },

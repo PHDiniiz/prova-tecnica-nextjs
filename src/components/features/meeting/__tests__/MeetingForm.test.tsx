@@ -4,7 +4,7 @@
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MeetingForm } from '../MeetingForm';
-// import { useCreateMeeting, useUpdateMeeting } from '@/hooks/useMeetings';
+import { useCreateMeeting, useUpdateMeeting } from '@/hooks/useMeetings';
 import { useToast } from '@/components/ui/toast';
 
 jest.mock('@/hooks/useMeetings', () => ({
@@ -16,13 +16,8 @@ jest.mock('@/components/ui/toast', () => ({
   useToast: jest.fn(),
 }));
 
-const mockUseCreateMeeting = jest.fn();
-const mockUseUpdateMeeting = jest.fn();
-
-jest.mock('@/hooks/useMeetings', () => ({
-  useCreateMeeting: () => mockUseCreateMeeting(),
-  useUpdateMeeting: () => mockUseUpdateMeeting(),
-}));
+const { useCreateMeeting: mockUseCreateMeeting, useUpdateMeeting: mockUseUpdateMeeting } =
+  require('@/hooks/useMeetings');
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -39,8 +34,8 @@ function createWrapper() {
 
 describe('MeetingForm', () => {
   const mockMembros = [
-    { _id: 'membro-1', nome: 'João Silva', email: 'joao@test.com', empresa: 'Empresa A', ativo: true, criadoEm: new Date(), atualizadoEm: new Date() },
-    { _id: 'membro-2', nome: 'Maria Santos', email: 'maria@test.com', empresa: 'Empresa B', ativo: true, criadoEm: new Date(), atualizadoEm: new Date() },
+    { _id: 'membro-1', nome: 'João Silva', empresa: 'Empresa A', ativo: true },
+    { _id: 'membro-2', nome: 'Maria Santos', empresa: 'Empresa B', ativo: true },
   ];
 
   beforeEach(() => {
@@ -81,7 +76,6 @@ describe('MeetingForm', () => {
       dataReuniao: new Date('2025-01-15T10:00:00Z'),
       local: 'Escritório',
       observacoes: 'Observações',
-      checkIns: [],
       criadoEm: new Date(),
       atualizadoEm: new Date(),
     };

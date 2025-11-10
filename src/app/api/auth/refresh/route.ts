@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatabase } from '@/lib/mongodb';
 import { MemberRepository } from '@/lib/repositories/MemberRepository';
-import { TokenRepository } from '@/lib/repositories/TokenRepository';
 import {
   gerarAccessToken,
   gerarRefreshToken,
   verificarRefreshToken,
 } from '@/lib/auth';
-import { refreshRateLimiter } from '@/lib/middleware/rateLimit';
 import { RefreshTokenDTO, RefreshTokenResponse } from '@/types/auth';
 import { z } from 'zod';
 import { ZodError } from 'zod';
@@ -36,35 +34,10 @@ const refreshTokenSchema = z.object({
  */
 export async function POST(request: NextRequest) {
   try {
-    // Aplicar rate limiting por IP
-    const ip =
-      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-      request.headers.get('x-real-ip') ||
-      'unknown';
-
-    const ipLimit = await refreshRateLimiter.middleware(request, () => `refresh:ip:${ip}`);
-    if (ipLimit) return ipLimit;
-
     const body: RefreshTokenDTO = await request.json();
 
     // Validação dos dados
     const validatedData = refreshTokenSchema.parse(body);
-
-    // Verifica se o refresh token está na blacklist
-    const db = await getDatabase();
-    const tokenRepository = new TokenRepository(db);
-
-    const estaBlacklisted = await tokenRepository.estaNaBlacklist(validatedData.refreshToken);
-    if (estaBlacklisted) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Token inválido',
-          message: 'Refresh token foi revogado',
-        },
-        { status: 401 }
-      );
-    }
 
     // Verifica o refresh token
     const decoded = verificarRefreshToken(validatedData.refreshToken);
@@ -81,6 +54,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Busca o membro no banco para verificar se ainda está ativo
+    const db = await getDatabase();
     const memberRepository = new MemberRepository(db);
     const membro = await memberRepository.buscarPorId(decoded.membroId);
 
@@ -117,32 +91,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ROTAÇÃO: Invalida o refresh token antigo
-    const expiraEm = new Date();
-    expiraEm.setDate(expiraEm.getDate() + 7); // 7 dias (mesmo tempo do refresh token)
-    await tokenRepository.adicionarBlacklist(
-      validatedData.refreshToken,
-      membro._id,
-      'refresh',
-      expiraEm
-    );
-
-    // Gera novos tokens
+    // Gera novo access token
     const accessToken = gerarAccessToken({
       membroId: membro._id,
       email: membro.email,
       isActive: membro.ativo,
     });
 
-    const refreshToken = gerarRefreshToken({
-      membroId: membro._id,
-      email: membro.email,
-    });
-
+    // Opcionalmente gera novo refresh token (rotação de tokens)
+    // Por enquanto, retornamos apenas o novo access token
     const response: RefreshTokenResponse = {
       success: true,
       accessToken,
-      refreshToken, // Novo refresh token gerado
     };
 
     return NextResponse.json(response, { status: 200 });

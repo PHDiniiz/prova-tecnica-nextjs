@@ -130,7 +130,7 @@ describe('POST /api/invites', () => {
 
   it('deve retornar erro 400 para dados inválidos', async () => {
     const { ZodError } = await import('zod');
-    new ZodError([
+    const error = new ZodError([
       {
         code: 'too_small',
         minimum: 1,

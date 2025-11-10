@@ -6,6 +6,7 @@ import { ReferralForm } from '@/components/features/referral/ReferralForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useToast } from '@/components/ui/toast';
 import { Member } from '@/types/member';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -15,6 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
  * TODO: Implementar autenticação JWT
  */
 export default function ReferralsPage() {
+  const { addToast } = useToast();
   const [membroId, setMembroId] = useState<string>('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [membrosAtivos, setMembrosAtivos] = useState<Member[]>([]);
@@ -63,7 +65,11 @@ export default function ReferralsPage() {
         carregarMembrosAtivos(adminToken);
       }
     } else {
-      alert('Por favor, insira um ID de membro válido');
+      addToast({
+        variant: 'warning',
+        title: 'Atenção',
+        description: 'Por favor, insira um ID de membro válido',
+      });
     }
   };
 

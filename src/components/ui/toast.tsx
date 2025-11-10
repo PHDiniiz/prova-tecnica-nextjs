@@ -3,6 +3,7 @@
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import React, { createContext, useContext, useState, useCallback, ReactNode, useRef, useEffect } from 'react';
+import { Button } from './button';
 
 /**
  * Toast/Notification Component

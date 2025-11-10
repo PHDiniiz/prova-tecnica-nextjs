@@ -6,7 +6,6 @@ import { MeetingRepository } from '@/lib/repositories/MeetingRepository';
 import { MemberRepository } from '@/lib/repositories/MemberRepository';
 import { Meeting, CriarMeetingDTO } from '@/types/meeting';
 import { BusinessError } from '@/lib/errors/BusinessError';
-import { getDatabase } from '@/lib/mongodb';
 
 jest.mock('@/lib/mongodb');
 jest.mock('@/lib/repositories/MeetingRepository');
@@ -37,7 +36,8 @@ describe('MeetingService', () => {
       buscarPorId: jest.fn(),
     } as any;
 
-    (getDatabase as jest.Mock).mockResolvedValue(mockDb);
+    const { getDatabase } = require('@/lib/mongodb');
+    getDatabase.mockResolvedValue(mockDb);
 
     (MeetingRepository as jest.MockedClass<typeof MeetingRepository>).mockImplementation(
       () => mockMeetingRepository

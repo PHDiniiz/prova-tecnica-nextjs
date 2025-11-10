@@ -11,7 +11,6 @@ import { Referral } from '@/types/referral';
 import { Member } from '@/types/member';
 import { ZodError } from 'zod';
 import { criarIndicacaoFake, criarMembroFake } from '@/tests/helpers/faker';
-import { getDatabase } from '@/lib/mongodb';
 
 jest.mock('@/lib/mongodb', () => ({
   getDatabase: jest.fn(),
@@ -50,7 +49,8 @@ describe('ObrigadoService', () => {
       buscarPorId: jest.fn(),
     } as any;
 
-    (getDatabase as jest.Mock).mockResolvedValue(mockDb);
+    const { getDatabase } = require('@/lib/mongodb');
+    getDatabase.mockResolvedValue(mockDb);
 
     (ObrigadoRepository as jest.MockedClass<typeof ObrigadoRepository>).mockImplementation(
       () => mockObrigadoRepository

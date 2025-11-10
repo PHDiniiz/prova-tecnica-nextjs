@@ -143,7 +143,7 @@ describe('useCreateObrigado', () => {
       wrapper: createWrapper(),
     });
 
-    const dto: CriarObrigadoDTO & { membroId: string } = {
+    const dto: CriarObrigadoDTO = {
       indicacaoId: 'indicacao-1',
       mensagem: 'Muito obrigado pela indicação!',
       publico: true,
@@ -182,7 +182,7 @@ describe('useCreateObrigado', () => {
       wrapper: createWrapper(),
     });
 
-    const dto: CriarObrigadoDTO & { membroId: string } = {
+    const dto: CriarObrigadoDTO = {
       indicacaoId: 'indicacao-1',
       mensagem: 'Muito obrigado!',
       publico: true,
@@ -227,7 +227,7 @@ describe('useCreateObrigado', () => {
       wrapper,
     });
 
-    const dto: CriarObrigadoDTO & { membroId: string } = {
+    const dto: CriarObrigadoDTO = {
       indicacaoId: 'indicacao-1',
       mensagem: 'Muito obrigado!',
       publico: true,

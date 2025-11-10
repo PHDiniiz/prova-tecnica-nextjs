@@ -85,8 +85,6 @@ describe('GET /api/members', () => {
         telefone: '+55 11 99999-9999',
         empresa: 'Empresa A',
         ativo: true,
-        criadoEm: new Date(),
-        atualizadoEm: new Date(),
       },
     ];
 
@@ -114,10 +112,7 @@ describe('GET /api/members', () => {
         _id: 'membro-1',
         nome: 'João Silva',
         email: 'joao@example.com',
-        empresa: 'Empresa A',
         ativo: true,
-        criadoEm: new Date(),
-        atualizadoEm: new Date(),
       },
     ];
 

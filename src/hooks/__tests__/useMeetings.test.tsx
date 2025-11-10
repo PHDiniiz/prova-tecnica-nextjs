@@ -171,7 +171,7 @@ describe('useCreateMeeting', () => {
     const dto: CriarMeetingDTO = {
       membro1Id: 'membro-1',
       membro2Id: 'membro-2',
-      dataReuniao: new Date(),
+      data: new Date(),
       local: 'Escritório',
     };
 
@@ -209,7 +209,7 @@ describe('useCreateMeeting', () => {
     const dto: CriarMeetingDTO = {
       membro1Id: 'membro-1',
       membro2Id: 'membro-2',
-      dataReuniao: new Date(),
+      data: new Date(),
       local: 'Escritório',
     };
 
@@ -306,8 +306,8 @@ describe('useCheckIn', () => {
     });
 
     const checkIn: CheckInDTO = {
-      membroId: 'membro-1',
       presente: true,
+      observacoes: 'Presente',
     };
 
     await waitFor(async () => {
@@ -346,7 +346,6 @@ describe('useCheckIn', () => {
     });
 
     const checkIn: CheckInDTO = {
-      membroId: 'membro-1',
       presente: true,
     };
 

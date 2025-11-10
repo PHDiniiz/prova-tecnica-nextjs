@@ -4,7 +4,7 @@
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NoticeForm } from '../NoticeForm';
-// import { useCreateNotice, useUpdateNotice } from '@/hooks/useNotices';
+import { useCreateNotice, useUpdateNotice } from '@/hooks/useNotices';
 import { useToast } from '@/components/ui/toast';
 
 jest.mock('@/hooks/useNotices', () => ({
@@ -16,13 +16,8 @@ jest.mock('@/components/ui/toast', () => ({
   useToast: jest.fn(),
 }));
 
-const mockUseCreateNotice = jest.fn();
-const mockUseUpdateNotice = jest.fn();
-
-jest.mock('@/hooks/useNotices', () => ({
-  useCreateNotice: () => mockUseCreateNotice(),
-  useUpdateNotice: () => mockUseUpdateNotice(),
-}));
+const { useCreateNotice: mockUseCreateNotice, useUpdateNotice: mockUseUpdateNotice } =
+  require('@/hooks/useNotices');
 
 function createWrapper() {
   const queryClient = new QueryClient({

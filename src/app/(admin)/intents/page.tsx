@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -5,12 +6,14 @@ import { IntentionList } from '@/components/features/intention/IntentionList';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/toast';
 
 /**
  * Página administrativa para gerenciar intenções
  * Requer autenticação via ADMIN_TOKEN
  */
 export default function AdminIntentsPage() {
+  const { addToast } = useToast();
   const [adminToken, setAdminToken] = useState<string>('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -28,7 +31,11 @@ export default function AdminIntentsPage() {
       localStorage.setItem('admin_token', adminToken);
       setIsAuthenticated(true);
     } else {
-      alert('Por favor, insira um token válido');
+      addToast({
+        variant: 'warning',
+        title: 'Atenção',
+        description: 'Por favor, insira um token válido',
+      });
     }
   };
 

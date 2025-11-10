@@ -5,7 +5,7 @@ import { MeetingList } from '@/components/features/meeting/MeetingList';
 import { MeetingForm } from '@/components/features/meeting/MeetingForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-// import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Member } from '@/types/member';
@@ -30,7 +30,6 @@ export default function MeetingsPage() {
       setIsAuthenticated(true);
       carregarMembrosAtivos(savedMembroId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const carregarMembrosAtivos = useCallback(async (adminToken: string) => {

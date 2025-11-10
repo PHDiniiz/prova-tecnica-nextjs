@@ -5,6 +5,7 @@ import {
   Meeting,
   CriarMeetingDTO,
   AtualizarMeetingDTO,
+  CheckInDTO,
   MeetingFiltros,
 } from '@/types/meeting';
 import { BusinessError } from '@/lib/errors/BusinessError';

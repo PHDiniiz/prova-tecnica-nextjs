@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { Referral, ReferralStatus, AtualizarStatusIndicacaoDTO } from '@/types/referral';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/components/ui/toast';
 import { ReferralStatusBadge } from './ReferralStatusBadge';
 
 interface ReferralStatusUpdateProps {
@@ -43,6 +44,7 @@ export function ReferralStatusUpdate({
   onUpdate,
   isUpdating = false,
 }: ReferralStatusUpdateProps) {
+  const { addToast } = useToast();
   const [novoStatus, setNovoStatus] = useState<ReferralStatus | ''>('');
   const [observacoes, setObservacoes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -77,7 +79,11 @@ export function ReferralStatusUpdate({
         setObservacoes('');
       } catch (error) {
         console.error('Erro ao atualizar status:', error);
-        alert('Erro ao atualizar status. Tente novamente.');
+        addToast({
+          variant: 'error',
+          title: 'Erro',
+          description: 'Erro ao atualizar status. Tente novamente.',
+        });
       } finally {
         setIsSubmitting(false);
       }

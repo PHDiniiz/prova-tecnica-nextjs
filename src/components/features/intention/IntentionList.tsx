@@ -5,6 +5,7 @@ import { Intention, IntentionStatus } from '@/types/intention';
 import { IntentionCard } from './IntentionCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/components/ui/toast';
 import { useIntentions } from '@/hooks/useIntentions';
 
 interface IntentionListProps {
@@ -15,6 +16,7 @@ interface IntentionListProps {
  * Componente para listar intenções com filtros e paginação
  */
 export function IntentionList({ adminToken }: IntentionListProps) {
+  const { addToast } = useToast();
   const [statusFiltro, setStatusFiltro] = useState<IntentionStatus | undefined>(
     undefined
   );
@@ -43,11 +45,11 @@ export function IntentionList({ adminToken }: IntentionListProps) {
         refetch();
       } catch (error) {
         console.error('Erro ao aprovar intenção:', error);
-        alert(
-          error instanceof Error
-            ? error.message
-            : 'Erro ao aprovar intenção'
-        );
+        addToast({
+          variant: 'error',
+          title: 'Erro',
+          description: error instanceof Error ? error.message : 'Erro ao aprovar intenção',
+        });
       }
     },
     [atualizarStatus, adminToken, refetch]
@@ -65,9 +67,11 @@ export function IntentionList({ adminToken }: IntentionListProps) {
         refetch();
       } catch (error) {
         console.error('Erro ao recusar intenção:', error);
-        alert(
-          error instanceof Error ? error.message : 'Erro ao recusar intenção'
-        );
+        addToast({
+          variant: 'error',
+          title: 'Erro',
+          description: error instanceof Error ? error.message : 'Erro ao recusar intenção',
+        });
       }
     },
     [atualizarStatus, adminToken, refetch]

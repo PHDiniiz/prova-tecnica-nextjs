@@ -6,7 +6,6 @@ import { IntentionRepository } from '@/lib/repositories/IntentionRepository';
 import { criarIntencaoFake } from '@/tests/helpers/faker';
 import { Intention } from '@/types/intention';
 import { ZodError } from 'zod';
-import { getDatabase } from '@/lib/mongodb';
 
 // Mock do MongoDB e Repositories
 jest.mock('@/lib/mongodb', () => ({
@@ -38,7 +37,8 @@ describe('IntentionService', () => {
     } as any;
 
     // Mock do getDatabase para retornar o mockDb
-    (getDatabase as jest.Mock).mockResolvedValue(mockDb);
+    const { getDatabase } = require('@/lib/mongodb');
+    getDatabase.mockResolvedValue(mockDb);
 
     // Mock do IntentionRepository constructor
     (IntentionRepository as jest.MockedClass<typeof IntentionRepository>).mockImplementation(

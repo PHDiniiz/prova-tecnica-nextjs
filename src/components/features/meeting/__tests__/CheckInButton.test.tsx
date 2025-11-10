@@ -8,15 +8,16 @@ import { CheckInButton } from '../CheckInButton';
 import { Meeting } from '@/types/meeting';
 import { useToast } from '@/components/ui/toast';
 
+// Mock do hook
+jest.mock('@/hooks/useMeetings', () => ({
+  useCheckIn: jest.fn(),
+}));
+
 jest.mock('@/components/ui/toast', () => ({
   useToast: jest.fn(),
 }));
 
-const mockUseCheckIn = jest.fn();
-
-jest.mock('@/hooks/useMeetings', () => ({
-  useCheckIn: mockUseCheckIn,
-}));
+const { useCheckIn } = require('@/hooks/useMeetings');
 
 // Helper para criar QueryClient wrapper
 function createWrapper() {
@@ -35,10 +36,9 @@ function createWrapper() {
 }
 
 // Mock do ToastProvider
-const ToastProvider = ({ children }: { children: React.ReactNode }) => {
+function ToastProvider({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
-};
-ToastProvider.displayName = 'ToastProvider';
+}
 
 describe('CheckInButton', () => {
   const mockMutateAsync = jest.fn();
@@ -59,7 +59,7 @@ describe('CheckInButton', () => {
     (useToast as jest.Mock).mockReturnValue({
       addToast: mockAddToast,
     });
-    mockUseCheckIn.mockReturnValue({
+    useCheckIn.mockReturnValue({
       mutateAsync: mockMutateAsync,
       isPending: false,
     });
@@ -85,7 +85,6 @@ describe('CheckInButton', () => {
       checkIns: [
         {
           membroId: 'membro-1',
-          dataCheckIn: new Date(),
           presente: true,
         },
       ],
@@ -216,7 +215,7 @@ describe('CheckInButton', () => {
   });
 
   it('deve desabilitar botões durante o carregamento', () => {
-    mockUseCheckIn.mockReturnValue({
+    useCheckIn.mockReturnValue({
       mutateAsync: mockMutateAsync,
       isPending: true,
     });
@@ -230,12 +229,7 @@ describe('CheckInButton', () => {
       { wrapper: createWrapper() }
     );
 
-    // Quando está pendente, ambos os botões mostram "Registrando..."
-    const buttons = screen.getAllByRole('button', { name: /registrando/i });
-    expect(buttons.length).toBeGreaterThan(0);
-    buttons.forEach((button) => {
-      expect(button).toBeDisabled();
-    });
+    expect(screen.getByRole('button', { name: /registrando/i })).toBeDisabled();
   });
 });
 
