@@ -48,6 +48,10 @@ export function useMeetings(options: UseMeetingsOptions) {
   return useQuery<ListarMeetingsResponse, Error>({
     queryKey: ['meetings', membroId, filtros],
     queryFn: async () => {
+      // Verifica se admin_token está disponível
+      const adminToken = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
+      const token = adminToken || membroToken;
+
       const params = new URLSearchParams();
       if (membroId) {
         params.append('membroId', membroId);
@@ -63,7 +67,7 @@ export function useMeetings(options: UseMeetingsOptions) {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${membroToken}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -74,7 +78,7 @@ export function useMeetings(options: UseMeetingsOptions) {
 
       return response.json();
     },
-    enabled: enabled && !!membroToken,
+    enabled: enabled && (!!membroToken || (typeof window !== 'undefined' && !!localStorage.getItem('admin_token'))),
     staleTime: 1000 * 60 * 2, // 2 minutos
     refetchOnMount: true,
     refetchOnWindowFocus: true,

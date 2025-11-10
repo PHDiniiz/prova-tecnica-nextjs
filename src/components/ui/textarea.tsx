@@ -20,7 +20,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         {label && (
           <label
             htmlFor={textareaId}
-            className="text-sm font-medium text-gray-700 dark:text-gray-300"
+            className="text-sm font-medium text-foreground"
           >
             {label}
           </label>
@@ -29,23 +29,23 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           ref={ref}
           id={textareaId}
           className={cn(
-            'w-full px-3 py-2 border rounded-lg resize-y',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'disabled:bg-gray-100 disabled:cursor-not-allowed',
-            'transition-all duration-200',
-            'min-h-[100px]',
+            'flex min-h-[100px] w-full rounded-lg border border-input bg-background px-3 py-2 text-sm',
+            'ring-offset-background placeholder:text-muted-foreground',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+            'disabled:cursor-not-allowed disabled:opacity-50',
+            'resize-y transition-all duration-200',
             error
-              ? 'border-red-500 focus:ring-red-500'
-              : 'border-gray-300 hover:border-gray-400',
+              ? 'border-destructive focus-visible:ring-destructive'
+              : '',
             className
           )}
           {...props}
         />
         {error && (
-          <p className="text-xs text-red-500 font-medium">{error}</p>
+          <p className="text-xs text-destructive font-medium">{error}</p>
         )}
         {helperText && !error && (
-          <p className="text-xs text-gray-500">{helperText}</p>
+          <p className="text-xs text-muted-foreground">{helperText}</p>
         )}
       </div>
     );

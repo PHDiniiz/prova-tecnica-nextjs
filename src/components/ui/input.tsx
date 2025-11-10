@@ -19,7 +19,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="text-sm font-medium text-gray-700 dark:text-gray-300"
+            className="text-sm font-medium text-foreground"
           >
             {label}
           </label>
@@ -28,22 +28,24 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           id={inputId}
           className={cn(
-            'w-full px-3 py-2 border rounded-lg',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'disabled:bg-gray-100 disabled:cursor-not-allowed',
+            'flex w-full rounded-lg border border-input bg-background px-3 py-2 text-sm',
+            'ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium',
+            'placeholder:text-muted-foreground',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+            'disabled:cursor-not-allowed disabled:opacity-50',
             'transition-all duration-200',
             error
-              ? 'border-red-500 focus:ring-red-500'
-              : 'border-gray-300 hover:border-gray-400',
+              ? 'border-destructive focus-visible:ring-destructive'
+              : '',
             className
           )}
           {...props}
         />
         {error && (
-          <p className="text-xs text-red-500 font-medium">{error}</p>
+          <p className="text-xs text-destructive font-medium">{error}</p>
         )}
         {helperText && !error && (
-          <p className="text-xs text-gray-500">{helperText}</p>
+          <p className="text-xs text-muted-foreground">{helperText}</p>
         )}
       </div>
     );

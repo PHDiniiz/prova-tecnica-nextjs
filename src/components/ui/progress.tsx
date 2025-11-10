@@ -41,10 +41,10 @@ export const Progress = ({
   const isIndeterminate = value === undefined;
 
   const variantClasses = {
-    default: 'bg-blue-500',
+    default: 'bg-primary',
     success: 'bg-green-500',
     warning: 'bg-yellow-500',
-    error: 'bg-red-500',
+    error: 'bg-destructive',
   };
 
   const heightStyle =
@@ -54,7 +54,7 @@ export const Progress = ({
     return (
       <div
         className={cn(
-          'relative w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700',
+          'relative w-full overflow-hidden rounded-full bg-muted',
           className
         )}
         style={{ height: heightStyle }}
@@ -91,7 +91,7 @@ export const Progress = ({
         transition={{ duration: 0.5, ease: 'easeOut' }}
       />
       {showLabel && (
-        <div className="absolute inset-0 flex items-center justify-center text-xs font-medium text-gray-700 dark:text-gray-300">
+        <div className="absolute inset-0 flex items-center justify-center text-xs font-medium text-foreground">
           {clampedValue}%
         </div>
       )}

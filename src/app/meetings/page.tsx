@@ -45,6 +45,16 @@ export default function MeetingsPage() {
 
   useEffect(() => {
     setIsMounted(true);
+    
+    // Verifica se está no contexto admin
+    const adminToken = localStorage.getItem('admin_token');
+    if (adminToken) {
+      // Se admin_token existe, permite acesso direto
+      setIsAuthenticated(true);
+      carregarMembrosAtivos(adminToken);
+      return;
+    }
+
     // Tenta recuperar o membroId do localStorage
     const savedMembroId = localStorage.getItem('membro_id');
     if (savedMembroId) {
@@ -73,7 +83,7 @@ export default function MeetingsPage() {
   // Isso evita diferenças entre SSR e CSR
   if (!isMounted) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center p-4">
         <Card variant="outlined" className="w-full max-w-md">
           <CardContent className="pt-6">
             <div className="space-y-4">
@@ -89,7 +99,7 @@ export default function MeetingsPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center p-4">
         <Card variant="outlined" className="w-full max-w-md">
           <CardContent className="pt-6">
             <div className="space-y-4">
@@ -125,8 +135,7 @@ export default function MeetingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -177,8 +186,10 @@ export default function MeetingsPage() {
         )}
 
         {/* Lista de reuniões */}
-        <MeetingList membroId={membroId} membroToken={membroId} />
-      </div>
+        <MeetingList 
+          membroId={membroId || ''} 
+          membroToken={membroId || (typeof window !== 'undefined' ? localStorage.getItem('admin_token') || '' : '')} 
+        />
     </div>
   );
 }

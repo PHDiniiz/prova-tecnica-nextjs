@@ -39,7 +39,7 @@ export const Skeleton = memo(function Skeleton({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
       className={cn(
-        'animate-pulse bg-gray-300 dark:bg-gray-700',
+        'animate-pulse bg-muted',
         variant === 'circular' && 'rounded-full',
         variant === 'rectangular' && 'rounded-md',
         variant === 'text' && 'rounded',
@@ -98,7 +98,7 @@ export const CardSkeleton = ({ className }: { className?: string }) => {
   return (
     <div
       className={cn(
-        'p-4 border border-gray-200 dark:border-gray-700 rounded-lg space-y-3',
+        'p-4 border border-border rounded-lg space-y-3',
         className
       )}
     >

@@ -13,13 +13,13 @@ export const metadata: Metadata = {
  */
 export default function IntentionPage() {
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          <h1 className="text-4xl font-bold text-foreground mb-2">
             Junte-se ao Nosso Grupo
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-muted-foreground">
             Faça parte de uma comunidade de networking e geração de negócios
           </p>
         </div>

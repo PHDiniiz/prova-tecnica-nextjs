@@ -1,5 +1,51 @@
 import Link from 'next/link';
+import { User } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+
+/**
+ * Componente ButtonLink - Link estilizado como Button
+ */
+function ButtonLink({
+  href,
+  variant = 'primary',
+  size = 'md',
+  children,
+  className,
+  ...props
+}: {
+  href: string;
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  children: React.ReactNode;
+  className?: string;
+  prefetch?: boolean;
+} & React.ComponentProps<typeof Link>) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+        variant === 'primary' &&
+          'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80',
+        variant === 'secondary' &&
+          'bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70',
+        variant === 'outline' &&
+          'border-2 border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground active:bg-accent/80',
+        variant === 'ghost' &&
+          'text-foreground hover:bg-accent hover:text-accent-foreground active:bg-accent/80',
+        size === 'sm' && 'px-3 py-1.5 text-sm',
+        size === 'md' && 'px-4 py-2 text-base',
+        size === 'lg' && 'px-6 py-3 text-lg',
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </Link>
+  );
+}
 
 /**
  * Página inicial da Plataforma de Gestão para Grupos de Networking
@@ -12,27 +58,38 @@ import { Card } from '@/components/ui/card';
  */
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-50 dark:from-black dark:via-zinc-950 dark:to-black">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
+          <h1 className="text-xl font-bold text-foreground">
             Plataforma de Networking
           </h1>
-          <nav className="flex gap-4">
+          <nav className="flex items-center gap-4">
             <Link
               href="/intention"
               prefetch={true}
-              className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Quero Participar
             </Link>
             <Link
               href="/notices"
               prefetch={true}
-              className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Avisos
+            </Link>
+            <Link
+              href="/admin/dashboard"
+              className={cn(
+                'inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                'border-2 border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground active:bg-accent/80',
+                'px-3 py-1.5 text-sm'
+              )}
+            >
+              <User className="h-4 w-4" />
+              <span>Admin</span>
             </Link>
           </nav>
         </div>
@@ -41,30 +98,22 @@ export default function Home() {
       {/* Hero Section */}
       <main className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-zinc-900 dark:text-zinc-50 mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
             Plataforma de Gestão para
             <br />
-            <span className="text-blue-600 dark:text-blue-400">Grupos de Networking</span>
+            <span className="text-primary">Grupos de Networking</span>
           </h2>
-          <p className="text-lg md:text-xl text-zinc-600 dark:text-zinc-400 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Sistema completo para digitalizar e otimizar a gestão de grupos de networking,
             eliminando planilhas e controles manuais.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/intention"
-              prefetch={true}
-              className="inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 px-8 py-6 text-base"
-            >
+            <ButtonLink href="/intention" variant="primary" size="lg" prefetch={true}>
               Quero Participar do Grupo
-            </Link>
-            <Link
-              href="/notices"
-              prefetch={true}
-              className="inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 border-2 border-gray-400 text-gray-700 hover:bg-gray-100 active:bg-gray-200 px-8 py-6 text-base"
-            >
+            </ButtonLink>
+            <ButtonLink href="/notices" variant="outline" size="lg" prefetch={true}>
               Ver Avisos e Comunicados
-            </Link>
+            </ButtonLink>
           </div>
         </div>
 
@@ -72,9 +121,9 @@ export default function Home() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           <Card className="p-6 hover:shadow-lg transition-shadow">
             <div className="mb-4">
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                 <svg
-                  className="w-6 h-6 text-blue-600 dark:text-blue-400"
+                  className="w-6 h-6 text-primary"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -87,24 +136,21 @@ export default function Home() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+              <h3 className="text-xl font-semibold text-foreground mb-2">
                 Gestão de Membros
               </h3>
-              <p className="text-zinc-600 dark:text-zinc-400">
+              <p className="text-muted-foreground">
                 Fluxo completo de admissão: intenção, aprovação e cadastro de novos membros.
               </p>
             </div>
-            <Link
-              href="/intention"
-              className="inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 text-gray-700 hover:bg-gray-100 active:bg-gray-200 px-3 py-1.5 text-sm"
-            >
+            <ButtonLink href="/intention" variant="ghost" size="sm">
               Participar →
-            </Link>
+            </ButtonLink>
           </Card>
 
           <Card className="p-6 hover:shadow-lg transition-shadow">
             <div className="mb-4">
-              <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center mb-4">
                 <svg
                   className="w-6 h-6 text-green-600 dark:text-green-400"
                   fill="none"
@@ -119,24 +165,21 @@ export default function Home() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+              <h3 className="text-xl font-semibold text-foreground mb-2">
                 Sistema de Indicações
               </h3>
-              <p className="text-zinc-600 dark:text-zinc-400">
+              <p className="text-muted-foreground">
                 Crie e acompanhe indicações de negócios entre membros do grupo.
               </p>
             </div>
-            <Link
-              href="/referrals"
-              className="inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 text-gray-700 hover:bg-gray-100 active:bg-gray-200 px-3 py-1.5 text-sm"
-            >
+            <ButtonLink href="/referrals" variant="ghost" size="sm">
               Ver Indicações →
-            </Link>
+            </ButtonLink>
           </Card>
 
           <Card className="p-6 hover:shadow-lg transition-shadow">
             <div className="mb-4">
-              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center mb-4">
                 <svg
                   className="w-6 h-6 text-purple-600 dark:text-purple-400"
                   fill="none"
@@ -151,24 +194,21 @@ export default function Home() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+              <h3 className="text-xl font-semibold text-foreground mb-2">
                 Avisos e Comunicados
               </h3>
-              <p className="text-zinc-600 dark:text-zinc-400">
+              <p className="text-muted-foreground">
                 Mantenha-se informado sobre eventos, reuniões e novidades do grupo.
               </p>
             </div>
-            <Link
-              href="/notices"
-              className="inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 text-gray-700 hover:bg-gray-100 active:bg-gray-200 px-3 py-1.5 text-sm"
-            >
+            <ButtonLink href="/notices" variant="ghost" size="sm">
               Ver Avisos →
-            </Link>
+            </ButtonLink>
           </Card>
 
           <Card className="p-6 hover:shadow-lg transition-shadow">
             <div className="mb-4">
-              <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-orange-500/10 rounded-lg flex items-center justify-center mb-4">
                 <svg
                   className="w-6 h-6 text-orange-600 dark:text-orange-400"
                   fill="none"
@@ -183,24 +223,21 @@ export default function Home() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+              <h3 className="text-xl font-semibold text-foreground mb-2">
                 Reuniões
               </h3>
-              <p className="text-zinc-600 dark:text-zinc-400">
+              <p className="text-muted-foreground">
                 Agende e gerencie reuniões 1:1 entre membros do grupo.
               </p>
             </div>
-            <Link
-              href="/meetings"
-              className="inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 text-gray-700 hover:bg-gray-100 active:bg-gray-200 px-3 py-1.5 text-sm"
-            >
+            <ButtonLink href="/meetings" variant="ghost" size="sm">
               Ver Reuniões →
-            </Link>
+            </ButtonLink>
           </Card>
 
           <Card className="p-6 hover:shadow-lg transition-shadow">
             <div className="mb-4">
-              <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-yellow-500/10 rounded-lg flex items-center justify-center mb-4">
                 <svg
                   className="w-6 h-6 text-yellow-600 dark:text-yellow-400"
                   fill="none"
@@ -215,10 +252,10 @@ export default function Home() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+              <h3 className="text-xl font-semibold text-foreground mb-2">
                 UI Otimista
               </h3>
-              <p className="text-zinc-600 dark:text-zinc-400">
+              <p className="text-muted-foreground">
                 Feedback instantâneo e atualizações em tempo real para melhor experiência.
               </p>
             </div>
@@ -226,9 +263,9 @@ export default function Home() {
 
           <Card className="p-6 hover:shadow-lg transition-shadow">
             <div className="mb-4">
-              <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-destructive/10 rounded-lg flex items-center justify-center mb-4">
                 <svg
-                  className="w-6 h-6 text-red-600 dark:text-red-400"
+                  className="w-6 h-6 text-destructive"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -241,10 +278,10 @@ export default function Home() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+              <h3 className="text-xl font-semibold text-foreground mb-2">
                 Mobile First
               </h3>
-              <p className="text-zinc-600 dark:text-zinc-400">
+              <p className="text-muted-foreground">
                 Design responsivo e otimizado para todos os dispositivos.
               </p>
             </div>
@@ -253,30 +290,27 @@ export default function Home() {
 
         {/* CTA Section */}
         <div className="max-w-3xl mx-auto text-center">
-          <Card className="p-8 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border-blue-200 dark:border-blue-800">
-            <h3 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">
+          <Card className="p-8 bg-primary/5 border-primary/20">
+            <h3 className="text-2xl font-bold text-foreground mb-4">
               Pronto para fazer parte do grupo?
             </h3>
-            <p className="text-zinc-600 dark:text-zinc-400 mb-6">
+            <p className="text-muted-foreground mb-6">
               Preencha o formulário de intenção e aguarde a aprovação dos administradores.
             </p>
-            <Link
-              href="/intention"
-              className="inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 px-6 py-3 text-lg"
-            >
+            <ButtonLink href="/intention" variant="primary" size="lg">
               Preencher Formulário de Intenção
-            </Link>
+            </ButtonLink>
           </Card>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-zinc-200 dark:border-zinc-800 mt-16 py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-zinc-600 dark:text-zinc-400">
+      <footer className="border-t border-border mt-16 py-8">
+        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           <p>
             Plataforma de Gestão para Grupos de Networking
             <br />
-            Desenvolvido com ❤️ pela equipe Durch Soluções
+            Desenvolvido com ❤️ por Pedro Henrique Diniz &lt;Durch Soluções&gt;
           </p>
         </div>
       </footer>
