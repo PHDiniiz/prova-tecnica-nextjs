@@ -2790,22 +2790,22 @@ tests/
 
 ```bash
 # Executar todos os testes
-pnpm test
+yarn test
 
 # Executar com cobertura
-pnpm test:coverage
+yarn test:coverage
 
 # Executar apenas testes unitários
-pnpm test:unit
+yarn test:unit
 
 # Executar apenas testes de integração
-pnpm test:integration
+yarn test:integration
 
 # Executar testes E2E (Cypress)
-pnpm test:e2e
+yarn test:e2e
 
 # Executar testes em modo watch
-pnpm test:watch
+yarn test:watch
 ```
 
 #### **Exemplo de Teste de Integração**
@@ -3055,7 +3055,7 @@ Todas as correções de configuração identificadas na seção 16 foram conclu�
 2. ✅ Criado arquivo `.env.example` com todas as variáveis necessárias
 3. ✅ Adicionados headers de segurança no `next.config.ts`
 4. ✅ Padronizados imports TypeScript (ajustados paths e revisados imports)
-5. ✅ Configurado Husky funcional (hook pre-commit usando pnpm, jest.setup.ts)
+5. ✅ Configurado Husky funcional (hook pre-commit usando yarn, jest.setup.ts)
 6. ✅ Corrigido teste de validação de email do IntentionForm (modo onBlur)
 
 ### **15.4 Sistema de Indicações Implementado (Dez 2024)**
@@ -3150,11 +3150,11 @@ src/
 ### **16.6 Configuração do Husky** ✅ **CONCLUÍDO**
 
 **Problema:** O Husky estava configurado mas não estava funcional devido a dois problemas:
-1. Hook pre-commit usando `npm` em vez de `pnpm`
+1. Hook pre-commit usando `npm` em vez de `yarn`
 2. Arquivo `jest.setup.js` com sintaxe TypeScript causando erro de parsing
 
 **Correção realizada:**
-- ✅ Corrigido hook `.husky/pre-commit` para usar `pnpm test` em vez de `npm test`
+- ✅ Corrigido hook `.husky/pre-commit` para usar `yarn test` em vez de `npm test`
 - ✅ Renomeado `jest.setup.js` para `jest.setup.ts` para suportar sintaxe TypeScript
 - ✅ Atualizado `jest.config.js` para referenciar `jest.setup.ts`
 - ✅ Adicionado mock do MongoDB no `jest.setup.ts` para evitar problemas com ESM

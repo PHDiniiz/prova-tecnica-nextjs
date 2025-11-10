@@ -60,8 +60,8 @@ Sistema completo para digitalizar e otimizar a gestão de grupos de networking, 
 
 ## 📦 Pré-requisitos
 
-- **Node.js** >= 18.x
-- **pnpm** >= 8.x (recomendado) ou npm/yarn
+- **Node.js** >= 22.x (LTS recomendado)
+- **Yarn** >= 1.22.0 (obrigatório)
 - **MongoDB** (local ou MongoDB Atlas)
 - **Git**
 
@@ -75,7 +75,7 @@ cd prova-tecnica-nextjs
 
 2. **Instale as dependências**
 ```bash
-pnpm install
+yarn install
 ```
 
 3. **Configure as variáveis de ambiente**
@@ -93,7 +93,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 4. **Execute o servidor de desenvolvimento**
 ```bash
-pnpm dev
+yarn dev
 ```
 
 Acesse [http://localhost:3000](http://localhost:3000) no navegador.
@@ -123,21 +123,22 @@ Certifique-se de que a string de conexão está correta no `.env.local`.
 
 ```bash
 # Desenvolvimento
-pnpm dev              # Inicia servidor de desenvolvimento
-pnpm build            # Cria build de produção
-pnpm start            # Inicia servidor de produção
+yarn dev              # Inicia servidor de desenvolvimento
+yarn build            # Cria build de produção
+yarn start            # Inicia servidor de produção
 
 # Testes
-pnpm test             # Executa todos os testes
-pnpm test:watch       # Executa testes em modo watch
-pnpm test:coverage    # Executa testes com cobertura
-pnpm test:unit        # Executa apenas testes unitários
-pnpm test:e2e         # Executa testes E2E (Cypress)
+yarn test             # Executa todos os testes
+yarn test:watch       # Executa testes em modo watch
+yarn test:coverage    # Executa testes com cobertura
+yarn test:unit        # Executa apenas testes unitários
+yarn test:e2e         # Executa testes E2E (Cypress)
 
 # Qualidade
-pnpm lint             # Executa ESLint
-pnpm typecheck        # Verifica tipos TypeScript
-pnpm ci:checks        # Executa todas as verificações (typecheck + lint + test)
+yarn lint             # Executa ESLint
+yarn typecheck        # Verifica tipos TypeScript
+yarn ci:checks        # Executa todas as verificações (typecheck + lint + test)
+yarn verify-package-manager  # Verifica se está usando yarn corretamente
 ```
 
 ## 📁 Estrutura do Projeto
@@ -266,13 +267,13 @@ O projeto possui uma estratégia completa de testes:
 
 ```bash
 # Todos os testes
-pnpm test
+yarn test
 
 # Com cobertura
-pnpm test:coverage
+yarn test:coverage
 
 # Modo watch
-pnpm test:watch
+yarn test:watch
 ```
 
 ### Meta de Cobertura

@@ -2,19 +2,25 @@
   "name": "prova-tecnica-nextjs",
   "version": "0.0.2",
   "private": true,
+  "packageManager": "yarn@1.22.22",
+  "engines": {
+    "node": ">=22.0.0",
+    "yarn": ">=1.22.0"
+  },
   "scripts": {
     "dev": "rm -rf .next && next dev",
-    "build": "rm -rf .next *.lock && pnpm install && next build",
+    "build": "rm -rf .next *.lock && yarn install && next build",
     "start": "next start",
     "lint": "eslint",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "typecheck": "npx tsc --noEmit -p tsconfig.json",
+    "typecheck": "yarn tsc --noEmit -p tsconfig.json",
     "test:unit": "jest --coverage",
     "test:e2e": "cypress run",
     "test:e2e:open": "cypress open",
-    "ci:checks": "pnpm typecheck && pnpm lint && pnpm test:unit"
+    "ci:checks": "yarn typecheck && yarn lint && yarn test:unit",
+    "verify-package-manager": "node scripts/verify-package-manager.js"
   },
   "dependencies": {
     "@faker-js/faker": "^10.1.0",
@@ -33,6 +39,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
