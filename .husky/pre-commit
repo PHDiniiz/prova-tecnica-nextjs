@@ -1,8 +1,2 @@
-#!/usr/bin/env sh
-. "$(dirname "$0")/_/husky.sh"
-
-# Verificar gerenciador de pacotes
-node scripts/verify-package-manager.js
-
 # Executar testes
-yarn test
+pnpm test
