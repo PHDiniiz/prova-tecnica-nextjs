@@ -2,25 +2,23 @@
   "name": "prova-tecnica-nextjs",
   "version": "0.0.2",
   "private": true,
-  "packageManager": "yarn@1.22.22",
+  "packageManager": "pnpm@10.19.0",
   "engines": {
-    "node": ">=22.0.0",
-    "yarn": ">=1.22.0"
+    "node": ">=22.0.0"
   },
   "scripts": {
     "dev": "rm -rf .next && next dev",
-    "build": "rm -rf .next *.lock && yarn install && next build",
+    "build": "rm -rf .next *.lock && pnpm install && next build",
     "start": "next start",
     "lint": "eslint",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "typecheck": "yarn tsc --noEmit -p tsconfig.json",
+    "typecheck": "pnpm tsc --noEmit -p tsconfig.json",
     "test:unit": "jest --coverage",
     "test:e2e": "cypress run",
     "test:e2e:open": "cypress open",
-    "ci:checks": "yarn typecheck && yarn lint && yarn test:unit",
-    "verify-package-manager": "node scripts/verify-package-manager.js"
+    "ci:checks": "pnpm typecheck && pnpm lint && pnpm test:unit"
   },
   "dependencies": {
     "@faker-js/faker": "^10.1.0",
