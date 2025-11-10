@@ -4,48 +4,6 @@ Registro de todas as mudanças significativas do projeto, seguindo o formato de 
 
 ---
 
-## [0.2.1] - 2025-11-10
-
-### Chores:
-- Finalizado completamente o Agente 2 com validação completa de endpoints e componentes
-- Adicionados 4 testes completos para console.log do email em InviteService.test.ts
-- Migrada worktree de `unEA5` para diretório principal `prova-tecnica-nextjs`
-- Removido arquivo Agente2.md (já não existia)
-- Atualizada documentação completa (TODO.md, FIXES.md, CHANGELOG.md)
-
-### Tests:
-- Adicionados 4 testes completos para console.log do email em InviteService.test.ts:
-  - Teste de console.log com informações completas da intenção (nome, email, empresa, cargo, token, link, expiração)
-  - Teste de console.log mesmo quando intenção não é encontrada
-  - Teste de link de cadastro com base URL customizada
-  - Teste de uso de localhost como padrão quando NEXT_PUBLIC_APP_URL não está definido
-- Validados todos os testes do fluxo de admissão (33 testes passando)
-- Validados testes de integração (todos passando)
-
-### Documentation:
-- Atualizado TODO.md com status final do Agente 2 (6/6 tarefas concluídas)
-- Atualizado FIXES.md com registro completo da finalização do Agente 2
-- Atualizado CHANGELOG.md com versão 0.2.1
-
-### Validation:
-- Validados todos os endpoints do fluxo de admissão (GET/POST /api/intentions, PATCH /api/intentions/[id]/status, GET /api/invites/[token], POST /api/members)
-- Verificado tratamento de erros em todos os endpoints e componentes
-- Verificados estados de loading e feedback visual em todos os componentes do fluxo
-
-### Documentation:
-- Completada seção "🧩 Estrutura de Componentes Frontend" no ARQUITETURA.md
-- Adicionados diagramas Mermaid da hierarquia de componentes e fluxo de dados
-- Documentados padrões de componentização (UI, Features, Hooks, Services)
-- Documentados princípios de design, estados de loading e UI otimista
-- Versão da Arquitetura atualizada para 1.1.0
-- Removido arquivo Agente1.md após conclusão completa
-
-### Chores:
-- Atualizada documentação completa (CHANGELOG.md, Docs/FIXES.md, Docs/TODO.md)
-- Migradas alterações da worktree para repositório principal
-
----
-
 ## [0.2.0] - 2025-01-27
 
 ### Chores:
