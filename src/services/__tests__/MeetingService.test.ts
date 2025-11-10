@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { MeetingService } from '../MeetingService';
 import { MeetingRepository } from '@/lib/repositories/MeetingRepository';
 import { MemberRepository } from '@/lib/repositories/MemberRepository';

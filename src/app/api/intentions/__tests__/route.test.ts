@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { POST } from '../route';
 import { IntentionService } from '@/services/IntentionService';
 import { criarIntencaoFake } from '@/tests/helpers/faker';

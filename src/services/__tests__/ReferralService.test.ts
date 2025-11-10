@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { ReferralService } from '../ReferralService';
 import { ReferralRepository } from '@/lib/repositories/ReferralRepository';
 import { MemberRepository } from '@/lib/repositories/MemberRepository';
@@ -89,8 +92,7 @@ describe('ReferralService', () => {
 
       const indicacaoCriada: Referral = {
         _id: '123',
-        membroIndicadorId,
-        membroIndicadoId,
+        membroIndicadorId: 'membro-1',
         ...dadosIndicacao,
         status: 'nova',
         criadoEm: new Date(),

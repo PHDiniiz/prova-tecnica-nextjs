@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { POST, GET } from '../route';
 import { ObrigadoService } from '@/services/ObrigadoService';
 import { NextRequest } from 'next/server';
@@ -5,6 +8,25 @@ import { ObjectId } from 'mongodb';
 
 // Mock do ObrigadoService
 jest.mock('@/services/ObrigadoService');
+
+// Mock do auth
+jest.mock('@/lib/auth', () => ({
+  extrairMembroIdDoToken: jest.fn((request: any) => {
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return null;
+    }
+    return authHeader.replace('Bearer ', '');
+  }),
+  respostaNaoAutorizado: jest.fn(() => ({
+    json: async () => ({
+      success: false,
+      error: 'Não autorizado',
+      message: 'Token de autenticação inválido ou ausente',
+    }),
+    status: 401,
+  })),
+}));
 
 // Mock do NextRequest para testes
 jest.mock('next/server', () => ({

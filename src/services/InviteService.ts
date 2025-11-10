@@ -1,5 +1,6 @@
 import { getDatabase } from '@/lib/mongodb';
 import { InviteRepository } from '@/lib/repositories/InviteRepository';
+import { IntentionService } from '@/services/IntentionService';
 import { Invite, CriarConviteDTO, ValidarConviteDTO } from '@/types/invite';
 import { randomBytes } from 'crypto';
 
@@ -50,12 +51,34 @@ export class InviteService {
 
     const novoConvite = await this.repository.criar(convite);
 
-    // Simula envio de email (console.log)
-    console.log(
-      `\n📧 Convite gerado para intenção ${dto.intencaoId}:\n` +
-        `Link: ${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/register/${token}\n` +
-        `Token: ${token}\n`
-    );
+    // Busca informações da intenção para o console.log
+    let intencaoInfo = null;
+    try {
+      const intentionService = new IntentionService();
+      intencaoInfo = await intentionService.buscarIntencaoPorId(dto.intencaoId);
+    } catch (error) {
+      console.error('Erro ao buscar informações da intenção:', error);
+    }
+
+    // Simula envio de email (console.log) com informações completas
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const registerUrl = `${baseUrl}/register/${token}`;
+    
+    console.log('\n' + '='.repeat(60));
+    console.log('CONVITE DE CADASTRO GERADO');
+    console.log('='.repeat(60));
+    
+    if (intencaoInfo) {
+      console.log(`Candidato: ${intencaoInfo.nome}`);
+      console.log(`Email: ${intencaoInfo.email}`);
+      console.log(`Empresa: ${intencaoInfo.empresa}`);
+    }
+    
+    console.log(`Link de Cadastro: ${registerUrl}`);
+    console.log(`Token: ${token}`);
+    console.log(`Expira em: ${expiraEm.toLocaleString('pt-BR')}`);
+    console.log(`Criado em: ${new Date().toLocaleString('pt-BR')}`);
+    console.log('='.repeat(60) + '\n');
 
     return novoConvite;
   }
@@ -91,4 +114,3 @@ export class InviteService {
     await this.repository.marcarComoUsado(token);
   }
 }
-

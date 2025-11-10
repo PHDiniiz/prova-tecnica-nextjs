@@ -1,5 +1,14 @@
 import { Db, ObjectId } from 'mongodb';
 import { Intention, IntentionStatus } from '@/types/intention';
+import {
+  convertObjectIdToString,
+  convertObjectIdsToString,
+  toObjectId,
+} from '@/lib/utils/mongodb-helpers';
+import {
+  calculatePaginationOffset,
+  createPaginationResponse,
+} from '@/lib/utils/pagination';
 
 /**
  * Repositório para operações com intenções no MongoDB
@@ -19,10 +28,7 @@ export class IntentionRepository {
         .sort({ criadoEm: -1 })
         .toArray();
 
-      return intencoes.map((intencao) => ({
-        ...intencao,
-        _id: intencao._id?.toString(),
-      }));
+      return convertObjectIdsToString(intencoes);
     } catch (error) {
       console.error('Erro ao buscar intenções:', error);
       throw new Error('Não foi possível buscar as intenções');
@@ -45,7 +51,7 @@ export class IntentionRepository {
   }> {
     try {
       const query = filtro?.status ? { status: filtro.status } : {};
-      const skip = (pagina - 1) * limite;
+      const skip = calculatePaginationOffset(pagina, limite);
 
       const [intencoes, total] = await Promise.all([
         this.db
@@ -58,15 +64,20 @@ export class IntentionRepository {
         this.db.collection<Intention>('intentions').countDocuments(query),
       ]);
 
-      return {
-        intencoes: intencoes.map((intencao) => ({
-          ...intencao,
-          _id: intencao._id?.toString(),
-        })),
+      const convertedIntencoes = convertObjectIdsToString(intencoes);
+      const paginationResponse = createPaginationResponse(
+        convertedIntencoes,
         total,
         pagina,
-        limite,
-        totalPaginas: Math.ceil(total / limite),
+        limite
+      );
+
+      return {
+        intencoes: paginationResponse.data,
+        total: paginationResponse.total,
+        pagina: paginationResponse.page,
+        limite: paginationResponse.limit,
+        totalPaginas: paginationResponse.totalPages,
       };
     } catch (error) {
       console.error('Erro ao buscar intenções com paginação:', error);
@@ -79,16 +90,14 @@ export class IntentionRepository {
    */
   async buscarPorId(id: string): Promise<Intention | null> {
     try {
+      const objectId = toObjectId(id, 'ID da intenção');
       const intencao = await this.db
         .collection<Intention>('intentions')
-        .findOne({ _id: new ObjectId(id) as any });
+        .findOne({ _id: objectId as any });
 
       if (!intencao) return null;
 
-      return {
-        ...intencao,
-        _id: intencao._id?.toString(),
-      };
+      return convertObjectIdToString(intencao);
     } catch (error) {
       console.error('Erro ao buscar intenção:', error);
       throw new Error('Não foi possível buscar a intenção');
@@ -129,10 +138,11 @@ export class IntentionRepository {
     status: IntentionStatus
   ): Promise<Intention | null> {
     try {
+      const objectId = toObjectId(id, 'ID da intenção');
       const result = await this.db
         .collection<Intention>('intentions')
         .findOneAndUpdate(
-          { _id: new ObjectId(id) as any },
+          { _id: objectId as any },
           {
             $set: {
               status,
@@ -144,10 +154,7 @@ export class IntentionRepository {
 
       if (!result) return null;
 
-      return {
-        ...result,
-        _id: result._id?.toString(),
-      };
+      return convertObjectIdToString(result);
     } catch (error) {
       console.error('Erro ao atualizar status da intenção:', error);
       throw new Error('Não foi possível atualizar o status da intenção');

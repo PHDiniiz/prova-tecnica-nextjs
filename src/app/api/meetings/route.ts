@@ -3,19 +3,7 @@ import { MeetingService } from '@/services/MeetingService';
 import { CriarMeetingDTO, MeetingFiltros } from '@/types/meeting';
 import { ZodError } from 'zod';
 import { BusinessError } from '@/lib/errors/BusinessError';
-
-/**
- * Extrai o membroId do header Authorization
- * Por enquanto aceita: Bearer {membroId}
- * TODO: Implementar JWT para autenticação real
- */
-function extrairMembroId(request: NextRequest): string | null {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader) return null;
-  
-  const token = authHeader.replace('Bearer ', '');
-  return token || null;
-}
+import { extrairMembroIdDoToken, respostaNaoAutorizado } from '@/lib/auth';
 
 /**
  * API Route para listar reuniões
@@ -37,17 +25,10 @@ function extrairMembroId(request: NextRequest): string | null {
  */
 export async function GET(request: NextRequest) {
   try {
-    const membroId = extrairMembroId(request);
+    const membroId = extrairMembroIdDoToken(request);
     
     if (!membroId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Não autorizado',
-          message: 'Token de autenticação ausente',
-        },
-        { status: 401 }
-      );
+      return respostaNaoAutorizado();
     }
 
     const { searchParams } = new URL(request.url);
@@ -135,17 +116,10 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const membroId = extrairMembroId(request);
+    const membroId = extrairMembroIdDoToken(request);
     
     if (!membroId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Não autorizado',
-          message: 'Token de autenticação ausente',
-        },
-        { status: 401 }
-      );
+      return respostaNaoAutorizado();
     }
 
     const body: CriarMeetingDTO = await request.json();

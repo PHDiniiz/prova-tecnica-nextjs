@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { ReferralRepository } from '../ReferralRepository';
 import { Db, ObjectId } from 'mongodb';
 import { Referral, ReferralStatus } from '@/types/referral';
@@ -52,10 +55,8 @@ describe('ReferralRepository', () => {
     it('deve buscar todas as indicações sem filtro', async () => {
       const indicacoes = [
         {
-          _id: new ObjectId('123'),
-          membroIndicadorId: new ObjectId('membro-1'),
-          membroIndicadoId: new ObjectId('membro-2'),
           ...criarIndicacaoFake('membro-1', 'membro-2'),
+          _id: new ObjectId('123'),
           criadoEm: new Date(),
           atualizadoEm: new Date(),
         },
@@ -103,10 +104,8 @@ describe('ReferralRepository', () => {
   describe('buscarPorId', () => {
     it('deve buscar uma indicação por ID', async () => {
       const indicacao = {
-        _id: new ObjectId('123'),
-        membroIndicadorId: new ObjectId('membro-1'),
-        membroIndicadoId: new ObjectId('membro-2'),
         ...criarIndicacaoFake('membro-1', 'membro-2'),
+        _id: new ObjectId('123'),
         criadoEm: new Date(),
         atualizadoEm: new Date(),
       };
@@ -134,10 +133,8 @@ describe('ReferralRepository', () => {
   describe('atualizarStatus', () => {
     it('deve atualizar o status de uma indicação', async () => {
       const indicacaoAtualizada = {
-        _id: new ObjectId('123'),
-        membroIndicadorId: new ObjectId('membro-1'),
-        membroIndicadoId: new ObjectId('membro-2'),
         ...criarIndicacaoFake('membro-1', 'membro-2'),
+        _id: new ObjectId('123'),
         status: 'em-contato' as ReferralStatus,
         criadoEm: new Date(),
         atualizadoEm: new Date(),
@@ -167,10 +164,8 @@ describe('ReferralRepository', () => {
 
     it('deve atualizar observações junto com o status', async () => {
       const indicacaoAtualizada = {
-        _id: new ObjectId('123'),
-        membroIndicadorId: new ObjectId('membro-1'),
-        membroIndicadoId: new ObjectId('membro-2'),
         ...criarIndicacaoFake('membro-1', 'membro-2'),
+        _id: new ObjectId('123'),
         status: 'em-contato' as ReferralStatus,
         observacoes: 'Primeiro contato realizado',
         criadoEm: new Date(),

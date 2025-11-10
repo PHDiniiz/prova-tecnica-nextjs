@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { ObrigadoService } from '../ObrigadoService';
 import { ObrigadoRepository } from '@/lib/repositories/ObrigadoRepository';
 import { ReferralRepository } from '@/lib/repositories/ReferralRepository';
@@ -71,8 +74,6 @@ describe('ObrigadoService', () => {
 
     const indicacaoFechada: Referral = {
       _id: indicacaoId,
-      membroIndicadorId,
-      membroIndicadoId,
       ...criarIndicacaoFake(membroIndicadorId, membroIndicadoId),
       status: 'fechada',
       criadoEm: new Date(),

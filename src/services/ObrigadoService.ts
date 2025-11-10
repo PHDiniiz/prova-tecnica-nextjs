@@ -5,14 +5,13 @@ import { MemberRepository } from '@/lib/repositories/MemberRepository';
 import { Obrigado, CriarObrigadoDTO } from '@/types/obrigado';
 import { BusinessError } from '@/lib/errors/BusinessError';
 import { z } from 'zod';
+import { objectIdSchema, textoLongoSchema } from '@/lib/utils/validation';
+import { withErrorHandling } from '@/lib/utils/errorHandler';
 
 // Schema de validação para criar obrigado
 const criarObrigadoSchema = z.object({
-  indicacaoId: z.string().min(1, 'Indicação é obrigatória'),
-  mensagem: z
-    .string()
-    .min(10, 'Mensagem deve ter pelo menos 10 caracteres')
-    .max(500, 'Mensagem deve ter no máximo 500 caracteres'),
+  indicacaoId: objectIdSchema,
+  mensagem: textoLongoSchema(10, 500, 'Mensagem'),
   publico: z.boolean().optional().default(true),
 });
 
@@ -49,102 +48,96 @@ export class ObrigadoService {
     membroIndicadoId: string,
     dto: CriarObrigadoDTO
   ): Promise<Obrigado> {
-    try {
-      await this.initRepositories();
+    return withErrorHandling(
+      async () => {
+        await this.initRepositories();
 
-      // Valida os dados
-      const dadosValidados = criarObrigadoSchema.parse(dto);
+        // Valida os dados
+        const dadosValidados = criarObrigadoSchema.parse(dto);
 
-      // Busca a indicação
-      const indicacao = await this.referralRepository.buscarPorId(
-        dadosValidados.indicacaoId
-      );
-
-      if (!indicacao) {
-        throw new BusinessError(
-          'Indicação não encontrada',
-          'Indicação não encontrada',
-          404
+        // Busca a indicação
+        const indicacao = await this.referralRepository.buscarPorId(
+          dadosValidados.indicacaoId
         );
-      }
 
-      // Verifica se a indicação está fechada
-      if (indicacao.status !== 'fechada') {
-        throw new BusinessError(
-          'Indicação não fechada',
-          'Apenas indicações com status "fechada" podem receber agradecimentos',
-          400
+        if (!indicacao) {
+          throw new BusinessError(
+            'Indicação não encontrada',
+            'Indicação não encontrada',
+            404
+          );
+        }
+
+        // Verifica se a indicação está fechada
+        if (indicacao.status !== 'fechada') {
+          throw new BusinessError(
+            'Indicação não fechada',
+            'Apenas indicações com status "fechada" podem receber agradecimentos',
+            400
+          );
+        }
+
+        // Verifica se o membro autenticado é o destinatário
+        if (indicacao.membroIndicadoId !== membroIndicadoId) {
+          throw new BusinessError(
+            'Não autorizado',
+            'Apenas o membro que recebeu a indicação pode criar agradecimento',
+            403
+          );
+        }
+
+        // Verifica se já existe obrigado para esta indicação
+        const obrigadoExistente = await this.repository.buscarPorIndicacaoId(
+          dadosValidados.indicacaoId
         );
-      }
 
-      // Verifica se o membro autenticado é o destinatário
-      if (indicacao.membroIndicadoId !== membroIndicadoId) {
-        throw new BusinessError(
-          'Não autorizado',
-          'Apenas o membro que recebeu a indicação pode criar agradecimento',
-          403
+        if (obrigadoExistente) {
+          throw new BusinessError(
+            'Obrigado já existe',
+            'Já existe um agradecimento para esta indicação',
+            409
+          );
+        }
+
+        // Valida se os membros existem e estão ativos
+        const membroIndicador = await this.memberRepository.buscarPorId(
+          indicacao.membroIndicadorId
         );
-      }
-
-      // Verifica se já existe obrigado para esta indicação
-      const obrigadoExistente = await this.repository.buscarPorIndicacaoId(
-        dadosValidados.indicacaoId
-      );
-
-      if (obrigadoExistente) {
-        throw new BusinessError(
-          'Obrigado já existe',
-          'Já existe um agradecimento para esta indicação',
-          409
+        const membroIndicado = await this.memberRepository.buscarPorId(
+          indicacao.membroIndicadoId
         );
-      }
 
-      // Valida se os membros existem e estão ativos
-      const membroIndicador = await this.memberRepository.buscarPorId(
-        indicacao.membroIndicadorId
-      );
-      const membroIndicado = await this.memberRepository.buscarPorId(
-        indicacao.membroIndicadoId
-      );
+        if (!membroIndicador || !membroIndicado) {
+          throw new BusinessError(
+            'Membro não encontrado',
+            'Um dos membros da indicação não foi encontrado',
+            404
+          );
+        }
 
-      if (!membroIndicador || !membroIndicado) {
-        throw new BusinessError(
-          'Membro não encontrado',
-          'Um dos membros da indicação não foi encontrado',
-          404
-        );
-      }
+        if (!membroIndicador.ativo || !membroIndicado.ativo) {
+          throw new BusinessError(
+            'Membro inativo',
+            'Apenas membros ativos podem criar agradecimentos',
+            403
+          );
+        }
 
-      if (!membroIndicador.ativo || !membroIndicado.ativo) {
-        throw new BusinessError(
-          'Membro inativo',
-          'Apenas membros ativos podem criar agradecimentos',
-          403
-        );
-      }
+        // Cria o obrigado
+        const obrigado: Omit<Obrigado, '_id'> = {
+          indicacaoId: dadosValidados.indicacaoId,
+          membroIndicadorId: indicacao.membroIndicadorId,
+          membroIndicadoId: indicacao.membroIndicadoId,
+          mensagem: dadosValidados.mensagem,
+          publico: dadosValidados.publico ?? true,
+          criadoEm: new Date(),
+        };
 
-      // Cria o obrigado
-      const obrigado: Omit<Obrigado, '_id'> = {
-        indicacaoId: dadosValidados.indicacaoId,
-        membroIndicadorId: indicacao.membroIndicadorId,
-        membroIndicadoId: indicacao.membroIndicadoId,
-        mensagem: dadosValidados.mensagem,
-        publico: dadosValidados.publico ?? true,
-        criadoEm: new Date(),
-      };
-
-      return await this.repository.criar(obrigado);
-    } catch (error) {
-      if (error instanceof BusinessError || error instanceof z.ZodError) {
-        throw error;
-      }
-      console.error('Erro ao criar obrigado:', error);
-      throw new BusinessError(
-        'Erro ao criar obrigado',
-        'Não foi possível criar o agradecimento',
-        500
-      );
-    }
+        return await this.repository.criar(obrigado);
+      },
+      'Não foi possível criar o agradecimento',
+      500
+    );
   }
 
   /**
@@ -154,17 +147,14 @@ export class ObrigadoService {
     membroIndicadorId?: string;
     membroIndicadoId?: string;
   }): Promise<Obrigado[]> {
-    try {
-      await this.initRepositories();
-      return await this.repository.buscarTodosPublicos(filtro);
-    } catch (error) {
-      console.error('Erro ao buscar obrigados:', error);
-      throw new BusinessError(
-        'Erro ao buscar obrigados',
-        'Não foi possível buscar os agradecimentos',
-        500
-      );
-    }
+    return withErrorHandling(
+      async () => {
+        await this.initRepositories();
+        return await this.repository.buscarTodosPublicos(filtro);
+      },
+      'Não foi possível buscar os agradecimentos',
+      500
+    );
   }
 
   /**
@@ -184,34 +174,28 @@ export class ObrigadoService {
     limite: number;
     totalPaginas: number;
   }> {
-    try {
-      await this.initRepositories();
-      return await this.repository.buscarComPaginacao(filtro, pagina, limite);
-    } catch (error) {
-      console.error('Erro ao buscar obrigados com paginação:', error);
-      throw new BusinessError(
-        'Erro ao buscar obrigados',
-        'Não foi possível buscar os agradecimentos',
-        500
-      );
-    }
+    return withErrorHandling(
+      async () => {
+        await this.initRepositories();
+        return await this.repository.buscarComPaginacao(filtro, pagina, limite);
+      },
+      'Não foi possível buscar os agradecimentos',
+      500
+    );
   }
 
   /**
    * Busca um obrigado por ID de indicação
    */
   async buscarPorIndicacaoId(indicacaoId: string): Promise<Obrigado | null> {
-    try {
-      await this.initRepositories();
-      return await this.repository.buscarPorIndicacaoId(indicacaoId);
-    } catch (error) {
-      console.error('Erro ao buscar obrigado:', error);
-      throw new BusinessError(
-        'Erro ao buscar obrigado',
-        'Não foi possível buscar o agradecimento',
-        500
-      );
-    }
+    return withErrorHandling(
+      async () => {
+        await this.initRepositories();
+        return await this.repository.buscarPorIndicacaoId(indicacaoId);
+      },
+      'Não foi possível buscar o agradecimento',
+      500
+    );
   }
 }
 

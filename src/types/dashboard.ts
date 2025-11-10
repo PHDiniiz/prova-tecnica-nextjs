@@ -8,6 +8,15 @@
 export type PeriodoFiltro = 'semanal' | 'mensal' | 'acumulado';
 
 /**
+ * Informações de variação de uma métrica
+ */
+export interface VariacaoMetrica {
+  valor: number; // Variação percentual
+  tipo: 'positivo' | 'negativo' | 'neutro';
+  periodo: string; // Descrição do período comparado (ex: "vs mês anterior")
+}
+
+/**
  * Métricas gerais do dashboard
  */
 export interface DashboardMetrics {
@@ -20,9 +29,20 @@ export interface DashboardMetrics {
   taxaFechamentoIndicacoes: number; // Percentual de indicações fechadas
   valorTotalEstimado: number; // Soma dos valores estimados das indicações fechadas
   valorMedioIndicacao: number; // Valor médio por indicação fechada
+  tempoMedioFechamento: number; // Tempo médio em dias entre criação e fechamento
   periodo: PeriodoFiltro;
   dataInicio: Date;
   dataFim: Date;
+  // Variações comparando com período anterior
+  variacoes?: {
+    membrosAtivos?: VariacaoMetrica;
+    indicacoesMes?: VariacaoMetrica;
+    obrigadosMes?: VariacaoMetrica;
+    taxaConversaoIntencoes?: VariacaoMetrica;
+    taxaFechamentoIndicacoes?: VariacaoMetrica;
+    valorTotalEstimado?: VariacaoMetrica;
+    tempoMedioFechamento?: VariacaoMetrica;
+  };
 }
 
 /**

@@ -3,17 +3,7 @@ import { MeetingService } from '@/services/MeetingService';
 import { AtualizarMeetingDTO } from '@/types/meeting';
 import { ZodError } from 'zod';
 import { BusinessError } from '@/lib/errors/BusinessError';
-
-/**
- * Extrai o membroId do header Authorization
- */
-function extrairMembroId(request: NextRequest): string | null {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader) return null;
-  
-  const token = authHeader.replace('Bearer ', '');
-  return token || null;
-}
+import { extrairMembroIdDoToken, respostaNaoAutorizado } from '@/lib/auth';
 
 /**
  * API Route para buscar uma reunião por ID
@@ -37,17 +27,10 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const membroId = extrairMembroId(request);
+    const membroId = extrairMembroIdDoToken(request);
     
     if (!membroId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Não autorizado',
-          message: 'Token de autenticação ausente',
-        },
-        { status: 401 }
-      );
+      return respostaNaoAutorizado();
     }
 
     const { id } = await params;
@@ -128,17 +111,10 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const membroId = extrairMembroId(request);
+    const membroId = extrairMembroIdDoToken(request);
     
     if (!membroId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Não autorizado',
-          message: 'Token de autenticação ausente',
-        },
-        { status: 401 }
-      );
+      return respostaNaoAutorizado();
     }
 
     const { id } = await params;

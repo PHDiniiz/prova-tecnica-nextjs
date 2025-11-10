@@ -83,7 +83,7 @@ export async function GET(
           { status: 400 }
         );
       }
-      if (error.message.includes('expirado')) {
+      if (error.message.includes('expirado') || error.message.includes('expirou')) {
         return NextResponse.json(
           {
             success: false,

@@ -3,21 +3,11 @@ import { ReferralService } from '@/services/ReferralService';
 import { CriarIndicacaoDTO, ReferralStatus } from '@/types/referral';
 import { ZodError } from 'zod';
 import { BusinessError } from '@/lib/errors/BusinessError';
-
-/**
- * Extrai o membroId do header Authorization
- * Por enquanto aceita: Bearer {membroId}
- * TODO: Implementar JWT para autenticação real
- */
-function extrairMembroId(request: NextRequest): string | null {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader) return null;
-  
-  const token = authHeader.replace('Bearer ', '');
-  // Por enquanto, aceita o membroId diretamente
-  // TODO: Validar JWT e extrair membroId do payload
-  return token || null;
-}
+import {
+  extrairMembroIdAtivoDoToken,
+  respostaNaoAutorizado,
+  respostaMembroInativo,
+} from '@/lib/auth';
 
 /**
  * API Route para criar uma nova indicação de negócio
@@ -52,17 +42,13 @@ function extrairMembroId(request: NextRequest): string | null {
  */
 export async function POST(request: NextRequest) {
   try {
-    const membroId = extrairMembroId(request);
+    const { membroId, isInactive } = extrairMembroIdAtivoDoToken(request);
     
     if (!membroId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Não autorizado',
-          message: 'Token de autenticação ausente',
-        },
-        { status: 401 }
-      );
+      if (isInactive) {
+        return respostaMembroInativo();
+      }
+      return respostaNaoAutorizado();
     }
 
     const body: CriarIndicacaoDTO = await request.json();
@@ -141,35 +127,42 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
-    const membroId = extrairMembroId(request);
+    const { membroId, isInactive } = extrairMembroIdAtivoDoToken(request);
     
     if (!membroId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Não autorizado',
-          message: 'Token de autenticação ausente',
-        },
-        { status: 401 }
-      );
+      if (isInactive) {
+        return respostaMembroInativo();
+      }
+      return respostaNaoAutorizado();
     }
 
     const { searchParams } = new URL(request.url);
     const tipo = searchParams.get('tipo') || 'ambas';
     const status = searchParams.get('status') as ReferralStatus | null;
+    const search = searchParams.get('search') || '';
     const pagina = parseInt(searchParams.get('page') || '1', 10);
     const limite = Math.min(parseInt(searchParams.get('limit') || '20', 10), 100);
 
     const service = new ReferralService();
     
     // Busca indicações feitas
-    const filtroFeitas: any = { membroIndicadorId: membroId };
+    const filtroFeitas: {
+      membroIndicadorId: string;
+      status?: ReferralStatus;
+      search?: string;
+    } = { membroIndicadorId: membroId };
     if (status) filtroFeitas.status = status;
+    if (search) filtroFeitas.search = search;
     const indicacoesFeitas = tipo === 'recebidas' ? [] : await service.buscarTodasIndicacoes(filtroFeitas);
 
     // Busca indicações recebidas
-    const filtroRecebidas: any = { membroIndicadoId: membroId };
+    const filtroRecebidas: {
+      membroIndicadoId: string;
+      status?: ReferralStatus;
+      search?: string;
+    } = { membroIndicadoId: membroId };
     if (status) filtroRecebidas.status = status;
+    if (search) filtroRecebidas.search = search;
     const indicacoesRecebidas = tipo === 'feitas' ? [] : await service.buscarTodasIndicacoes(filtroRecebidas);
 
     // Aplica paginação
@@ -177,7 +170,6 @@ export async function GET(request: NextRequest) {
     const total = todasIndicacoes.length;
     const inicio = (pagina - 1) * limite;
     const fim = inicio + limite;
-    const indicacoesPaginadas = todasIndicacoes.slice(inicio, fim);
     const totalPaginas = Math.ceil(total / limite);
 
     return NextResponse.json(

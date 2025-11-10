@@ -1,13 +1,20 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { InviteService } from '../InviteService';
 import { InviteRepository } from '@/lib/repositories/InviteRepository';
-import { criarConviteFake } from '@/tests/helpers/faker';
+import { IntentionService } from '@/services/IntentionService';
+import { criarConviteFake, criarIntencaoFake } from '@/tests/helpers/faker';
 import { Invite } from '@/types/invite';
+import { Intention } from '@/types/intention';
 
 jest.mock('@/lib/mongodb', () => ({
   getDatabase: jest.fn(),
 }));
 
 jest.mock('@/lib/repositories/InviteRepository');
+
+jest.mock('@/services/IntentionService');
 
 describe('InviteService', () => {
   let service: InviteService;
@@ -88,6 +95,144 @@ describe('InviteService', () => {
       const token2 = mockRepository.criar.mock.calls[1][0].token;
 
       expect(token1).not.toBe(token2);
+    });
+
+    describe('console.log do email', () => {
+      let consoleLogSpy: jest.SpyInstance;
+      let mockIntentionService: jest.Mocked<IntentionService>;
+
+      beforeEach(() => {
+        consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+        jest.spyOn(console, 'error').mockImplementation();
+
+        mockIntentionService = {
+          buscarIntencaoPorId: jest.fn(),
+        } as any;
+
+        (IntentionService as jest.MockedClass<typeof IntentionService>).mockImplementation(
+          () => mockIntentionService
+        );
+      });
+
+      afterEach(() => {
+        consoleLogSpy.mockRestore();
+        jest.restoreAllMocks();
+      });
+
+      it('deve chamar console.log ao criar convite com informações da intenção', async () => {
+        const intencaoId = 'intencao-123';
+        const intencaoInfo: Intention = {
+          _id: intencaoId,
+          ...criarIntencaoFake(),
+        };
+
+        // Captura o token gerado através do mock do repository
+        let tokenGerado: string;
+        mockRepository.criar.mockImplementation(async (convite) => {
+          tokenGerado = convite.token;
+          return {
+            _id: '123',
+            ...convite,
+          } as Invite;
+        });
+
+        mockIntentionService.buscarIntencaoPorId.mockResolvedValueOnce(intencaoInfo);
+
+        await service.criarConvite({ intencaoId });
+
+        // Verifica que console.log foi chamado
+        expect(consoleLogSpy).toHaveBeenCalled();
+
+        // Verifica se contém informações do candidato
+        const logCalls = consoleLogSpy.mock.calls.flat().join('\n');
+        expect(logCalls).toContain('CONVITE DE CADASTRO GERADO');
+        expect(logCalls).toContain(`Candidato: ${intencaoInfo.nome}`);
+        expect(logCalls).toContain(`Email: ${intencaoInfo.email}`);
+        expect(logCalls).toContain(`Empresa: ${intencaoInfo.empresa}`);
+        expect(logCalls).toContain(`Link de Cadastro:`);
+        expect(logCalls).toContain(`Token: ${tokenGerado!}`);
+        expect(logCalls).toContain('Expira em:');
+        expect(logCalls).toContain('Criado em:');
+      });
+
+      it('deve chamar console.log mesmo quando não há informações da intenção', async () => {
+        const intencaoId = 'intencao-123';
+
+        // Captura o token gerado através do mock do repository
+        let tokenGerado: string;
+        mockRepository.criar.mockImplementation(async (convite) => {
+          tokenGerado = convite.token;
+          return {
+            _id: '123',
+            ...convite,
+          } as Invite;
+        });
+
+        mockIntentionService.buscarIntencaoPorId.mockRejectedValueOnce(
+          new Error('Intenção não encontrada')
+        );
+
+        await service.criarConvite({ intencaoId });
+
+        // Verifica que console.log foi chamado mesmo sem informações da intenção
+        expect(consoleLogSpy).toHaveBeenCalled();
+
+        const logCalls = consoleLogSpy.mock.calls.flat().join('\n');
+        expect(logCalls).toContain('📧 CONVITE DE CADASTRO GERADO');
+        expect(logCalls).toContain(`🔗 Link de Cadastro:`);
+        expect(logCalls).toContain(`🔑 Token: ${tokenGerado!}`);
+      });
+
+      it('deve incluir link de cadastro completo com base URL', async () => {
+        const intencaoId = 'intencao-123';
+        const baseUrl = 'https://example.com';
+        const originalEnv = process.env.NEXT_PUBLIC_APP_URL;
+
+        process.env.NEXT_PUBLIC_APP_URL = baseUrl;
+
+        // Captura o token gerado através do mock do repository
+        let tokenGerado: string;
+        mockRepository.criar.mockImplementation(async (convite) => {
+          tokenGerado = convite.token;
+          return {
+            _id: '123',
+            ...convite,
+          } as Invite;
+        });
+
+        await service.criarConvite({ intencaoId });
+
+        const logCalls = consoleLogSpy.mock.calls.flat().join('\n');
+        expect(logCalls).toContain(`🔗 Link de Cadastro: ${baseUrl}/register/${tokenGerado!}`);
+
+        // Restaura
+        process.env.NEXT_PUBLIC_APP_URL = originalEnv;
+      });
+
+      it('deve usar localhost como padrão quando NEXT_PUBLIC_APP_URL não está definido', async () => {
+        const intencaoId = 'intencao-123';
+        const originalEnv = process.env.NEXT_PUBLIC_APP_URL;
+
+        delete process.env.NEXT_PUBLIC_APP_URL;
+
+        // Captura o token gerado através do mock do repository
+        let tokenGerado: string;
+        mockRepository.criar.mockImplementation(async (convite) => {
+          tokenGerado = convite.token;
+          return {
+            _id: '123',
+            ...convite,
+          } as Invite;
+        });
+
+        await service.criarConvite({ intencaoId });
+
+        const logCalls = consoleLogSpy.mock.calls.flat().join('\n');
+        expect(logCalls).toContain(`🔗 Link de Cadastro: http://localhost:3000/register/${tokenGerado!}`);
+
+        // Restaura
+        process.env.NEXT_PUBLIC_APP_URL = originalEnv;
+      });
     });
   });
 

@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { Referral, ReferralStatus, AtualizarStatusIndicacaoDTO } from '@/types/referral';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/components/ui/toast';
 import { ReferralStatusBadge } from './ReferralStatusBadge';
 
 interface ReferralStatusUpdateProps {
@@ -43,6 +44,7 @@ export function ReferralStatusUpdate({
   onUpdate,
   isUpdating = false,
 }: ReferralStatusUpdateProps) {
+  const { addToast } = useToast();
   const [novoStatus, setNovoStatus] = useState<ReferralStatus | ''>('');
   const [observacoes, setObservacoes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -58,6 +60,21 @@ export function ReferralStatusUpdate({
 
   // Status disponíveis para transição
   const statusDisponiveis = transicoesValidas[referral.status] || [];
+
+  if (!podeAtualizar) {
+    return (
+      <div className="flex items-center gap-2">
+        <ReferralStatusBadge status={referral.status} />
+        {referral.status === 'fechada' || referral.status === 'recusada' ? (
+          <span className="text-sm text-gray-500">Status final</span>
+        ) : (
+          <span className="text-sm text-gray-500">
+            Apenas o destinatário pode atualizar
+          </span>
+        )}
+      </div>
+    );
+  }
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -77,28 +94,17 @@ export function ReferralStatusUpdate({
         setObservacoes('');
       } catch (error) {
         console.error('Erro ao atualizar status:', error);
-        alert('Erro ao atualizar status. Tente novamente.');
+        addToast({
+          variant: 'error',
+          title: 'Erro',
+          description: 'Erro ao atualizar status. Tente novamente.',
+        });
       } finally {
         setIsSubmitting(false);
       }
     },
-    [novoStatus, observacoes, referral._id, onUpdate, statusDisponiveis]
+    [novoStatus, observacoes, referral._id, onUpdate, statusDisponiveis, addToast]
   );
-
-  if (!podeAtualizar) {
-    return (
-      <div className="flex items-center gap-2">
-        <ReferralStatusBadge status={referral.status} />
-        {referral.status === 'fechada' || referral.status === 'recusada' ? (
-          <span className="text-sm text-gray-500">Status final</span>
-        ) : (
-          <span className="text-sm text-gray-500">
-            Apenas o destinatário pode atualizar
-          </span>
-        )}
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-3">

@@ -61,84 +61,333 @@ Sistema completo para digitalizar e otimizar a gestão de grupos de networking, 
 ## 📦 Pré-requisitos
 
 - **Node.js** >= 22.x (LTS recomendado)
-- **Yarn** >= 1.22.0 (obrigatório)
+- **pnpm** >= 10.19.0 (obrigatório)
 - **MongoDB** (local ou MongoDB Atlas)
 - **Git**
 
 ## 🚀 Instalação
 
-1. **Clone o repositório**
+### Passo 1: Clone o Repositório
+
 ```bash
 git clone <repository-url>
 cd prova-tecnica-nextjs
 ```
 
-2. **Instale as dependências**
+### Passo 2: Instale o pnpm (se ainda não tiver)
+
+O projeto utiliza `pnpm` como gerenciador de pacotes. Se você ainda não tem o pnpm instalado:
+
 ```bash
-yarn install
+# Via npm
+npm install -g pnpm
+
+# Via Homebrew (macOS)
+brew install pnpm
+
+# Via curl
+curl -fsSL https://get.pnpm.io/install.sh | sh -
 ```
 
-3. **Configure as variáveis de ambiente**
+Verifique a instalação:
 ```bash
+pnpm --version
+# Deve retornar >= 10.19.0
+```
+
+### Passo 3: Instale as Dependências
+
+```bash
+pnpm install
+```
+
+Este comando irá:
+- Instalar todas as dependências listadas no `package.json`
+- Criar o arquivo `pnpm-lock.yaml` com as versões exatas
+- Configurar os hooks do Husky (se aplicável)
+
+**Nota**: Se encontrar erros de permissão no Windows, execute o terminal como Administrador.
+
+### Passo 4: Configure as Variáveis de Ambiente
+
+Crie o arquivo `.env.local` na raiz do projeto:
+
+```bash
+# No Linux/macOS
 cp .env.example .env.local
+
+# No Windows (PowerShell)
+Copy-Item .env.example .env.local
 ```
 
-Edite o arquivo `.env.local` com suas configurações:
+**Importante**: Se o arquivo `.env.example` não existir, crie o `.env.local` manualmente com o seguinte conteúdo:
+
 ```env
-MONGODB_URI=mongodb+srv://usuario:senha@cluster.mongodb.net/
-MONGODB_DB_NAME=networking_group
-ADMIN_TOKEN=seu_token_secreto_aqui
+# MongoDB Configuration
+MONGODB_URI=mongodb+srv://usuario:senha@cluster.mongodb.net/ag-sistemas
+# OU para MongoDB local:
+# MONGODB_URI=mongodb://localhost:27017/ag-sistemas
+
+# Database Name (opcional, pode estar na URI)
+MONGODB_DB_NAME=ag-sistemas
+
+# Admin Authentication
+ADMIN_TOKEN=seu_token_secreto_super_seguro_aqui
+
+# Application URL
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# JWT Configuration (Obrigatório para autenticação)
+JWT_SECRET=seu_jwt_secret_super_seguro_minimo_32_caracteres
+JWT_ACCESS_EXPIRES_IN=15m
+JWT_REFRESH_EXPIRES_IN=7d
 ```
 
-4. **Execute o servidor de desenvolvimento**
+**⚠️ Segurança**: 
+- Nunca commite o arquivo `.env.local` no Git
+- Use valores seguros e únicos para `ADMIN_TOKEN` e `JWT_SECRET`
+- Em produção, use variáveis de ambiente do servidor/hosting
+
+### Passo 5: Configure o MongoDB
+
+#### Opção A: MongoDB Atlas (Recomendado para desenvolvimento e produção)
+
+1. Acesse [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+2. Crie uma conta gratuita (se não tiver)
+3. Crie um novo cluster (Free tier disponível)
+4. Configure um usuário de banco de dados
+5. Configure a Network Access (adicione `0.0.0.0/0` para desenvolvimento ou IP específico para produção)
+6. Obtenha a connection string no botão "Connect"
+7. Cole a connection string no `.env.local` como `MONGODB_URI`
+
+#### Opção B: MongoDB Local
+
+1. Instale o MongoDB localmente:
+   - **macOS**: `brew install mongodb-community`
+   - **Windows**: Baixe do [site oficial](https://www.mongodb.com/try/download/community)
+   - **Linux**: `sudo apt-get install mongodb`
+
+2. Inicie o MongoDB:
+   ```bash
+   # macOS/Linux
+   brew services start mongodb-community
+   # OU
+   mongod --config /usr/local/etc/mongod.conf
+   
+   # Windows
+   # Inicie o serviço MongoDB via Services
+   ```
+
+3. Use a connection string local no `.env.local`:
+   ```env
+   MONGODB_URI=mongodb://localhost:27017/ag-sistemas
+   ```
+
+### Passo 6: Execute o Servidor de Desenvolvimento
+
 ```bash
-yarn dev
+pnpm dev
 ```
 
-Acesse [http://localhost:3000](http://localhost:3000) no navegador.
+O servidor irá:
+- Compilar o projeto Next.js
+- Iniciar na porta 3000 (ou próxima disponível)
+- Conectar ao MongoDB
+- Habilitar hot-reload para desenvolvimento
 
-## ⚙️ Configuração
+**Saída esperada**:
+```
+✓ Ready in 2.5s
+○ Compiling / ...
+✓ Compiled / in 1.2s
+✓ Compiled /api/intentions in 0.8s
+✓ Compiled /api/members in 0.6s
+```
+
+### Passo 7: Acesse a Aplicação
+
+Abra seu navegador e acesse:
+- **Frontend**: [http://localhost:3000](http://localhost:3000)
+- **API Health Check**: [http://localhost:3000/api/members](http://localhost:3000/api/members) (requer autenticação)
+
+## 🏃 Execução
+
+### Modo Desenvolvimento
+
+```bash
+pnpm dev
+```
+
+Características:
+- Hot-reload automático
+- Source maps para debugging
+- Erros detalhados no console
+- Fast Refresh do React
+
+### Modo Produção (Local)
+
+```bash
+# 1. Build do projeto
+pnpm build
+
+# 2. Inicie o servidor de produção
+pnpm start
+```
+
+**Nota**: O build de produção é otimizado e minificado. Use apenas para testar antes do deploy.
+
+### Verificação de Saúde do Sistema
+
+Após iniciar o servidor, verifique se tudo está funcionando:
+
+1. **Conexão MongoDB**: Verifique os logs do servidor por "Conectado ao MongoDB com sucesso!"
+2. **API Routes**: Acesse `http://localhost:3000/api/members` (deve retornar JSON, mesmo que vazio)
+3. **Frontend**: Acesse `http://localhost:3000` (deve carregar a página inicial)
+
+## ⚙️ Configuração Detalhada
 
 ### Variáveis de Ambiente
 
-| Variável | Descrição | Obrigatório |
-|----------|-----------|-------------|
-| `MONGODB_URI` | URI de conexão do MongoDB | Sim |
-| `MONGODB_DB_NAME` | Nome do banco de dados | Sim |
-| `ADMIN_TOKEN` | Token secreto para acesso administrativo | Sim |
-| `NEXT_PUBLIC_APP_URL` | URL base da aplicação | Sim |
-| `JWT_SECRET` | Secret para tokens JWT (futuro) | Não |
-| `JWT_EXPIRES_IN` | Tempo de expiração do JWT (futuro) | Não |
+| Variável | Descrição | Obrigatório | Exemplo |
+|----------|-----------|-------------|---------|
+| `MONGODB_URI` | URI completa de conexão do MongoDB (inclui credenciais e database) | ✅ Sim | `mongodb+srv://user:pass@cluster.mongodb.net/ag-sistemas` |
+| `MONGODB_DB_NAME` | Nome do banco de dados (opcional se estiver na URI) | ⚠️ Opcional | `ag-sistemas` |
+| `ADMIN_TOKEN` | Token secreto para autenticação administrativa (use um valor seguro) | ✅ Sim | `admin_secret_token_123456` |
+| `NEXT_PUBLIC_APP_URL` | URL base da aplicação (usado para links e redirecionamentos) | ✅ Sim | `http://localhost:3000` |
+| `JWT_SECRET` | Secret para assinatura de tokens JWT (mínimo 32 caracteres) | ✅ Sim | `meu_jwt_secret_super_seguro_123456789` |
+| `JWT_ACCESS_EXPIRES_IN` | Tempo de expiração do access token (padrão: 15m) | ⚠️ Opcional | `15m`, `1h`, `30m` |
+| `JWT_REFRESH_EXPIRES_IN` | Tempo de expiração do refresh token (padrão: 7d) | ⚠️ Opcional | `7d`, `30d`, `14d` |
 
-### MongoDB
+### Geração de Tokens Seguros
 
-O projeto utiliza MongoDB como banco de dados. Você pode usar:
-- **MongoDB Atlas** (recomendado para produção)
-- **MongoDB local** (para desenvolvimento)
+Para gerar tokens seguros, você pode usar:
 
-Certifique-se de que a string de conexão está correta no `.env.local`.
+```bash
+# Node.js
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+
+# OpenSSL
+openssl rand -hex 32
+
+# Online (use apenas para desenvolvimento)
+# https://randomkeygen.com/
+```
+
+### Configuração do MongoDB
+
+#### MongoDB Atlas (Recomendado)
+
+1. **Criar Cluster**:
+   - Acesse [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+   - Crie um cluster gratuito (M0)
+   - Escolha a região mais próxima
+
+2. **Configurar Acesso**:
+   - **Database Access**: Crie um usuário com senha forte
+   - **Network Access**: Adicione `0.0.0.0/0` para desenvolvimento ou IP específico para produção
+
+3. **Obter Connection String**:
+   - Clique em "Connect" no cluster
+   - Escolha "Connect your application"
+   - Copie a connection string
+   - Substitua `<password>` pela senha do usuário criado
+   - Adicione o nome do banco: `mongodb+srv://user:pass@cluster.mongodb.net/ag-sistemas`
+
+#### MongoDB Local
+
+Para desenvolvimento local:
+
+```bash
+# Instalar MongoDB
+# macOS
+brew tap mongodb/brew
+brew install mongodb-community
+
+# Iniciar MongoDB
+brew services start mongodb-community
+
+# Verificar status
+brew services list
+```
+
+Connection string local:
+```env
+MONGODB_URI=mongodb://localhost:27017/ag-sistemas
+```
+
+### Estrutura do Banco de Dados
+
+O sistema cria automaticamente as seguintes coleções:
+
+- `members` - Membros do grupo
+- `intentions` - Intenções de participação
+- `invites` - Convites de cadastro
+- `referrals` - Indicações de negócios
+- `meetings` - Reuniões 1:1
+- `notices` - Avisos e comunicados
+- `obrigados` - Agradecimentos públicos
+
+**Nota**: As coleções são criadas automaticamente na primeira inserção de dados.
 
 ## 📜 Scripts Disponíveis
 
+### Desenvolvimento
+
 ```bash
-# Desenvolvimento
-yarn dev              # Inicia servidor de desenvolvimento
-yarn build            # Cria build de produção
-yarn start            # Inicia servidor de produção
+# Inicia servidor de desenvolvimento com hot-reload
+pnpm dev
 
-# Testes
-yarn test             # Executa todos os testes
-yarn test:watch       # Executa testes em modo watch
-yarn test:coverage    # Executa testes com cobertura
-yarn test:unit        # Executa apenas testes unitários
-yarn test:e2e         # Executa testes E2E (Cypress)
+# Cria build de produção (otimizado e minificado)
+pnpm build
 
-# Qualidade
-yarn lint             # Executa ESLint
-yarn typecheck        # Verifica tipos TypeScript
-yarn ci:checks        # Executa todas as verificações (typecheck + lint + test)
-yarn verify-package-manager  # Verifica se está usando yarn corretamente
+# Inicia servidor de produção (após build)
+pnpm start
+```
+
+### Testes
+
+```bash
+# Executa todos os testes uma vez
+pnpm test
+
+# Executa testes em modo watch (re-executa ao salvar arquivos)
+pnpm test:watch
+
+# Executa testes com relatório de cobertura
+pnpm test:coverage
+
+# Executa apenas testes unitários
+pnpm test:unit
+
+# Executa testes de integração
+pnpm test:integration
+```
+
+### Qualidade de Código
+
+```bash
+# Verifica erros de linting
+pnpm lint
+
+# Corrige automaticamente erros de linting (quando possível)
+pnpm lint --fix
+
+# Verifica tipos TypeScript sem compilar
+pnpm typecheck
+
+# Executa todas as verificações (typecheck + lint + test)
+# Útil para CI/CD
+pnpm ci:checks
+```
+
+### Utilitários
+
+```bash
+# Limpa cache e arquivos de build
+rm -rf .next node_modules
+
+# Reinstala dependências (útil após problemas)
+rm -rf node_modules pnpm-lock.yaml && pnpm install
 ```
 
 ## 📁 Estrutura do Projeto
@@ -267,13 +516,13 @@ O projeto possui uma estratégia completa de testes:
 
 ```bash
 # Todos os testes
-yarn test
+pnpm test
 
 # Com cobertura
-yarn test:coverage
+pnpm test:coverage
 
 # Modo watch
-yarn test:watch
+pnpm test:watch
 ```
 
 ### Meta de Cobertura
@@ -304,9 +553,109 @@ Para produção, use MongoDB Atlas:
 
 Veja mais detalhes em [DEPLOY.md](./Docs/Documentation/DEPLOY.md).
 
+## 🔧 Troubleshooting
+
+### Problemas Comuns
+
+#### 1. Erro: "MONGODB_URI não está definida"
+
+**Solução**:
+- Verifique se o arquivo `.env.local` existe na raiz do projeto
+- Confirme que a variável `MONGODB_URI` está definida
+- Reinicie o servidor após criar/modificar o `.env.local`
+
+#### 2. Erro: "Cannot connect to MongoDB"
+
+**Soluções**:
+- Verifique se o MongoDB está rodando (local) ou se a connection string está correta (Atlas)
+- Confirme que as credenciais estão corretas
+- Verifique se o IP está na whitelist do MongoDB Atlas
+- Teste a connection string no MongoDB Compass
+
+#### 3. Erro: "JWT_SECRET não configurado"
+
+**Solução**:
+- Adicione `JWT_SECRET` no `.env.local` com pelo menos 32 caracteres
+- Gere um secret seguro usando: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
+
+#### 4. Erro: "Port 3000 is already in use"
+
+**Soluções**:
+```bash
+# Encontre o processo usando a porta
+# macOS/Linux
+lsof -ti:3000 | xargs kill -9
+
+# Windows
+netstat -ano | findstr :3000
+taskkill /PID <PID> /F
+
+# OU use outra porta
+PORT=3001 pnpm dev
+```
+
+#### 5. Erro: "Module not found" ou dependências faltando
+
+**Solução**:
+```bash
+# Limpe e reinstale
+rm -rf node_modules pnpm-lock.yaml
+pnpm install
+```
+
+#### 6. Erro de TypeScript: "Cannot find module"
+
+**Soluções**:
+- Verifique se o caminho do import está correto
+- Execute `pnpm typecheck` para ver todos os erros
+- Verifique se o `tsconfig.json` está configurado corretamente
+
+#### 7. Build falha em produção
+
+**Soluções**:
+- Verifique se todas as variáveis de ambiente estão configuradas
+- Execute `pnpm typecheck` e corrija erros de tipo
+- Execute `pnpm lint` e corrija erros de linting
+- Verifique os logs de build para erros específicos
+
+#### 8. Testes falhando
+
+**Soluções**:
+- Execute `pnpm test:watch` para ver erros em tempo real
+- Verifique se o MongoDB está acessível (alguns testes podem precisar)
+- Limpe o cache do Jest: `rm -rf .jest-cache`
+
+### Logs e Debugging
+
+Para ver logs detalhados:
+
+```bash
+# Desenvolvimento com logs
+DEBUG=* pnpm dev
+
+# Apenas logs do MongoDB
+DEBUG=mongodb:* pnpm dev
+```
+
+### Verificação de Saúde
+
+Execute este checklist após a instalação:
+
+- [ ] Node.js >= 22.x instalado
+- [ ] pnpm >= 10.19.0 instalado
+- [ ] MongoDB conectado e acessível
+- [ ] Arquivo `.env.local` criado com todas as variáveis
+- [ ] `pnpm install` executado com sucesso
+- [ ] `pnpm dev` inicia sem erros
+- [ ] Página inicial carrega em `http://localhost:3000`
+- [ ] API retorna resposta em `/api/members` (mesmo que vazia)
+
 ## 📚 Documentação Adicional
 
-- **[Documentacao.md](./Documentacao.md)** - Documentação técnica completa
+- **[ARQUITETURA.md](./ARQUITETURA.md)** - Diagrama de arquitetura e decisões técnicas
+- **[MODELO_DADOS.md](./Docs/Documentation/MODELO_DADOS.md)** - Esquema completo do banco de dados
+- **[ESTRUTURA_COMPONENTES.md](./Docs/Documentation/ESTRUTURA_COMPONENTES.md)** - Organização dos componentes React
+- **[API_REFERENCE.md](./Docs/Documentation/API_REFERENCE.md)** - Referência completa da API REST
 - **[CONTRIBUTING.md](./Docs/Documentation/CONTRIBUTING.md)** - Guia de contribuição
 - **[DEPLOY.md](./Docs/Documentation/DEPLOY.md)** - Guia de deploy
 

@@ -44,54 +44,52 @@ interface AtualizarStatusResponse {
 /**
  * Hook para gerenciar intenções usando React Query
  */
-export function useIntentions() {
+export function useIntentions(
+  status?: IntentionStatus,
+  pagina: number = 1,
+  limite: number = 20,
+  adminToken?: string
+) {
   const queryClient = useQueryClient();
 
   /**
    * Query para listar intenções (admin)
    */
-  const listarIntencoes = (
-    status?: IntentionStatus,
-    pagina: number = 1,
-    limite: number = 20,
-    adminToken?: string
-  ) => {
-    return useQuery<ListarIntencoesResponse, Error>({
-      queryKey: ['intentions', status, pagina, limite],
-      queryFn: async () => {
-        const params = new URLSearchParams({
-          page: pagina.toString(),
-          limit: limite.toString(),
-        });
-        if (status) {
-          params.append('status', status);
-        }
+  const listarIntencoes = useQuery<ListarIntencoesResponse, Error>({
+    queryKey: ['intentions', status, pagina, limite],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        page: pagina.toString(),
+        limit: limite.toString(),
+      });
+      if (status) {
+        params.append('status', status);
+      }
 
-        const headers: HeadersInit = {
-          'Content-Type': 'application/json',
-        };
-        if (adminToken) {
-          headers['Authorization'] = `Bearer ${adminToken}`;
-        }
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      if (adminToken) {
+        headers['Authorization'] = `Bearer ${adminToken}`;
+      }
 
-        const response = await fetch(`/api/intentions?${params.toString()}`, {
-          headers,
-        });
+      const response = await fetch(`/api/intentions?${params.toString()}`, {
+        headers,
+      });
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (!response.ok) {
-          throw new Error(
-            data.message || data.error || 'Erro ao listar intenções'
-          );
-        }
+      if (!response.ok) {
+        throw new Error(
+          data.message || data.error || 'Erro ao listar intenções'
+        );
+      }
 
-        return data;
-      },
-      enabled: !!adminToken, // Só executa se tiver token admin
-      staleTime: 5 * 60 * 1000, // 5 minutos
-    });
-  };
+      return data;
+    },
+    enabled: !!adminToken, // Só executa se tiver token admin
+    staleTime: 5 * 60 * 1000, // 5 minutos
+  });
 
   /**
    * Mutation para criar uma nova intenção
@@ -157,6 +155,8 @@ export function useIntentions() {
   });
 
   return {
+    // Listar intenções
+    ...listarIntencoes,
     // Criar intenção
     criarIntencao: criarIntencao.mutateAsync,
     isCreating: criarIntencao.isPending,
@@ -164,8 +164,6 @@ export function useIntentions() {
     isCreateError: criarIntencao.isError,
     createError: criarIntencao.error,
     resetCreate: criarIntencao.reset,
-    // Listar intenções
-    listarIntencoes,
     // Atualizar status
     atualizarStatus: atualizarStatus.mutateAsync,
     isUpdatingStatus: atualizarStatus.isPending,

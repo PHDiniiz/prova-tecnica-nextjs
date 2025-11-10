@@ -1,12 +1,36 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { NoticeList } from '@/components/features/notice/NoticeList';
-import { NoticeForm } from '@/components/features/notice/NoticeForm';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useQueryClient } from '@tanstack/react-query';
+import dynamic from 'next/dynamic';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useToast } from '@/components/ui/toast';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Notice } from '@/types/notice';
+
+// Dynamic imports para reduzir bundle inicial
+const NoticeList = dynamic(
+  () => import('@/components/features/notice/NoticeList').then((mod) => ({ default: mod.NoticeList })),
+  {
+    loading: () => (
+      <div className="space-y-4">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-20 w-full" />
+      </div>
+    ),
+    ssr: false,
+  }
+);
+
+const NoticeForm = dynamic(
+  () => import('@/components/features/notice/NoticeForm').then((mod) => ({ default: mod.NoticeForm })),
+  {
+    ssr: false,
+  }
+);
 
 /**
  * Página administrativa para CRUD de avisos
@@ -14,6 +38,8 @@ import { Notice } from '@/types/notice';
  * TODO: Implementar autenticação JWT real
  */
 export default function AdminNoticesPage() {
+  const queryClient = useQueryClient();
+  const { addToast } = useToast();
   const [adminToken, setAdminToken] = useState<string>('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -64,17 +90,28 @@ export default function AdminNoticesPage() {
         throw new Error(error.message || 'Erro ao deletar aviso');
       }
 
-      alert('Aviso deletado com sucesso!');
-      window.location.reload(); // Simplificado - em produção usar invalidação de query
+      addToast({
+        variant: 'success',
+        title: 'Sucesso!',
+        description: 'Aviso deletado com sucesso!',
+      });
+
+      // Invalida queries para atualizar a lista
+      queryClient.invalidateQueries({ queryKey: ['notices'] });
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Erro ao deletar aviso');
+      addToast({
+        variant: 'error',
+        title: 'Erro',
+        description: error instanceof Error ? error.message : 'Erro ao deletar aviso',
+      });
     }
   };
 
   const handleFormSuccess = () => {
     setShowForm(false);
     setNoticeEditando(undefined);
-    window.location.reload(); // Simplificado - em produção usar invalidação de query
+    // Invalida queries para atualizar a lista
+    queryClient.invalidateQueries({ queryKey: ['notices'] });
   };
 
   const handleFormCancel = () => {

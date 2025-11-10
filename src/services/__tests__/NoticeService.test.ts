@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { NoticeService } from '../NoticeService';
 import { NoticeRepository } from '@/lib/repositories/NoticeRepository';
 import { Notice, NoticeType } from '@/types/notice';

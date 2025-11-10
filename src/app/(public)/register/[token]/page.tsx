@@ -2,10 +2,30 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import { MemberForm } from '@/components/features/member/MemberForm';
+import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
+import { useToast } from '@/components/ui/toast';
 import { CriarMembroDTO } from '@/types/member';
+
+// Dynamic import para reduzir bundle inicial
+const MemberForm = dynamic(
+  () => import('@/components/features/member/MemberForm').then((mod) => ({ default: mod.MemberForm })),
+  {
+    loading: () => (
+      <Card variant="outlined">
+        <CardContent className="pt-6 space-y-4">
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-24 w-full" />
+        </CardContent>
+      </Card>
+    ),
+    ssr: false,
+  }
+);
 
 interface ValidarTokenResponse {
   success: boolean;
@@ -29,6 +49,7 @@ interface ValidarTokenResponse {
 export default function RegisterPage() {
   const params = useParams();
   const token = params.token as string;
+  const { addToast } = useToast();
 
   const [isValidating, setIsValidating] = useState(true);
   const [isValid, setIsValid] = useState(false);
@@ -103,11 +124,11 @@ export default function RegisterPage() {
         setIsSuccess(true);
       } catch (error) {
         console.error('Erro ao cadastrar membro:', error);
-        alert(
-          error instanceof Error
-            ? error.message
-            : 'Erro ao cadastrar. Tente novamente.'
-        );
+        addToast({
+          variant: 'error',
+          title: 'Erro',
+          description: error instanceof Error ? error.message : 'Erro ao cadastrar. Tente novamente.',
+        });
       } finally {
         setIsSubmitting(false);
       }

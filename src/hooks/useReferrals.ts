@@ -52,55 +52,59 @@ interface ListarIndicacoesOptions {
   status?: ReferralStatus;
   page?: number;
   limit?: number;
+  search?: string;
 }
 
 /**
  * Hook para gerenciar indicações usando React Query
  */
-export function useReferrals(membroId: string) {
+export function useReferrals(
+  membroId: string,
+  options: ListarIndicacoesOptions = {}
+) {
   const queryClient = useQueryClient();
+  const { tipo = 'ambas', status, page = 1, limit = 20, search } = options;
 
   /**
    * Query para listar indicações
    */
-  const listarIndicacoes = (options: ListarIndicacoesOptions = {}) => {
-    const { tipo = 'ambas', status, page = 1, limit = 20 } = options;
+  const listarIndicacoes = useQuery<ListarIndicacoesResponse, Error>({
+    queryKey: ['referrals', membroId, tipo, status, page, limit, search],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        tipo,
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+      if (status) {
+        params.append('status', status);
+      }
+      if (search) {
+        params.append('search', search);
+      }
 
-    return useQuery<ListarIndicacoesResponse, Error>({
-      queryKey: ['referrals', membroId, tipo, status, page, limit],
-      queryFn: async () => {
-        const params = new URLSearchParams({
-          tipo,
-          page: page.toString(),
-          limit: limit.toString(),
-        });
-        if (status) {
-          params.append('status', status);
-        }
+      const response = await fetch(`/api/referrals?${params.toString()}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${membroId}`,
+        },
+      });
 
-        const response = await fetch(`/api/referrals?${params.toString()}`, {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${membroId}`,
-          },
-        });
+      const data = await response.json();
 
-        const data = await response.json();
+      if (!response.ok) {
+        throw new Error(
+          data.message || data.error || 'Erro ao listar indicações'
+        );
+      }
 
-        if (!response.ok) {
-          throw new Error(
-            data.message || data.error || 'Erro ao listar indicações'
-          );
-        }
-
-        return data;
-      },
-      enabled: !!membroId,
-      staleTime: 5 * 1000, // 5 segundos
-      refetchOnWindowFocus: true,
-      refetchOnMount: true,
-    });
-  };
+      return data;
+    },
+    enabled: !!membroId,
+    staleTime: 5 * 1000, // 5 segundos
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+  });
 
   /**
    * Mutation para criar uma nova indicação
@@ -172,7 +176,7 @@ export function useReferrals(membroId: string) {
 
   return {
     // Listar indicações
-    listarIndicacoes,
+    ...listarIndicacoes,
     // Criar indicação
     criarIndicacao: criarIndicacao.mutateAsync,
     isCreating: criarIndicacao.isPending,

@@ -3,21 +3,11 @@ import { ReferralService } from '@/services/ReferralService';
 import { AtualizarStatusIndicacaoDTO } from '@/types/referral';
 import { ZodError } from 'zod';
 import { BusinessError } from '@/lib/errors/BusinessError';
-
-/**
- * Extrai o membroId do header Authorization
- * Por enquanto aceita: Bearer {membroId}
- * TODO: Implementar JWT para autenticação real
- */
-function extrairMembroId(request: NextRequest): string | null {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader) return null;
-  
-  const token = authHeader.replace('Bearer ', '');
-  // Por enquanto, aceita o membroId diretamente
-  // TODO: Validar JWT e extrair membroId do payload
-  return token || null;
-}
+import {
+  extrairMembroIdAtivoDoToken,
+  respostaNaoAutorizado,
+  respostaMembroInativo,
+} from '@/lib/auth';
 
 /**
  * API Route para atualizar o status de uma indicação
@@ -32,17 +22,13 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
-    const membroId = extrairMembroId(request);
+    const { membroId, isInactive } = extrairMembroIdAtivoDoToken(request);
     
     if (!membroId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Não autorizado',
-          message: 'Token de autenticação ausente',
-        },
-        { status: 401 }
-      );
+      if (isInactive) {
+        return respostaMembroInativo();
+      }
+      return respostaNaoAutorizado();
     }
 
     const body: AtualizarStatusIndicacaoDTO = await request.json();

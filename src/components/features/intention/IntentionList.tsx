@@ -1,10 +1,12 @@
 'use client';
 
 import { useMemo, useState, useCallback } from 'react';
-import { Intention, IntentionStatus } from '@/types/intention';
+import { IntentionStatus } from '@/types/intention';
 import { IntentionCard } from './IntentionCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent } from '@/components/ui/card';
+import { useToast } from '@/components/ui/toast';
 import { useIntentions } from '@/hooks/useIntentions';
 
 interface IntentionListProps {
@@ -15,21 +17,21 @@ interface IntentionListProps {
  * Componente para listar intenções com filtros e paginação
  */
 export function IntentionList({ adminToken }: IntentionListProps) {
+  const { addToast } = useToast();
   const [statusFiltro, setStatusFiltro] = useState<IntentionStatus | undefined>(
     undefined
   );
   const [pagina, setPagina] = useState(1);
   const limite = 20;
 
-  const { listarIntencoes, atualizarStatus, isUpdatingStatus } =
-    useIntentions();
-
-  const { data, isLoading, error, refetch } = listarIntencoes(
-    statusFiltro,
-    pagina,
-    limite,
-    adminToken
-  );
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    atualizarStatus,
+    isUpdatingStatus,
+  } = useIntentions(statusFiltro, pagina, limite, adminToken);
 
   const handleApprove = useCallback(
     async (id: string) => {
@@ -43,14 +45,14 @@ export function IntentionList({ adminToken }: IntentionListProps) {
         refetch();
       } catch (error) {
         console.error('Erro ao aprovar intenção:', error);
-        alert(
-          error instanceof Error
-            ? error.message
-            : 'Erro ao aprovar intenção'
-        );
+        addToast({
+          variant: 'error',
+          title: 'Erro',
+          description: error instanceof Error ? error.message : 'Erro ao aprovar intenção',
+        });
       }
     },
-    [atualizarStatus, adminToken, refetch]
+    [atualizarStatus, adminToken, refetch, addToast]
   );
 
   const handleReject = useCallback(
@@ -65,12 +67,14 @@ export function IntentionList({ adminToken }: IntentionListProps) {
         refetch();
       } catch (error) {
         console.error('Erro ao recusar intenção:', error);
-        alert(
-          error instanceof Error ? error.message : 'Erro ao recusar intenção'
-        );
+        addToast({
+          variant: 'error',
+          title: 'Erro',
+          description: error instanceof Error ? error.message : 'Erro ao recusar intenção',
+        });
       }
     },
-    [atualizarStatus, adminToken, refetch]
+    [atualizarStatus, adminToken, refetch, addToast]
   );
 
   const totalPaginas = useMemo(
@@ -82,34 +86,21 @@ export function IntentionList({ adminToken }: IntentionListProps) {
     return (
       <div className="space-y-4">
         {[...Array(3)].map((_, i) => (
-          <Skeleton key={i} className="h-48 w-full" />
+          <Card key={i} variant="outlined">
+            <CardContent className="pt-6">
+              <Skeleton className="h-6 w-3/4 mb-4" />
+              <Skeleton className="h-4 w-full mb-2" />
+              <Skeleton className="h-4 w-2/3" />
+            </CardContent>
+          </Card>
         ))}
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-red-600 mb-4">
-          Erro ao carregar intenções: {error.message}
-        </p>
-        <Button onClick={() => refetch()}>Tentar novamente</Button>
-      </div>
-    );
-  }
-
-  if (!data || data.data.length === 0) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-gray-600">Nenhuma intenção encontrada</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Filtros */}
+      {/* Filtros - sempre renderizados */}
       <div className="flex gap-2 flex-wrap">
         <Button
           onClick={() => {
@@ -149,40 +140,61 @@ export function IntentionList({ adminToken }: IntentionListProps) {
         </Button>
       </div>
 
-      {/* Lista de intenções */}
-      <div className="space-y-4">
-        {data.data.map((intencao) => (
-          <IntentionCard
-            key={intencao._id}
-            intencao={intencao}
-            onApprove={handleApprove}
-            onReject={handleReject}
-            isUpdating={isUpdatingStatus}
-          />
-        ))}
-      </div>
-
-      {/* Paginação */}
-      {totalPaginas > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            onClick={() => setPagina((p) => Math.max(1, p - 1))}
-            disabled={pagina === 1}
-            variant="outline"
-          >
-            Anterior
-          </Button>
-          <span className="text-sm text-gray-600">
-            Página {pagina} de {totalPaginas} ({data.pagination.total} total)
-          </span>
-          <Button
-            onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
-            disabled={pagina === totalPaginas}
-            variant="outline"
-          >
-            Próxima
-          </Button>
+      {/* Mensagem de erro */}
+      {error && (
+        <div className="text-center py-8">
+          <p className="text-red-600 mb-4">
+            Erro ao carregar intenções: {error.message}
+          </p>
+          <Button onClick={() => refetch()}>Tentar novamente</Button>
         </div>
+      )}
+
+      {/* Mensagem quando não há dados */}
+      {!error && (!data || data.data.length === 0) && (
+        <div className="text-center py-8">
+          <p className="text-gray-600">Nenhuma intenção encontrada</p>
+        </div>
+      )}
+
+      {/* Lista de intenções */}
+      {!error && data && data.data.length > 0 && (
+        <>
+          <div className="space-y-4">
+            {data.data.map((intencao) => (
+              <IntentionCard
+                key={intencao._id}
+                intencao={intencao}
+                onApprove={handleApprove}
+                onReject={handleReject}
+                isUpdating={isUpdatingStatus}
+              />
+            ))}
+          </div>
+
+          {/* Paginação */}
+          {totalPaginas > 1 && (
+            <div className="flex items-center justify-center gap-2">
+              <Button
+                onClick={() => setPagina((p) => Math.max(1, p - 1))}
+                disabled={pagina === 1}
+                variant="outline"
+              >
+                Anterior
+              </Button>
+              <span className="text-sm text-gray-600">
+                Página {pagina} de {totalPaginas} ({data.pagination.total} total)
+              </span>
+              <Button
+                onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
+                disabled={pagina === totalPaginas}
+                variant="outline"
+              >
+                Próxima
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

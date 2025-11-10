@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { MemberRepository } from '../MemberRepository';
 import { Db, ObjectId } from 'mongodb';
 import { Member } from '@/types/member';

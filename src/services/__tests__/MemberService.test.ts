@@ -1,8 +1,12 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { MemberService } from '../MemberService';
 import { MemberRepository } from '@/lib/repositories/MemberRepository';
 import { InviteService } from '../InviteService';
 import { criarMembroFake, criarConviteFake } from '@/tests/helpers/faker';
-import { Member, Invite } from '@/types/member';
+import { Member } from '@/types/member';
+import { Invite } from '@/types/invite';
 import { ZodError } from 'zod';
 
 jest.mock('@/lib/mongodb', () => ({

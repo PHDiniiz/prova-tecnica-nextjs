@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { IntentionService } from '../IntentionService';
 import { IntentionRepository } from '@/lib/repositories/IntentionRepository';
 import { criarIntencaoFake } from '@/tests/helpers/faker';

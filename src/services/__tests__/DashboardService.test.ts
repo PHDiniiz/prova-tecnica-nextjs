@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { DashboardService } from '../DashboardService';
 import { DashboardRepository } from '@/lib/repositories/DashboardRepository';
 import { PeriodoFiltro } from '@/types/dashboard';
@@ -46,9 +49,11 @@ describe('DashboardService', () => {
         taxaFechamentoIndicacoes: 20,
         valorTotalEstimado: 1000000,
         valorMedioIndicacao: 20000,
+        tempoMedioFechamento: 15.5,
         periodo: 'mensal' as PeriodoFiltro,
         dataInicio: new Date(),
         dataFim: new Date(),
+        variacoes: {},
       };
 
       mockRepository.buscarMetricasGerais.mockResolvedValueOnce(metricasMock);
@@ -146,9 +151,11 @@ describe('DashboardService', () => {
         taxaFechamentoIndicacoes: 20,
         valorTotalEstimado: 1000000,
         valorMedioIndicacao: 20000,
+        tempoMedioFechamento: 15.5,
         periodo: 'mensal' as PeriodoFiltro,
         dataInicio: new Date(),
         dataFim: new Date(),
+        variacoes: {},
       };
 
       const performanceMock = [
@@ -188,9 +195,11 @@ describe('DashboardService', () => {
         taxaFechamentoIndicacoes: 20,
         valorTotalEstimado: 1000000,
         valorMedioIndicacao: 20000,
+        tempoMedioFechamento: 15.5,
         periodo: 'mensal' as PeriodoFiltro,
         dataInicio: new Date(),
         dataFim: new Date(),
+        variacoes: {},
       };
 
       const performanceIndividualMock = {
