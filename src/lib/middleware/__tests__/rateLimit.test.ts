@@ -32,8 +32,11 @@ describe('RateLimiter', () => {
   let rateLimiter: RateLimiter;
   let mockCollection: any;
   let mockDb: any;
+  let getDatabaseMock: jest.Mock;
 
   beforeEach(() => {
+    jest.clearAllMocks();
+
     mockCollection = {
       findOneAndUpdate: jest.fn(),
       deleteMany: jest.fn(),
@@ -44,12 +47,17 @@ describe('RateLimiter', () => {
     };
 
     const { getDatabase } = require('@/lib/mongodb');
-    getDatabase.mockResolvedValue(mockDb);
+    getDatabaseMock = getDatabase as jest.Mock;
+    getDatabaseMock.mockResolvedValue(mockDb);
 
     rateLimiter = new RateLimiter({
       maxRequests: 5,
       windowMs: 15 * 60 * 1000, // 15 minutos
     });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('checkLimit', () => {
@@ -92,9 +100,12 @@ describe('RateLimiter', () => {
       const now = new Date();
       const resetAt = new Date(now.getTime() + 15 * 60 * 1000);
 
+      // Quando não existe, findOneAndUpdate com upsert cria e retorna o documento
       mockCollection.findOneAndUpdate.mockResolvedValue({
+        key: 'new-key',
         count: 1,
         resetAt,
+        createdAt: now,
       });
 
       mockCollection.deleteMany.mockResolvedValue({ deletedCount: 0 });
@@ -102,12 +113,21 @@ describe('RateLimiter', () => {
       const result = await rateLimiter.checkLimit('new-key');
 
       expect(result.allowed).toBe(true);
+      expect(result.remaining).toBe(4); // 5 - 1 = 4
       expect(mockCollection.findOneAndUpdate).toHaveBeenCalledWith(
         {
           key: 'new-key',
           resetAt: { $gt: expect.any(Date) },
         },
-        expect.any(Object),
+        expect.objectContaining({
+          $setOnInsert: expect.objectContaining({
+            key: 'new-key',
+            count: 0,
+            resetAt: expect.any(Date),
+            createdAt: expect.any(Date),
+          }),
+          $inc: { count: 1 },
+        }),
         {
           upsert: true,
           returnDocument: 'after',

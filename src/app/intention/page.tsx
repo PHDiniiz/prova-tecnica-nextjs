@@ -1,4 +1,4 @@
-import { IntentionForm } from '@/components/features/intention/IntentionForm';
+import { IntentionFormWrapper } from '@/components/features/intention/IntentionFormWrapper';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -24,7 +24,7 @@ export default function IntentionPage() {
           </p>
         </div>
 
-        <IntentionForm />
+        <IntentionFormWrapper />
       </div>
     </div>
   );

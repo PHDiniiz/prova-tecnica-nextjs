@@ -118,8 +118,11 @@ describe('DashboardPage', () => {
       wrapper: createWrapper(),
     });
 
-    expect(screen.getByText(/erro ao carregar dashboard/i)).toBeInTheDocument();
-    expect(screen.getByText(/erro ao carregar dashboard/i)).toBeInTheDocument();
+    // Verifica que o erro está presente (pode estar em múltiplos elementos)
+    const errorElements = screen.getAllByText(/erro ao carregar dashboard/i);
+    expect(errorElements.length).toBeGreaterThan(0);
+    // Verifica que há um botão de tentar novamente
+    expect(screen.getByText(/tentar novamente/i)).toBeInTheDocument();
   });
 
   it('deve permitir mudar período', async () => {

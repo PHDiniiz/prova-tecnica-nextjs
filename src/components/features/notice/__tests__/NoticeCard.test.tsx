@@ -19,7 +19,9 @@ describe('NoticeCard', () => {
   it('deve renderizar informações do aviso', () => {
     render(<NoticeCard notice={mockNotice} />);
 
-    expect(screen.getByText(/aviso importante/i)).toBeInTheDocument();
+    // Usar getAllByText pois "aviso importante" aparece no título e no conteúdo
+    const avisoTexts = screen.getAllByText(/aviso importante/i);
+    expect(avisoTexts.length).toBeGreaterThan(0);
     expect(screen.getByText(/este é um aviso importante/i)).toBeInTheDocument();
   });
 

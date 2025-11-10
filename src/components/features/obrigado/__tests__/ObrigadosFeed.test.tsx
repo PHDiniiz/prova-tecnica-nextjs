@@ -153,7 +153,16 @@ describe('ObrigadosFeed', () => {
 
   it('deve exibir paginação quando há múltiplas páginas', () => {
     const mockData = {
-      data: [],
+      data: [
+        {
+          _id: '1',
+          mensagem: 'Agradecimento teste',
+          publico: true,
+          criadoEm: new Date('2024-01-15'),
+          indicacaoId: 'ind-1',
+          membroId: 'membro-1',
+        },
+      ],
       pagination: { page: 1, limit: 20, total: 50, totalPages: 3 },
     };
 
@@ -172,7 +181,16 @@ describe('ObrigadosFeed', () => {
   it('deve navegar para próxima página', async () => {
     const user = userEvent.setup();
     const mockData = {
-      data: [],
+      data: [
+        {
+          _id: '1',
+          mensagem: 'Agradecimento teste',
+          publico: true,
+          criadoEm: new Date('2024-01-15'),
+          indicacaoId: 'ind-1',
+          membroId: 'membro-1',
+        },
+      ],
       pagination: { page: 1, limit: 20, total: 50, totalPages: 3 },
     };
 
@@ -198,7 +216,16 @@ describe('ObrigadosFeed', () => {
 
   it('deve desabilitar botão anterior na primeira página', () => {
     const mockData = {
-      data: [],
+      data: [
+        {
+          _id: '1',
+          mensagem: 'Agradecimento teste',
+          publico: true,
+          criadoEm: new Date('2024-01-15'),
+          indicacaoId: 'ind-1',
+          membroId: 'membro-1',
+        },
+      ],
       pagination: { page: 1, limit: 20, total: 50, totalPages: 3 },
     };
 

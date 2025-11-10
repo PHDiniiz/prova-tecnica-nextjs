@@ -7,13 +7,14 @@ import {
   IntentionStatus,
 } from '@/types/intention';
 import { z } from 'zod';
+import { nomeSchema, empresaSchema, emailSchema, textoLongoSchema } from '@/lib/utils/validation';
 
 // Schema de validação para criar intenção
 const criarIntencaoSchema = z.object({
-  nome: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  email: z.string().email('Email inválido'),
-  empresa: z.string().min(2, 'Empresa deve ter pelo menos 2 caracteres'),
-  motivo: z.string().min(10, 'Motivo deve ter pelo menos 10 caracteres'),
+  nome: nomeSchema,
+  email: emailSchema,
+  empresa: empresaSchema,
+  motivo: textoLongoSchema(10, 500, 'Motivo'),
 });
 
 /**

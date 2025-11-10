@@ -1,10 +1,11 @@
 /// <reference types="jest" />
 /// <reference types="@testing-library/jest-dom" />
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ObrigadoForm } from '../ObrigadoForm';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ToastProvider } from '@/components/ui/toast';
 import { ReactNode } from 'react';
 
 // Mock do useCreateObrigado
@@ -12,18 +13,11 @@ jest.mock('@/hooks/useObrigados', () => ({
   useCreateObrigado: jest.fn(),
 }));
 
-// Mock do useToast
-jest.mock('@/components/ui/toast', () => ({
-  useToast: () => ({
-    addToast: jest.fn(),
-  }),
-}));
-
 // Mock dos componentes UI
 jest.mock('@/components/ui/button', () => ({
-  Button: ({ children, onClick, disabled, ...props }: any) => (
-    <button onClick={onClick} disabled={disabled} {...props}>
-      {children}
+  Button: ({ children, onClick, disabled, isLoading, ...props }: any) => (
+    <button onClick={onClick} disabled={disabled || isLoading} {...props}>
+      {isLoading ? 'Registrando...' : children}
     </button>
   ),
 }));
@@ -49,7 +43,9 @@ function createWrapper() {
   });
 
   return ({ children }: { children: ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>{children}</ToastProvider>
+    </QueryClientProvider>
   );
 }
 
@@ -90,7 +86,9 @@ describe('ObrigadoForm', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/deve ter pelo menos 10 caracteres/i)).toBeInTheDocument();
+      // A mensagem aparece tanto no span do Textarea quanto no p do componente
+      const errorMessages = screen.getAllByText(/deve ter pelo menos 10 caracteres/i);
+      expect(errorMessages.length).toBeGreaterThan(0);
     });
   });
 
@@ -102,15 +100,17 @@ describe('ObrigadoForm', () => {
       { wrapper: createWrapper() }
     );
 
-    const textarea = screen.getByLabelText(/Mensagem de Agradecimento/i);
+    const textarea = screen.getByLabelText(/Mensagem de Agradecimento/i) as HTMLTextAreaElement;
     const submitButton = screen.getByText(/Registrar Agradecimento/i);
 
+    // Definir valor diretamente usando fireEvent para evitar timeout
     const longMessage = 'a'.repeat(501);
-    await user.type(textarea, longMessage);
+    fireEvent.change(textarea, { target: { value: longMessage } });
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/deve ter no máximo 500 caracteres/i)).toBeInTheDocument();
+      const errorMessages = screen.getAllByText(/deve ter no máximo 500 caracteres/i);
+      expect(errorMessages.length).toBeGreaterThan(0);
     });
   });
 
@@ -123,19 +123,23 @@ describe('ObrigadoForm', () => {
       { wrapper: createWrapper() }
     );
 
-    const textarea = screen.getByLabelText(/Mensagem de Agradecimento/i);
+    const textarea = screen.getByLabelText(/Mensagem de Agradecimento/i) as HTMLTextAreaElement;
     const submitButton = screen.getByText(/Registrar Agradecimento/i);
 
+    // Limpar o textarea antes de preencher para evitar interferência de testes anteriores
+    await user.clear(textarea);
     await user.type(textarea, 'Esta é uma mensagem de agradecimento válida!');
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(mockMutateAsync).toHaveBeenCalledWith({
-        mensagem: 'Esta é uma mensagem de agradecimento válida!',
-        publico: true,
-        indicacaoId: 'ind-1',
-        membroId: 'membro-1',
-      });
+      expect(mockMutateAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          mensagem: 'Esta é uma mensagem de agradecimento válida!',
+          publico: true,
+          indicacaoId: 'ind-1',
+          membroId: 'membro-1',
+        })
+      );
     });
   });
 

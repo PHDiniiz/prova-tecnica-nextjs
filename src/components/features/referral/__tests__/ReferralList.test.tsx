@@ -86,66 +86,12 @@ const mockReferralRecebida: Referral = {
 };
 
 describe('ReferralList', () => {
-  const mockListarIndicacoes = jest.fn();
   const mockAtualizarStatus = jest.fn();
   const mockRefetch = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     (useReferrals as jest.Mock).mockReturnValue({
-      listarIndicacoes: mockListarIndicacoes,
-      atualizarStatus: mockAtualizarStatus,
-      isUpdatingStatus: false,
-    });
-  });
-
-  it('deve exibir skeletons durante carregamento', () => {
-    mockListarIndicacoes.mockReturnValue({
-      data: undefined,
-      isLoading: true,
-      error: null,
-      refetch: mockRefetch,
-    });
-
-    render(<ReferralList membroId="membro-1" />, { wrapper: createWrapper() });
-
-    const skeletons = screen.getAllByTestId('skeleton');
-    expect(skeletons.length).toBeGreaterThan(0);
-  });
-
-  it('deve exibir mensagem de erro quando ocorre erro', () => {
-    mockListarIndicacoes.mockReturnValue({
-      data: undefined,
-      isLoading: false,
-      error: { message: 'Erro ao carregar' },
-      refetch: mockRefetch,
-    });
-
-    render(<ReferralList membroId="membro-1" />, { wrapper: createWrapper() });
-
-    expect(screen.getByText(/Erro ao carregar indicações/i)).toBeInTheDocument();
-    expect(screen.getByText('Tentar Novamente')).toBeInTheDocument();
-  });
-
-  it('deve chamar refetch ao clicar em Tentar Novamente', async () => {
-    const user = userEvent.setup();
-    mockListarIndicacoes.mockReturnValue({
-      data: undefined,
-      isLoading: false,
-      error: { message: 'Erro ao carregar' },
-      refetch: mockRefetch,
-    });
-
-    render(<ReferralList membroId="membro-1" />, { wrapper: createWrapper() });
-
-    const botaoTentar = screen.getByText('Tentar Novamente');
-    await user.click(botaoTentar);
-
-    expect(mockRefetch).toHaveBeenCalled();
-  });
-
-  it('deve exibir mensagem quando não há indicações', () => {
-    mockListarIndicacoes.mockReturnValue({
       data: {
         data: {
           feitas: [],
@@ -161,6 +107,81 @@ describe('ReferralList', () => {
       isLoading: false,
       error: null,
       refetch: mockRefetch,
+      atualizarStatus: mockAtualizarStatus,
+      isUpdatingStatus: false,
+    });
+  });
+
+  it('deve exibir skeletons durante carregamento', () => {
+    (useReferrals as jest.Mock).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      error: null,
+      refetch: mockRefetch,
+      atualizarStatus: mockAtualizarStatus,
+      isUpdatingStatus: false,
+    });
+
+    render(<ReferralList membroId="membro-1" />, { wrapper: createWrapper() });
+
+    const skeletons = screen.getAllByTestId('skeleton');
+    expect(skeletons.length).toBeGreaterThan(0);
+  });
+
+  it('deve exibir mensagem de erro quando ocorre erro', () => {
+    (useReferrals as jest.Mock).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: { message: 'Erro ao carregar' },
+      refetch: mockRefetch,
+      atualizarStatus: mockAtualizarStatus,
+      isUpdatingStatus: false,
+    });
+
+    render(<ReferralList membroId="membro-1" />, { wrapper: createWrapper() });
+
+    expect(screen.getByText(/Erro ao carregar indicações/i)).toBeInTheDocument();
+    expect(screen.getByText('Tentar Novamente')).toBeInTheDocument();
+  });
+
+  it('deve chamar refetch ao clicar em Tentar Novamente', async () => {
+    const user = userEvent.setup();
+    (useReferrals as jest.Mock).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: { message: 'Erro ao carregar' },
+      refetch: mockRefetch,
+      atualizarStatus: mockAtualizarStatus,
+      isUpdatingStatus: false,
+    });
+
+    render(<ReferralList membroId="membro-1" />, { wrapper: createWrapper() });
+
+    const botaoTentar = screen.getByText('Tentar Novamente');
+    await user.click(botaoTentar);
+
+    expect(mockRefetch).toHaveBeenCalled();
+  });
+
+  it('deve exibir mensagem quando não há indicações', () => {
+    (useReferrals as jest.Mock).mockReturnValue({
+      data: {
+        data: {
+          feitas: [],
+          recebidas: [],
+        },
+        pagination: {
+          page: 1,
+          limit: 20,
+          total: 0,
+          totalPages: 1,
+        },
+      },
+      isLoading: false,
+      error: null,
+      refetch: mockRefetch,
+      atualizarStatus: mockAtualizarStatus,
+      isUpdatingStatus: false,
     });
 
     render(<ReferralList membroId="membro-1" />, { wrapper: createWrapper() });
@@ -169,7 +190,7 @@ describe('ReferralList', () => {
   });
 
   it('deve exibir indicações feitas', () => {
-    mockListarIndicacoes.mockReturnValue({
+    (useReferrals as jest.Mock).mockReturnValue({
       data: {
         data: {
           feitas: [mockReferralFeita],
@@ -185,6 +206,8 @@ describe('ReferralList', () => {
       isLoading: false,
       error: null,
       refetch: mockRefetch,
+      atualizarStatus: mockAtualizarStatus,
+      isUpdatingStatus: false,
     });
 
     render(<ReferralList membroId="membro-1" tipo="feitas" />, { wrapper: createWrapper() });
@@ -194,7 +217,7 @@ describe('ReferralList', () => {
   });
 
   it('deve exibir indicações recebidas', () => {
-    mockListarIndicacoes.mockReturnValue({
+    (useReferrals as jest.Mock).mockReturnValue({
       data: {
         data: {
           feitas: [],
@@ -210,6 +233,8 @@ describe('ReferralList', () => {
       isLoading: false,
       error: null,
       refetch: mockRefetch,
+      atualizarStatus: mockAtualizarStatus,
+      isUpdatingStatus: false,
     });
 
     render(<ReferralList membroId="membro-1" tipo="recebidas" />, { wrapper: createWrapper() });
@@ -219,7 +244,7 @@ describe('ReferralList', () => {
   });
 
   it('deve exibir ambas as indicações quando tipo é ambas', () => {
-    mockListarIndicacoes.mockReturnValue({
+    (useReferrals as jest.Mock).mockReturnValue({
       data: {
         data: {
           feitas: [mockReferralFeita],
@@ -235,6 +260,8 @@ describe('ReferralList', () => {
       isLoading: false,
       error: null,
       refetch: mockRefetch,
+      atualizarStatus: mockAtualizarStatus,
+      isUpdatingStatus: false,
     });
 
     render(<ReferralList membroId="membro-1" tipo="ambas" />, { wrapper: createWrapper() });
@@ -248,7 +275,7 @@ describe('ReferralList', () => {
   it('deve filtrar por tipo ao alterar select', async () => {
     const user = userEvent.setup();
     // Mock inicial com ambas as indicações
-    mockListarIndicacoes.mockReturnValue({
+    (useReferrals as jest.Mock).mockReturnValue({
       data: {
         data: {
           feitas: [mockReferralFeita],
@@ -264,6 +291,8 @@ describe('ReferralList', () => {
       isLoading: false,
       error: null,
       refetch: mockRefetch,
+      atualizarStatus: mockAtualizarStatus,
+      isUpdatingStatus: false,
     });
 
     render(<ReferralList membroId="membro-1" tipo="ambas" />, { wrapper: createWrapper() });
@@ -277,7 +306,7 @@ describe('ReferralList', () => {
     await user.selectOptions(tipoSelect, 'feitas');
 
     // Atualiza mock para retornar apenas feitas
-    mockListarIndicacoes.mockReturnValue({
+    (useReferrals as jest.Mock).mockReturnValue({
       data: {
         data: {
           feitas: [mockReferralFeita],
@@ -293,6 +322,8 @@ describe('ReferralList', () => {
       isLoading: false,
       error: null,
       refetch: mockRefetch,
+      atualizarStatus: mockAtualizarStatus,
+      isUpdatingStatus: false,
     });
 
     await waitFor(() => {
@@ -304,7 +335,7 @@ describe('ReferralList', () => {
 
   it('deve filtrar por status ao alterar select', async () => {
     const user = userEvent.setup();
-    mockListarIndicacoes.mockReturnValue({
+    (useReferrals as jest.Mock).mockReturnValue({
       data: {
         data: {
           feitas: [mockReferralFeita],
@@ -320,6 +351,8 @@ describe('ReferralList', () => {
       isLoading: false,
       error: null,
       refetch: mockRefetch,
+      atualizarStatus: mockAtualizarStatus,
+      isUpdatingStatus: false,
     });
 
     render(<ReferralList membroId="membro-1" />, { wrapper: createWrapper() });
@@ -327,13 +360,14 @@ describe('ReferralList', () => {
     const statusSelect = screen.getByLabelText(/Status/i);
     await user.selectOptions(statusSelect, 'nova');
 
+    // O hook será chamado novamente quando o filtro mudar
     await waitFor(() => {
-      expect(mockListarIndicacoes).toHaveBeenCalled();
+      expect(useReferrals).toHaveBeenCalled();
     });
   });
 
   it('deve exibir paginação quando há múltiplas páginas', () => {
-    mockListarIndicacoes.mockReturnValue({
+    (useReferrals as jest.Mock).mockReturnValue({
       data: {
         data: {
           feitas: [mockReferralFeita],
@@ -349,6 +383,8 @@ describe('ReferralList', () => {
       isLoading: false,
       error: null,
       refetch: mockRefetch,
+      atualizarStatus: mockAtualizarStatus,
+      isUpdatingStatus: false,
     });
 
     render(<ReferralList membroId="membro-1" />, { wrapper: createWrapper() });
@@ -359,7 +395,7 @@ describe('ReferralList', () => {
   });
 
   it('deve desabilitar botão Anterior na primeira página', () => {
-    mockListarIndicacoes.mockReturnValue({
+    (useReferrals as jest.Mock).mockReturnValue({
       data: {
         data: {
           feitas: [mockReferralFeita],
@@ -375,6 +411,8 @@ describe('ReferralList', () => {
       isLoading: false,
       error: null,
       refetch: mockRefetch,
+      atualizarStatus: mockAtualizarStatus,
+      isUpdatingStatus: false,
     });
 
     render(<ReferralList membroId="membro-1" />, { wrapper: createWrapper() });
@@ -385,7 +423,7 @@ describe('ReferralList', () => {
 
   it('deve desabilitar botão Próxima quando não há próxima página', () => {
     // Testa quando há apenas uma página (totalPages = 1)
-    mockListarIndicacoes.mockReturnValue({
+    (useReferrals as jest.Mock).mockReturnValue({
       data: {
         data: {
           feitas: [mockReferralFeita],
@@ -401,6 +439,8 @@ describe('ReferralList', () => {
       isLoading: false,
       error: null,
       refetch: mockRefetch,
+      atualizarStatus: mockAtualizarStatus,
+      isUpdatingStatus: false,
     });
 
     render(<ReferralList membroId="membro-1" />, { wrapper: createWrapper() });
@@ -410,7 +450,7 @@ describe('ReferralList', () => {
   });
 
   it('deve exibir componente de atualização de status para indicações recebidas', () => {
-    mockListarIndicacoes.mockReturnValue({
+    (useReferrals as jest.Mock).mockReturnValue({
       data: {
         data: {
           feitas: [],
@@ -426,6 +466,8 @@ describe('ReferralList', () => {
       isLoading: false,
       error: null,
       refetch: mockRefetch,
+      atualizarStatus: mockAtualizarStatus,
+      isUpdatingStatus: false,
     });
 
     render(<ReferralList membroId="membro-1" tipo="recebidas" />, { wrapper: createWrapper() });
@@ -436,7 +478,7 @@ describe('ReferralList', () => {
   it('deve chamar atualizarStatus ao atualizar status de indicação', async () => {
     const user = userEvent.setup();
     mockAtualizarStatus.mockResolvedValueOnce({ success: true });
-    mockListarIndicacoes.mockReturnValue({
+    (useReferrals as jest.Mock).mockReturnValue({
       data: {
         data: {
           feitas: [],
@@ -452,6 +494,8 @@ describe('ReferralList', () => {
       isLoading: false,
       error: null,
       refetch: mockRefetch,
+      atualizarStatus: mockAtualizarStatus,
+      isUpdatingStatus: false,
     });
 
     render(<ReferralList membroId="membro-1" tipo="recebidas" />, { wrapper: createWrapper() });
@@ -469,7 +513,7 @@ describe('ReferralList', () => {
   });
 
   it('não deve exibir paginação quando há apenas uma página', () => {
-    mockListarIndicacoes.mockReturnValue({
+    (useReferrals as jest.Mock).mockReturnValue({
       data: {
         data: {
           feitas: [mockReferralFeita],
@@ -485,6 +529,8 @@ describe('ReferralList', () => {
       isLoading: false,
       error: null,
       refetch: mockRefetch,
+      atualizarStatus: mockAtualizarStatus,
+      isUpdatingStatus: false,
     });
 
     render(<ReferralList membroId="membro-1" />, { wrapper: createWrapper() });
@@ -495,7 +541,7 @@ describe('ReferralList', () => {
   it('deve navegar para próxima página ao clicar no botão', async () => {
     const user = userEvent.setup();
     
-    mockListarIndicacoes.mockReturnValue({
+    (useReferrals as jest.Mock).mockReturnValue({
       data: {
         data: {
           feitas: [mockReferralFeita],
@@ -511,6 +557,8 @@ describe('ReferralList', () => {
       isLoading: false,
       error: null,
       refetch: mockRefetch,
+      atualizarStatus: mockAtualizarStatus,
+      isUpdatingStatus: false,
     });
 
     render(<ReferralList membroId="membro-1" />, { wrapper: createWrapper() });
@@ -527,7 +575,7 @@ describe('ReferralList', () => {
 
   it('deve resetar página ao alterar filtro de tipo', async () => {
     const user = userEvent.setup();
-    mockListarIndicacoes.mockReturnValue({
+    (useReferrals as jest.Mock).mockReturnValue({
       data: {
         data: {
           feitas: [mockReferralFeita],
@@ -543,6 +591,8 @@ describe('ReferralList', () => {
       isLoading: false,
       error: null,
       refetch: mockRefetch,
+      atualizarStatus: mockAtualizarStatus,
+      isUpdatingStatus: false,
     });
 
     render(<ReferralList membroId="membro-1" tipo="ambas" />, { wrapper: createWrapper() });
@@ -550,14 +600,15 @@ describe('ReferralList', () => {
     const tipoSelect = screen.getByLabelText(/Tipo/i);
     await user.selectOptions(tipoSelect, 'feitas');
 
+    // O hook será chamado novamente quando o filtro mudar
     await waitFor(() => {
-      expect(mockListarIndicacoes).toHaveBeenCalled();
+      expect(useReferrals).toHaveBeenCalled();
     });
   });
 
   it('deve resetar página ao alterar filtro de status', async () => {
     const user = userEvent.setup();
-    mockListarIndicacoes.mockReturnValue({
+    (useReferrals as jest.Mock).mockReturnValue({
       data: {
         data: {
           feitas: [mockReferralFeita],
@@ -573,6 +624,8 @@ describe('ReferralList', () => {
       isLoading: false,
       error: null,
       refetch: mockRefetch,
+      atualizarStatus: mockAtualizarStatus,
+      isUpdatingStatus: false,
     });
 
     render(<ReferralList membroId="membro-1" />, { wrapper: createWrapper() });
@@ -580,13 +633,14 @@ describe('ReferralList', () => {
     const statusSelect = screen.getByLabelText(/Status/i);
     await user.selectOptions(statusSelect, 'nova');
 
+    // O hook será chamado novamente quando o filtro mudar
     await waitFor(() => {
-      expect(mockListarIndicacoes).toHaveBeenCalled();
+      expect(useReferrals).toHaveBeenCalled();
     });
   });
 
   it('deve exibir mensagem quando não há indicações com filtros selecionados', () => {
-    mockListarIndicacoes.mockReturnValue({
+    (useReferrals as jest.Mock).mockReturnValue({
       data: {
         data: {
           feitas: [],
@@ -602,6 +656,8 @@ describe('ReferralList', () => {
       isLoading: false,
       error: null,
       refetch: mockRefetch,
+      atualizarStatus: mockAtualizarStatus,
+      isUpdatingStatus: false,
     });
 
     render(<ReferralList membroId="membro-1" />, { wrapper: createWrapper() });

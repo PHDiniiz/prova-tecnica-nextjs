@@ -1,12 +1,29 @@
 
 'use client';
 
-import { useState } from 'react';
-import { IntentionList } from '@/components/features/intention/IntentionList';
+import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// Dynamic import para reduzir bundle inicial
+const IntentionList = dynamic(
+  () => import('@/components/features/intention/IntentionList').then((mod) => ({ default: mod.IntentionList })),
+  {
+    loading: () => (
+      <div className="space-y-4">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-24 w-full" />
+      </div>
+    ),
+    ssr: false,
+  }
+);
 
 /**
  * Página administrativa para gerenciar intenções
@@ -14,19 +31,20 @@ import { useToast } from '@/components/ui/toast';
  */
 export default function AdminIntentsPage() {
   const { addToast } = useToast();
-  // Inicialização lazy do estado para evitar setState em useEffect
-  const [adminToken, setAdminToken] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('admin_token') || '';
+  // Estados sempre inicializados com valores padrão para evitar diferenças SSR/CSR
+  const [adminToken, setAdminToken] = useState<string>('');
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isMounted, setIsMounted] = useState<boolean>(false);
+
+  // Verifica localStorage apenas após montagem no cliente
+  useEffect(() => {
+    setIsMounted(true);
+    const storedToken = localStorage.getItem('admin_token');
+    if (storedToken) {
+      setAdminToken(storedToken);
+      setIsAuthenticated(true);
     }
-    return '';
-  });
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return !!localStorage.getItem('admin_token');
-    }
-    return false;
-  });
+  }, []);
 
   const handleLogin = () => {
     if (adminToken.trim()) {
@@ -46,6 +64,24 @@ export default function AdminIntentsPage() {
     setAdminToken('');
     setIsAuthenticated(false);
   };
+
+  // Renderiza loading até o componente estar montado no cliente
+  // Isso evita diferenças entre SSR e CSR
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-3/4" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (

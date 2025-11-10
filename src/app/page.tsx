@@ -22,12 +22,14 @@ export default function Home() {
           <nav className="flex gap-4">
             <Link
               href="/intention"
+              prefetch={true}
               className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
             >
               Quero Participar
             </Link>
             <Link
               href="/notices"
+              prefetch={true}
               className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
             >
               Avisos
@@ -51,12 +53,14 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/intention"
+              prefetch={true}
               className="inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 px-8 py-6 text-base"
             >
               Quero Participar do Grupo
             </Link>
             <Link
               href="/notices"
+              prefetch={true}
               className="inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 border-2 border-gray-400 text-gray-700 hover:bg-gray-100 active:bg-gray-200 px-8 py-6 text-base"
             >
               Ver Avisos e Comunicados

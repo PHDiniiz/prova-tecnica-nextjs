@@ -65,22 +65,19 @@ export class InviteService {
     const registerUrl = `${baseUrl}/register/${token}`;
     
     console.log('\n' + '='.repeat(60));
-    console.log('📧 CONVITE DE CADASTRO GERADO');
+    console.log('CONVITE DE CADASTRO GERADO');
     console.log('='.repeat(60));
     
     if (intencaoInfo) {
-      console.log(`👤 Candidato: ${intencaoInfo.nome}`);
-      console.log(`📧 Email: ${intencaoInfo.email}`);
-      console.log(`🏢 Empresa: ${intencaoInfo.empresa}`);
-      if (intencaoInfo.cargo) {
-        console.log(`💼 Cargo: ${intencaoInfo.cargo}`);
-      }
+      console.log(`Candidato: ${intencaoInfo.nome}`);
+      console.log(`Email: ${intencaoInfo.email}`);
+      console.log(`Empresa: ${intencaoInfo.empresa}`);
     }
     
-    console.log(`🔗 Link de Cadastro: ${registerUrl}`);
-    console.log(`🔑 Token: ${token}`);
-    console.log(`⏰ Expira em: ${expiraEm.toLocaleString('pt-BR')}`);
-    console.log(`📅 Criado em: ${new Date().toLocaleString('pt-BR')}`);
+    console.log(`Link de Cadastro: ${registerUrl}`);
+    console.log(`Token: ${token}`);
+    console.log(`Expira em: ${expiraEm.toLocaleString('pt-BR')}`);
+    console.log(`Criado em: ${new Date().toLocaleString('pt-BR')}`);
     console.log('='.repeat(60) + '\n');
 
     return novoConvite;
@@ -117,4 +114,3 @@ export class InviteService {
     await this.repository.marcarComoUsado(token);
   }
 }
-

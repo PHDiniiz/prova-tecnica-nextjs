@@ -3,16 +3,24 @@ import { MemberRepository } from '@/lib/repositories/MemberRepository';
 import { InviteService } from './InviteService';
 import { Member, CriarMembroDTO } from '@/types/member';
 import { z } from 'zod';
+import {
+  nomeSchema,
+  emailSchema,
+  empresaSchema,
+  urlSchema,
+  telefoneSchema,
+  objectIdSchema,
+} from '@/lib/utils/validation';
 
 // Schema de validação para criar membro
 const criarMembroSchema = z.object({
-  nome: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  email: z.string().email('Email inválido'),
-  telefone: z.string().optional(),
-  empresa: z.string().min(2, 'Empresa deve ter pelo menos 2 caracteres'),
-  linkedin: z.string().url('LinkedIn deve ser uma URL válida').optional(),
+  nome: nomeSchema,
+  email: emailSchema,
+  telefone: telefoneSchema,
+  empresa: empresaSchema,
+  linkedin: urlSchema,
   areaAtuacao: z.string().optional(),
-  intencaoId: z.string().optional(),
+  intencaoId: objectIdSchema.optional(),
   token: z.string().min(1, 'Token é obrigatório'),
 });
 

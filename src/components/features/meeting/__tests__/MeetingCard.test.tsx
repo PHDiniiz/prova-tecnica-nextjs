@@ -4,6 +4,23 @@
 import { render, screen } from '@testing-library/react';
 import { MeetingCard } from '../MeetingCard';
 import { Meeting } from '@/types/meeting';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ToastProvider } from '@/components/ui/toast';
+
+function createWrapper() {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  });
+
+  return ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>{children}</ToastProvider>
+    </QueryClientProvider>
+  );
+}
 
 describe('MeetingCard', () => {
   const mockMeeting: Meeting = {
@@ -24,7 +41,8 @@ describe('MeetingCard', () => {
         meeting={mockMeeting}
         membroId="membro-1"
         membroToken="token-123"
-      />
+      />,
+      { wrapper: createWrapper() }
     );
 
     expect(screen.getByText(/reunião 1:1/i)).toBeInTheDocument();
@@ -38,7 +56,8 @@ describe('MeetingCard', () => {
         meeting={mockMeeting}
         membroId="membro-1"
         membroToken="token-123"
-      />
+      />,
+      { wrapper: createWrapper() }
     );
 
     expect(screen.getByText(/check-in pendente/i)).toBeInTheDocument();
@@ -58,7 +77,8 @@ describe('MeetingCard', () => {
         meeting={meetingCompleto}
         membroId="membro-1"
         membroToken="token-123"
-      />
+      />,
+      { wrapper: createWrapper() }
     );
 
     expect(screen.getByText(/check-in completo/i)).toBeInTheDocument();
@@ -78,7 +98,8 @@ describe('MeetingCard', () => {
         meeting={meetingComCheckIns}
         membroId="membro-1"
         membroToken="token-123"
-      />
+      />,
+      { wrapper: createWrapper() }
     );
 
     expect(screen.getByText(/presente/i)).toBeInTheDocument();

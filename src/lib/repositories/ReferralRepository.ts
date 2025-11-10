@@ -1,5 +1,10 @@
 import { Db, ObjectId, Filter } from 'mongodb';
 import { Referral, ReferralStatus } from '@/types/referral';
+import {
+  convertObjectIdToString,
+  convertObjectIdsToString,
+  toObjectId,
+} from '@/lib/utils/mongodb-helpers';
 
 /**
  * Repositório para operações com indicações no MongoDB
@@ -41,12 +46,19 @@ export class ReferralRepository {
         .sort({ criadoEm: -1 })
         .toArray();
 
-      return indicacoes.map((indicacao) => ({
-        ...indicacao,
-        _id: indicacao._id?.toString(),
-        membroIndicadorId: indicacao.membroIndicadorId?.toString() || indicacao.membroIndicadorId,
-        membroIndicadoId: indicacao.membroIndicadoId?.toString() || indicacao.membroIndicadoId,
-      }));
+      return convertObjectIdsToString(
+        indicacoes.map((indicacao) => ({
+          ...indicacao,
+          membroIndicadorId:
+            indicacao.membroIndicadorId instanceof ObjectId
+              ? indicacao.membroIndicadorId.toString()
+              : indicacao.membroIndicadorId,
+          membroIndicadoId:
+            indicacao.membroIndicadoId instanceof ObjectId
+              ? indicacao.membroIndicadoId.toString()
+              : indicacao.membroIndicadoId,
+        }))
+      );
     } catch (error) {
       console.error('Erro ao buscar indicações:', error);
       throw new Error('Não foi possível buscar as indicações');
@@ -58,18 +70,24 @@ export class ReferralRepository {
    */
   async buscarPorId(id: string): Promise<Referral | null> {
     try {
+      const objectId = toObjectId(id, 'ID da indicação');
       const indicacao = await this.db
         .collection<Referral>('referrals')
-        .findOne({ _id: new ObjectId(id) as unknown as string });
+        .findOne({ _id: objectId as unknown as string });
 
       if (!indicacao) return null;
 
-      return {
+      return convertObjectIdToString({
         ...indicacao,
-        _id: indicacao._id?.toString(),
-        membroIndicadorId: indicacao.membroIndicadorId?.toString() || indicacao.membroIndicadorId,
-        membroIndicadoId: indicacao.membroIndicadoId?.toString() || indicacao.membroIndicadoId,
-      };
+        membroIndicadorId:
+          indicacao.membroIndicadorId instanceof ObjectId
+            ? indicacao.membroIndicadorId.toString()
+            : indicacao.membroIndicadorId,
+        membroIndicadoId:
+          indicacao.membroIndicadoId instanceof ObjectId
+            ? indicacao.membroIndicadoId.toString()
+            : indicacao.membroIndicadoId,
+      });
     } catch (error) {
       console.error('Erro ao buscar indicação:', error);
       throw new Error('Não foi possível buscar a indicação');
@@ -124,10 +142,11 @@ export class ReferralRepository {
         updateData.observacoes = observacoes;
       }
 
+      const objectId = toObjectId(id, 'ID da indicação');
       const result = await this.db
         .collection<Referral>('referrals')
         .findOneAndUpdate(
-          { _id: new ObjectId(id) as unknown as string },
+          { _id: objectId as unknown as string },
           {
             $set: updateData,
           },
@@ -136,12 +155,17 @@ export class ReferralRepository {
 
       if (!result) return null;
 
-      return {
+      return convertObjectIdToString({
         ...result,
-        _id: result._id?.toString(),
-        membroIndicadorId: result.membroIndicadorId?.toString() || result.membroIndicadorId,
-        membroIndicadoId: result.membroIndicadoId?.toString() || result.membroIndicadoId,
-      };
+        membroIndicadorId:
+          result.membroIndicadorId instanceof ObjectId
+            ? result.membroIndicadorId.toString()
+            : result.membroIndicadorId,
+        membroIndicadoId:
+          result.membroIndicadoId instanceof ObjectId
+            ? result.membroIndicadoId.toString()
+            : result.membroIndicadoId,
+      });
     } catch (error) {
       console.error('Erro ao atualizar status da indicação:', error);
       throw new Error('Não foi possível atualizar o status da indicação');

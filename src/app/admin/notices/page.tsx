@@ -2,13 +2,35 @@
 
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { NoticeList } from '@/components/features/notice/NoticeList';
-import { NoticeForm } from '@/components/features/notice/NoticeForm';
+import dynamic from 'next/dynamic';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/toast';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Notice } from '@/types/notice';
+
+// Dynamic imports para reduzir bundle inicial
+const NoticeList = dynamic(
+  () => import('@/components/features/notice/NoticeList').then((mod) => ({ default: mod.NoticeList })),
+  {
+    loading: () => (
+      <div className="space-y-4">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-20 w-full" />
+      </div>
+    ),
+    ssr: false,
+  }
+);
+
+const NoticeForm = dynamic(
+  () => import('@/components/features/notice/NoticeForm').then((mod) => ({ default: mod.NoticeForm })),
+  {
+    ssr: false,
+  }
+);
 
 /**
  * Página administrativa para CRUD de avisos

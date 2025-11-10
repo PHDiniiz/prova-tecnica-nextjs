@@ -9,6 +9,25 @@ import { BusinessError } from '@/lib/errors/BusinessError';
 // Mock do MeetingService
 jest.mock('@/services/MeetingService');
 
+// Mock do auth
+jest.mock('@/lib/auth', () => ({
+  extrairMembroIdDoToken: jest.fn((request: any) => {
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return null;
+    }
+    return authHeader.replace('Bearer ', '');
+  }),
+  respostaNaoAutorizado: jest.fn(() => ({
+    json: async () => ({
+      success: false,
+      error: 'Não autorizado',
+      message: 'Token de autenticação inválido ou ausente',
+    }),
+    status: 401,
+  })),
+}));
+
 // Mock do NextRequest para testes
 jest.mock('next/server', () => ({
   NextRequest: class NextRequest {

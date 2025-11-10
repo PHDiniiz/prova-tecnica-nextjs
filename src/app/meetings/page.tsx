@@ -5,7 +5,6 @@ import { MeetingList } from '@/components/features/meeting/MeetingList';
 import { MeetingForm } from '@/components/features/meeting/MeetingForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Member } from '@/types/member';
@@ -21,16 +20,7 @@ export default function MeetingsPage() {
   const [membrosAtivos, setMembrosAtivos] = useState<Member[]>([]);
   const [isLoadingMembers, setIsLoadingMembers] = useState(false);
   const [showForm, setShowForm] = useState(false);
-
-  useEffect(() => {
-    // Tenta recuperar o membroId do localStorage
-    const savedMembroId = localStorage.getItem('membro_id');
-    if (savedMembroId) {
-      setMembroId(savedMembroId);
-      setIsAuthenticated(true);
-      carregarMembrosAtivos(savedMembroId);
-    }
-  }, []);
+  const [isMounted, setIsMounted] = useState(false);
 
   const carregarMembrosAtivos = useCallback(async (adminToken: string) => {
     try {
@@ -53,6 +43,17 @@ export default function MeetingsPage() {
     }
   }, []);
 
+  useEffect(() => {
+    setIsMounted(true);
+    // Tenta recuperar o membroId do localStorage
+    const savedMembroId = localStorage.getItem('membro_id');
+    if (savedMembroId) {
+      setMembroId(savedMembroId);
+      setIsAuthenticated(true);
+      carregarMembrosAtivos(savedMembroId);
+    }
+  }, [carregarMembrosAtivos]);
+
   const handleLogin = () => {
     if (membroId.trim()) {
       localStorage.setItem('membro_id', membroId);
@@ -67,6 +68,24 @@ export default function MeetingsPage() {
     setIsAuthenticated(false);
     setMembrosAtivos([]);
   };
+
+  // Renderiza loading até o componente estar montado no cliente
+  // Isso evita diferenças entre SSR e CSR
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <Card variant="outlined" className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-3/4" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (

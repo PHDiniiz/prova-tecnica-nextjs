@@ -1,5 +1,14 @@
 import { Db, ObjectId } from 'mongodb';
 import { Obrigado } from '@/types/obrigado';
+import {
+  convertObjectIdToString,
+  convertObjectIdsToString,
+  toObjectId,
+} from '@/lib/utils/mongodb-helpers';
+import {
+  calculatePaginationOffset,
+  createPaginationResponse,
+} from '@/lib/utils/pagination';
 
 /**
  * Repositório para operações com obrigados no MongoDB
@@ -31,12 +40,19 @@ export class ObrigadoRepository {
         .sort({ criadoEm: -1 })
         .toArray();
 
-      return obrigados.map((obrigado) => ({
-        ...obrigado,
-        _id: obrigado._id?.toString(),
-        membroIndicadorId: obrigado.membroIndicadorId?.toString() || obrigado.membroIndicadorId,
-        membroIndicadoId: obrigado.membroIndicadoId?.toString() || obrigado.membroIndicadoId,
-      }));
+      return convertObjectIdsToString(
+        obrigados.map((obrigado) => ({
+          ...obrigado,
+          membroIndicadorId:
+            obrigado.membroIndicadorId instanceof ObjectId
+              ? obrigado.membroIndicadorId.toString()
+              : obrigado.membroIndicadorId,
+          membroIndicadoId:
+            obrigado.membroIndicadoId instanceof ObjectId
+              ? obrigado.membroIndicadoId.toString()
+              : obrigado.membroIndicadoId,
+        }))
+      );
     } catch (error) {
       console.error('Erro ao buscar obrigados:', error);
       throw new Error('Não foi possível buscar os obrigados');
@@ -71,7 +87,7 @@ export class ObrigadoRepository {
         query.membroIndicadoId = new ObjectId(filtro.membroIndicadoId) as any;
       }
 
-      const skip = (pagina - 1) * limite;
+      const skip = calculatePaginationOffset(pagina, limite);
 
       const [obrigados, total] = await Promise.all([
         this.db
@@ -84,17 +100,33 @@ export class ObrigadoRepository {
         this.db.collection<Obrigado>('obrigados').countDocuments(query),
       ]);
 
-      return {
-        obrigados: obrigados.map((obrigado) => ({
+      const convertedObrigados = convertObjectIdsToString(
+        obrigados.map((obrigado) => ({
           ...obrigado,
-          _id: obrigado._id?.toString(),
-          membroIndicadorId: obrigado.membroIndicadorId?.toString() || obrigado.membroIndicadorId,
-          membroIndicadoId: obrigado.membroIndicadoId?.toString() || obrigado.membroIndicadoId,
-        })),
+          membroIndicadorId:
+            obrigado.membroIndicadorId instanceof ObjectId
+              ? obrigado.membroIndicadorId.toString()
+              : obrigado.membroIndicadorId,
+          membroIndicadoId:
+            obrigado.membroIndicadoId instanceof ObjectId
+              ? obrigado.membroIndicadoId.toString()
+              : obrigado.membroIndicadoId,
+        }))
+      );
+
+      const paginationResponse = createPaginationResponse(
+        convertedObrigados,
         total,
         pagina,
-        limite,
-        totalPaginas: Math.ceil(total / limite),
+        limite
+      );
+
+      return {
+        obrigados: paginationResponse.data,
+        total: paginationResponse.total,
+        pagina: paginationResponse.page,
+        limite: paginationResponse.limit,
+        totalPaginas: paginationResponse.totalPages,
       };
     } catch (error) {
       console.error('Erro ao buscar obrigados com paginação:', error);
@@ -107,18 +139,24 @@ export class ObrigadoRepository {
    */
   async buscarPorIndicacaoId(indicacaoId: string): Promise<Obrigado | null> {
     try {
+      const objectId = toObjectId(indicacaoId, 'ID da indicação');
       const obrigado = await this.db
         .collection<Obrigado>('obrigados')
-        .findOne({ indicacaoId: new ObjectId(indicacaoId) as any });
+        .findOne({ indicacaoId: objectId as any });
 
       if (!obrigado) return null;
 
-      return {
+      return convertObjectIdToString({
         ...obrigado,
-        _id: obrigado._id?.toString(),
-        membroIndicadorId: obrigado.membroIndicadorId?.toString() || obrigado.membroIndicadorId,
-        membroIndicadoId: obrigado.membroIndicadoId?.toString() || obrigado.membroIndicadoId,
-      };
+        membroIndicadorId:
+          obrigado.membroIndicadorId instanceof ObjectId
+            ? obrigado.membroIndicadorId.toString()
+            : obrigado.membroIndicadorId,
+        membroIndicadoId:
+          obrigado.membroIndicadoId instanceof ObjectId
+            ? obrigado.membroIndicadoId.toString()
+            : obrigado.membroIndicadoId,
+      });
     } catch (error) {
       console.error('Erro ao buscar obrigado por indicação:', error);
       throw new Error('Não foi possível buscar o obrigado');

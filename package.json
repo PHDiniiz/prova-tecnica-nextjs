@@ -1,6 +1,6 @@
 {
   "name": "prova-tecnica-nextjs",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": true,
   "packageManager": "pnpm@10.19.0",
   "engines": {
@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "rm -rf .next && next dev",
-    "build": "rm -rf .next *.lock && pnpm install && next build",
+    "build": "rm -rf .next *.lock && pnpm install && next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "test": "jest",
@@ -17,7 +17,8 @@
     "typecheck": "pnpm tsc --noEmit -p tsconfig.json",
     "test:unit": "jest --coverage",
     "test:integration": "jest --testPathPattern=integration",
-    "ci:checks": "pnpm typecheck && pnpm lint && pnpm test:unit"
+    "ci:checks": "pnpm typecheck && pnpm lint && pnpm test:unit",
+    "analyze": "ANALYZE=true pnpm build"
   },
   "dependencies": {
     "@faker-js/faker": "^10.1.0",
@@ -36,6 +37,7 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.0.1",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",

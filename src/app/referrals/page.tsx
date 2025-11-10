@@ -1,14 +1,30 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { ReferralList } from '@/components/features/referral/ReferralList';
-import { ReferralForm } from '@/components/features/referral/ReferralForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
 import { Member } from '@/types/member';
 import { Skeleton } from '@/components/ui/skeleton';
+
+// Dynamic import para reduzir bundle inicial
+const ReferralForm = dynamic(
+  () => import('@/components/features/referral/ReferralForm').then((mod) => ({ default: mod.ReferralForm })),
+  {
+    loading: () => (
+      <Card variant="outlined">
+        <CardContent className="pt-6">
+          <Skeleton className="h-8 w-full mb-4" />
+          <Skeleton className="h-4 w-3/4" />
+        </CardContent>
+      </Card>
+    ),
+    ssr: false,
+  }
+);
 
 /**
  * Página para gestão de indicações

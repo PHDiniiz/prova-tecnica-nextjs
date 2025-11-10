@@ -98,28 +98,9 @@ export function IntentionList({ adminToken }: IntentionListProps) {
     );
   }
 
-  if (error) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-red-600 mb-4">
-          Erro ao carregar intenções: {error.message}
-        </p>
-        <Button onClick={() => refetch()}>Tentar novamente</Button>
-      </div>
-    );
-  }
-
-  if (!data || data.data.length === 0) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-gray-600">Nenhuma intenção encontrada</p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
-      {/* Filtros */}
+      {/* Filtros - sempre renderizados */}
       <div className="flex gap-2 flex-wrap">
         <Button
           onClick={() => {
@@ -159,40 +140,61 @@ export function IntentionList({ adminToken }: IntentionListProps) {
         </Button>
       </div>
 
-      {/* Lista de intenções */}
-      <div className="space-y-4">
-        {data.data.map((intencao) => (
-          <IntentionCard
-            key={intencao._id}
-            intencao={intencao}
-            onApprove={handleApprove}
-            onReject={handleReject}
-            isUpdating={isUpdatingStatus}
-          />
-        ))}
-      </div>
-
-      {/* Paginação */}
-      {totalPaginas > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            onClick={() => setPagina((p) => Math.max(1, p - 1))}
-            disabled={pagina === 1}
-            variant="outline"
-          >
-            Anterior
-          </Button>
-          <span className="text-sm text-gray-600">
-            Página {pagina} de {totalPaginas} ({data.pagination.total} total)
-          </span>
-          <Button
-            onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
-            disabled={pagina === totalPaginas}
-            variant="outline"
-          >
-            Próxima
-          </Button>
+      {/* Mensagem de erro */}
+      {error && (
+        <div className="text-center py-8">
+          <p className="text-red-600 mb-4">
+            Erro ao carregar intenções: {error.message}
+          </p>
+          <Button onClick={() => refetch()}>Tentar novamente</Button>
         </div>
+      )}
+
+      {/* Mensagem quando não há dados */}
+      {!error && (!data || data.data.length === 0) && (
+        <div className="text-center py-8">
+          <p className="text-gray-600">Nenhuma intenção encontrada</p>
+        </div>
+      )}
+
+      {/* Lista de intenções */}
+      {!error && data && data.data.length > 0 && (
+        <>
+          <div className="space-y-4">
+            {data.data.map((intencao) => (
+              <IntentionCard
+                key={intencao._id}
+                intencao={intencao}
+                onApprove={handleApprove}
+                onReject={handleReject}
+                isUpdating={isUpdatingStatus}
+              />
+            ))}
+          </div>
+
+          {/* Paginação */}
+          {totalPaginas > 1 && (
+            <div className="flex items-center justify-center gap-2">
+              <Button
+                onClick={() => setPagina((p) => Math.max(1, p - 1))}
+                disabled={pagina === 1}
+                variant="outline"
+              >
+                Anterior
+              </Button>
+              <span className="text-sm text-gray-600">
+                Página {pagina} de {totalPaginas} ({data.pagination.total} total)
+              </span>
+              <Button
+                onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
+                disabled={pagina === totalPaginas}
+                variant="outline"
+              >
+                Próxima
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

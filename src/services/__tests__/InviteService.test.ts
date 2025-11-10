@@ -124,7 +124,6 @@ describe('InviteService', () => {
         const intencaoInfo: Intention = {
           _id: intencaoId,
           ...criarIntencaoFake(),
-          cargo: 'Desenvolvedor',
         };
 
         // Captura o token gerado através do mock do repository
@@ -146,15 +145,14 @@ describe('InviteService', () => {
 
         // Verifica se contém informações do candidato
         const logCalls = consoleLogSpy.mock.calls.flat().join('\n');
-        expect(logCalls).toContain('📧 CONVITE DE CADASTRO GERADO');
-        expect(logCalls).toContain(`👤 Candidato: ${intencaoInfo.nome}`);
-        expect(logCalls).toContain(`📧 Email: ${intencaoInfo.email}`);
-        expect(logCalls).toContain(`🏢 Empresa: ${intencaoInfo.empresa}`);
-        expect(logCalls).toContain(`💼 Cargo: ${intencaoInfo.cargo}`);
-        expect(logCalls).toContain(`🔗 Link de Cadastro:`);
-        expect(logCalls).toContain(`🔑 Token: ${tokenGerado!}`);
-        expect(logCalls).toContain('⏰ Expira em:');
-        expect(logCalls).toContain('📅 Criado em:');
+        expect(logCalls).toContain('CONVITE DE CADASTRO GERADO');
+        expect(logCalls).toContain(`Candidato: ${intencaoInfo.nome}`);
+        expect(logCalls).toContain(`Email: ${intencaoInfo.email}`);
+        expect(logCalls).toContain(`Empresa: ${intencaoInfo.empresa}`);
+        expect(logCalls).toContain(`Link de Cadastro:`);
+        expect(logCalls).toContain(`Token: ${tokenGerado!}`);
+        expect(logCalls).toContain('Expira em:');
+        expect(logCalls).toContain('Criado em:');
       });
 
       it('deve chamar console.log mesmo quando não há informações da intenção', async () => {

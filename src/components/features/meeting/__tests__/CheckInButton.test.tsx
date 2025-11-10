@@ -230,7 +230,12 @@ describe('CheckInButton', () => {
       { wrapper: createWrapper() }
     );
 
-    expect(screen.getByRole('button', { name: /registrando/i })).toBeDisabled();
+    // Ambos os botões devem estar desabilitados durante o carregamento
+    const registrandoButtons = screen.getAllByRole('button', { name: /registrando/i });
+    expect(registrandoButtons.length).toBe(2);
+    registrandoButtons.forEach((button) => {
+      expect(button).toBeDisabled();
+    });
   });
 });
 

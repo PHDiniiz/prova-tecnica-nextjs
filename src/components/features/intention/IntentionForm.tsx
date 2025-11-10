@@ -1,14 +1,15 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { useIntentions } from '@/hooks/useIntentions';
 import { CriarIntencaoDTO } from '@/types/intention';
 
@@ -46,10 +47,12 @@ export function IntentionForm() {
     resetCreate,
   } = useIntentions(undefined, 1, 20, undefined);
 
+  const [validationStep, setValidationStep] = useState<'idle' | 'validating' | 'sending'>('idle');
+
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     reset: resetForm,
   } = useForm<IntentionFormData>({
     resolver: zodResolver(intentionFormSchema),
@@ -69,6 +72,11 @@ export function IntentionForm() {
   const onSubmit = useCallback(
     async (data: IntentionFormData) => {
       try {
+        setValidationStep('validating');
+        // Simula validação rápida
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
+        setValidationStep('sending');
         const dto: CriarIntencaoDTO = {
           nome: data.nome.trim(),
           email: data.email.trim().toLowerCase(),
@@ -78,9 +86,11 @@ export function IntentionForm() {
 
         await criarIntencao(dto);
         resetForm();
+        setValidationStep('idle');
       } catch (err) {
         // Erro já é tratado pelo hook
         console.error('Erro ao criar intenção:', err);
+        setValidationStep('idle');
       }
     },
     [criarIntencao, resetForm]
@@ -138,13 +148,33 @@ export function IntentionForm() {
           </motion.div>
         )}
 
+        <AnimatePresence>
+          {(validationStep === 'validating' || validationStep === 'sending') && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-4"
+            >
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm text-gray-600">
+                  <span>
+                    {validationStep === 'validating' ? 'Validando dados...' : 'Enviando solicitação...'}
+                  </span>
+                </div>
+                <Progress variant="default" />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Input
             label="Nome Completo *"
             placeholder="Seu nome completo"
             error={errors.nome?.message}
             {...register('nome')}
-            disabled={isCreating || isCreateSuccess}
+            disabled={isCreating || isCreateSuccess || validationStep !== 'idle'}
           />
 
           <Input
@@ -154,7 +184,7 @@ export function IntentionForm() {
             error={errors.email?.message}
             helperText="Usaremos este email para contato"
             {...register('email')}
-            disabled={isCreating || isCreateSuccess}
+            disabled={isCreating || isCreateSuccess || validationStep !== 'idle'}
           />
 
           <Input
@@ -162,7 +192,7 @@ export function IntentionForm() {
             placeholder="Nome da sua empresa"
             error={errors.empresa?.message}
             {...register('empresa')}
-            disabled={isCreating || isCreateSuccess}
+            disabled={isCreating || isCreateSuccess || validationStep !== 'idle'}
           />
 
           <Textarea
@@ -172,7 +202,7 @@ export function IntentionForm() {
             helperText="Mínimo de 10 caracteres"
             rows={6}
             {...register('motivo')}
-            disabled={isCreating || isCreateSuccess}
+            disabled={isCreating || isCreateSuccess || validationStep !== 'idle'}
           />
 
           <div className="pt-4">
@@ -180,11 +210,17 @@ export function IntentionForm() {
               type="submit"
               variant="primary"
               size="lg"
-              isLoading={isCreating}
-              disabled={isCreateSuccess}
+              isLoading={isCreating || validationStep !== 'idle'}
+              disabled={isCreateSuccess || validationStep !== 'idle'}
               className="w-full"
             >
-              {isCreating ? 'Enviando...' : 'Enviar Solicitação'}
+              {validationStep === 'validating'
+                ? 'Validando...'
+                : validationStep === 'sending'
+                  ? 'Enviando...'
+                  : isCreating
+                    ? 'Enviando...'
+                    : 'Enviar Solicitação'}
             </Button>
           </div>
         </form>
