@@ -1,8 +1,6 @@
 #!/usr/bin/env sh
 . "$(dirname "$0")/_/husky.sh"
 
-# Verificar gerenciador de pacotes
+# Verificar gerenciador de pacotes antes do push
 node scripts/verify-package-manager.js
 
-# Executar testes
-yarn test

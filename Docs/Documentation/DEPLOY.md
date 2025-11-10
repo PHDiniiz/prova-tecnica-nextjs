@@ -17,7 +17,7 @@ Este documento fornece instruções detalhadas para fazer deploy da aplicação 
 - Conta no [Vercel](https://vercel.com) (recomendado)
 - Conta no [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
 - Repositório Git (GitHub, GitLab ou Bitbucket)
-- Node.js 18+ instalado localmente (para deploy manual)
+- Node.js 22.x (LTS) instalado localmente (para deploy manual)
 
 ## 🌐 Deploy no Vercel (Recomendado)
 
@@ -38,9 +38,9 @@ Certifique-se de que seu código está no GitHub, GitLab ou Bitbucket.
 
 - **Framework Preset**: Next.js
 - **Root Directory**: `./` (raiz do projeto)
-- **Build Command**: `pnpm build` (ou `npm run build`)
+- **Build Command**: `yarn build`
 - **Output Directory**: `.next` (padrão do Next.js)
-- **Install Command**: `pnpm install` (ou `npm install`)
+- **Install Command**: `yarn install`
 
 #### Environment Variables
 
@@ -77,17 +77,17 @@ Configure as seguintes variáveis no painel do Vercel:
 
 ```bash
 # Instalar dependências
-pnpm install
+yarn install
 
 # Criar build de produção
-pnpm build
+yarn build
 ```
 
 ### Passo 2: Executar em Produção
 
 ```bash
 # Iniciar servidor de produção
-pnpm start
+yarn start
 ```
 
 ### Passo 3: Usar PM2 (Recomendado para servidores)
@@ -212,7 +212,7 @@ Use `.env.local` (não commitar no Git).
 
 **Solução:**
 1. Verifique logs do build no Vercel
-2. Execute `pnpm build` localmente para ver erros
+2. Execute `yarn build` localmente para ver erros
 3. Verifique se todas as dependências estão no `package.json`
 
 ### Erro: "Environment variables not found"
@@ -226,7 +226,7 @@ Use `.env.local` (não commitar no Git).
 
 **Solução:**
 1. Verifique se todas as dependências estão no `package.json`
-2. Execute `pnpm install` localmente
+2. Execute `yarn install` localmente
 3. Verifique se não há imports de arquivos inexistentes
 
 ### Performance Lenta
