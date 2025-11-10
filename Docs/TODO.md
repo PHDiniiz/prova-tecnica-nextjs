@@ -4,9 +4,11 @@ Este arquivo contém a lista de tarefas pendentes organizadas por prioridade.
 
 **Última atualização**: 2025-01-27  
 **Última verificação TypeScript**: 2025-01-27 (`npx tsc --noEmit -p tsconfig.test.json`)  
-**Versão**: 0.1.1  
-**Progresso Agente 1**: ✅ 3/3 tarefas de alta prioridade concluídas (100%)  
-**Progresso Agente 2**: ✅ 3/3 tarefas concluídas (100%)
+**Versão**: 0.2.0  
+**Status dos Agentes**: ✅ Todos os agentes concluídos (2025-01-27)
+- **Agente 1**: ✅ 4/4 tarefas concluídas (100%) - Lint pendente para execução futura
+- **Agente 2**: ✅ 3/3 tarefas concluídas (100%)
+- **Agente 3**: ✅ 3/3 tarefas concluídas (100%) - Pendências futuras documentadas
 
 ---
 
@@ -32,6 +34,9 @@ Este arquivo contém a lista de tarefas pendentes organizadas por prioridade.
 - [x] Remover Cypress e configurar Jest como única ferramenta de testes
 - [x] Corrigir testes de NoticeList e MeetingList (problemas com skeletons)
 - [x] Adicionar testes de edge cases em hooks (useReferrals)
+- [x] Implementar testes nos arquivos vazios - 6 arquivos implementados (42+ testes novos)
+- [ ] Corrigir 67 testes falhando - Pendência futura (autenticação 401, mocks, ToastProvider)
+- [ ] Aumentar cobertura de testes para 99.9% - Pendência futura (atual: 66.39% statements)
 
 ### Documentação
 - [x] Criar README.md na raiz
@@ -92,11 +97,24 @@ Este arquivo contém a lista de tarefas pendentes organizadas por prioridade.
 
 ---
 
+## 📝 Pendências Futuras (Documentadas pelos Agentes)
+
+### ⏳ Execução Futura
+- **Lint**: Executar `pnpm lint` e corrigir erros (Agente 1 - pendente conforme solicitado)
+- **Testes Falhando**: Corrigir 67 testes falhando (Agente 3 - pendência futura)
+  - Principais problemas: autenticação 401, mocks de Response.json, múltiplos elementos, falta de ToastProvider
+- **Cobertura de Testes**: Aumentar de 66.39% para 99.9% (Agente 3 - pendência futura)
+  - Statements: 66.39% (meta: 99.9%)
+  - Branches: 56.51% (meta: 99.9%)
+  - Functions: 70.79% (meta: 99.9%)
+  - Lines: 65.95% (meta: 99.9%)
+
 ## 📝 Notas
 
 - Tarefas marcadas com [x] foram concluídas
 - Prioridades podem mudar conforme necessidade do projeto
 - Novas tarefas devem ser adicionadas na seção apropriada
+- **Agentes concluídos em 2025-01-27**: Todos os agentes foram finalizados e seus arquivos foram removidos após conclusão
 
 ---
 

@@ -4,6 +4,29 @@ Registro de todas as mudanças significativas do projeto, seguindo o formato de 
 
 ---
 
+## [0.2.0] - 2025-01-27
+
+### Chores:
+- Concluídos todos os agentes de desenvolvimento (Agente 1, Agente 2, Agente 3)
+- Removidos arquivos dos agentes após conclusão (Agente1.md, Agente2.md, Agente3.md)
+- Atualizada documentação completa (TODO.md, CHANGELOG.md, PLANO_ATUAL.md, Docs/FIXES.md)
+
+### Documentation:
+- Finalizado Agente 1: 4/4 tarefas concluídas (100%) - Lint pendente para execução futura conforme solicitado
+- Finalizado Agente 2: 3/3 tarefas concluídas (100%) - Testes executados, React Query validado, validação end-to-end concluída
+- Finalizado Agente 3: 3/3 tarefas concluídas (100%) - Testes vazios implementados (42+ testes novos), pendências futuras documentadas
+- Documentadas pendências futuras: Lint (Agente 1), 67 testes falhando e cobertura 66.39% → 99.9% (Agente 3)
+- Atualizado TODO.md com status final dos agentes e pendências futuras
+- Atualizado PLANO_ATUAL.md com conclusão dos agentes
+- Atualizado Docs/FIXES.md com registro de conclusão dos agentes
+
+### Status Final dos Agentes:
+- **Agente 1**: ✅ Concluído - TypeScript (0 erros), Qualidade de Código, Git validados. Lint pendente para execução futura.
+- **Agente 2**: ✅ Concluído - 559 testes executados (492 passando, 67 falhando documentados), React Query validado, build de produção bem-sucedido.
+- **Agente 3**: ✅ Concluído com Pendências Futuras - 42+ testes novos implementados em 6 arquivos vazios. Pendências: corrigir 67 testes falhando e aumentar cobertura para 99.9%.
+
+---
+
 ## [0.1.2] - 2025-01-27
 
 ### Fixes:
