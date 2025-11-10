@@ -85,6 +85,7 @@ describe('CheckInButton', () => {
       checkIns: [
         {
           membroId: 'membro-1',
+          dataCheckIn: new Date(),
           presente: true,
         },
       ],

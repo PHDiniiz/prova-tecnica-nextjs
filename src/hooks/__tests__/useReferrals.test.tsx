@@ -57,16 +57,11 @@ describe('useReferrals', () => {
         wrapper: createWrapper(),
       });
 
-      const { result: queryResult } = renderHook(
-        () => result.current.listarIndicacoes(),
-        { wrapper: createWrapper() }
-      );
-
       await waitFor(() => {
-        expect(queryResult.current.isSuccess).toBe(true);
+        expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(queryResult.current.data).toEqual(mockResponse);
+      expect(result.current.data).toEqual(mockResponse);
       expect(global.fetch).toHaveBeenCalledWith(
         '/api/referrals?tipo=ambas&page=1&limit=20',
         expect.objectContaining({
@@ -97,13 +92,9 @@ describe('useReferrals', () => {
         json: async () => mockResponse,
       });
 
-      const { result } = renderHook(() => useReferrals('membro-123'), {
-        wrapper: createWrapper(),
-      });
-
-      const { result: queryResult } = renderHook(
+      const { result } = renderHook(
         () =>
-          result.current.listarIndicacoes({
+          useReferrals('membro-123', {
             tipo: 'feitas',
             status: 'nova',
             page: 2,
@@ -113,7 +104,7 @@ describe('useReferrals', () => {
       );
 
       await waitFor(() => {
-        expect(queryResult.current.isSuccess).toBe(true);
+        expect(result.current.isSuccess).toBe(true);
       });
 
       const url = (global.fetch as jest.Mock).mock.calls[0][0];
@@ -136,16 +127,11 @@ describe('useReferrals', () => {
         wrapper: createWrapper(),
       });
 
-      const { result: queryResult } = renderHook(
-        () => result.current.listarIndicacoes(),
-        { wrapper: createWrapper() }
-      );
-
       await waitFor(() => {
-        expect(queryResult.current.isError).toBe(true);
+        expect(result.current.isError).toBe(true);
       });
 
-      expect(queryResult.current.error).toBeInstanceOf(Error);
+      expect(result.current.error).toBeInstanceOf(Error);
     });
 
     it('não deve fazer requisição quando membroId não é fornecido', async () => {
@@ -153,13 +139,8 @@ describe('useReferrals', () => {
         wrapper: createWrapper(),
       });
 
-      const { result: queryResult } = renderHook(
-        () => result.current.listarIndicacoes(),
-        { wrapper: createWrapper() }
-      );
-
       await waitFor(() => {
-        expect(queryResult.current.isLoading).toBe(false);
+        expect(result.current.isLoading).toBe(false);
       });
 
       expect(global.fetch).not.toHaveBeenCalled();
@@ -402,14 +383,9 @@ describe('useReferrals', () => {
         wrapper: createWrapper(),
       });
 
-      const { result: queryResult } = renderHook(
-        () => result.current.listarIndicacoes(),
-        { wrapper: createWrapper() }
-      );
-
       await waitFor(() => {
-        expect(queryResult.current.isError).toBe(true);
-        expect(queryResult.current.error?.message).toContain('Erro interno do servidor');
+        expect(result.current.isError).toBe(true);
+        expect(result.current.error?.message).toContain('Erro interno do servidor');
       });
     });
 

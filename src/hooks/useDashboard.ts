@@ -9,9 +9,9 @@ import { PeriodoFiltro, DashboardResponse } from '@/types/dashboard';
 interface DashboardApiResponse {
   success: boolean;
   data: {
-    metricasGerais: any;
-    performanceMembros?: any[];
-    performanceIndividual?: any | null;
+    metricasGerais: DashboardResponse['data']['metricasGerais'];
+    performanceMembros?: DashboardResponse['data']['performanceMembros'];
+    performanceIndividual?: DashboardResponse['data']['performanceIndividual'] | null;
   };
   periodo: PeriodoFiltro;
 }

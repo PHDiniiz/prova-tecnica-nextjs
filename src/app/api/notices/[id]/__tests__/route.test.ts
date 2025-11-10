@@ -78,6 +78,8 @@ describe('GET /api/notices/[id]', () => {
       conteudo: 'Conteúdo do aviso',
       tipo: 'info' as const,
       ativo: true,
+      criadoEm: new Date(),
+      atualizadoEm: new Date(),
     };
 
     mockService.buscarAvisoPorId.mockResolvedValueOnce(aviso);
@@ -134,9 +136,11 @@ describe('PATCH /api/notices/[id]', () => {
       conteudo: 'Conteúdo atualizado',
       tipo: 'warning' as const,
       ativo: false,
+      criadoEm: new Date(),
+      atualizadoEm: new Date(),
     };
 
-    mockService.atualizarAviso.mockResolvedValueOnce(avisoAtualizado);
+    mockService.atualizarAviso.mockResolvedValueOnce(avisoAtualizado as any);
 
     const requestBody = {
       ativo: false,

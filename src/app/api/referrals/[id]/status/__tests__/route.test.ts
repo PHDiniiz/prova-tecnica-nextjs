@@ -63,16 +63,21 @@ describe('PATCH /api/referrals/[id]/status', () => {
       _id: 'referral-1',
       membroIndicadorId: 'membro-1',
       membroIndicadoId: membroToken,
+      empresaContato: 'Empresa ABC',
+      descricao: 'Indicação de negócio',
       status: 'nova' as const,
+      criadoEm: new Date(),
+      atualizadoEm: new Date(),
     };
 
     const indicacaoAtualizada = {
       ...indicacao,
       status: 'em-contato' as const,
+      atualizadoEm: new Date(),
     };
 
-    mockService.buscarIndicacaoPorId.mockResolvedValueOnce(indicacao);
-    mockService.atualizarStatusIndicacao.mockResolvedValueOnce(indicacaoAtualizada);
+    mockService.buscarIndicacaoPorId.mockResolvedValueOnce(indicacao as any);
+    mockService.atualizarStatusIndicacao.mockResolvedValueOnce(indicacaoAtualizada as any);
 
     const requestBody = {
       status: 'em-contato' as const,
@@ -153,7 +158,11 @@ describe('PATCH /api/referrals/[id]/status', () => {
       _id: 'referral-1',
       membroIndicadorId: 'membro-1',
       membroIndicadoId: 'outro-membro',
+      empresaContato: 'Empresa ABC',
+      descricao: 'Indicação de negócio',
       status: 'nova' as const,
+      criadoEm: new Date(),
+      atualizadoEm: new Date(),
     };
 
     mockService.buscarIndicacaoPorId.mockResolvedValueOnce(indicacao);

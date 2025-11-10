@@ -62,11 +62,16 @@ describe('POST /api/meetings/[id]/checkin', () => {
       _id: 'meeting-1',
       membro1Id: 'membro-1',
       membro2Id: 'membro-2',
-      checkInMembro1: {
-        presente: true,
-        observacoes: 'Presente',
-      },
-      status: 'agendada' as const,
+      dataReuniao: new Date(),
+      checkIns: [
+        {
+          membroId: 'membro-1',
+          dataCheckIn: new Date(),
+          presente: true,
+        },
+      ],
+      criadoEm: new Date(),
+      atualizadoEm: new Date(),
     };
 
     mockService.registrarCheckIn.mockResolvedValueOnce(reuniaoAtualizada);

@@ -6,7 +6,7 @@ export class BusinessError extends Error {
     public readonly type: string,
     message: string,
     public readonly statusCode: number = 400,
-    public readonly details?: any
+    public readonly details?: unknown
   ) {
     super(message);
     this.name = 'BusinessError';

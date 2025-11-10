@@ -123,9 +123,11 @@ describe('POST /api/referrals', () => {
       empresaContato: 'Empresa ABC',
       descricao: 'Indicação de negócio',
       status: 'nova' as const,
+      criadoEm: new Date(),
+      atualizadoEm: new Date(),
     };
 
-    mockService.criarIndicacao.mockResolvedValueOnce(indicacaoCriada);
+    mockService.criarIndicacao.mockResolvedValueOnce(indicacaoCriada as any);
 
     const requestBody = {
       membroIndicadoId: 'membro-2',

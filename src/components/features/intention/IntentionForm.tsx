@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -44,7 +44,7 @@ export function IntentionForm() {
     isCreateError,
     createError,
     resetCreate,
-  } = useIntentions();
+  } = useIntentions(undefined, 1, 20, undefined);
 
   const {
     register,

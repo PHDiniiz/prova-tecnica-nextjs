@@ -143,12 +143,12 @@ describe('useCreateObrigado', () => {
       wrapper: createWrapper(),
     });
 
-    const dto: CriarObrigadoDTO = {
+    const dto = {
       indicacaoId: 'indicacao-1',
       mensagem: 'Muito obrigado pela indicação!',
       publico: true,
       membroId: 'membro-2',
-    };
+    } as CriarObrigadoDTO & { membroId: string };
 
     await waitFor(async () => {
       const response = await result.current.mutateAsync(dto);
@@ -182,12 +182,12 @@ describe('useCreateObrigado', () => {
       wrapper: createWrapper(),
     });
 
-    const dto: CriarObrigadoDTO = {
+    const dto = {
       indicacaoId: 'indicacao-1',
       mensagem: 'Muito obrigado!',
       publico: true,
       membroId: 'membro-2',
-    };
+    } as CriarObrigadoDTO & { membroId: string };
 
     await waitFor(async () => {
       await expect(result.current.mutateAsync(dto)).rejects.toThrow();

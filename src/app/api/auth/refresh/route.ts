@@ -3,7 +3,6 @@ import { getDatabase } from '@/lib/mongodb';
 import { MemberRepository } from '@/lib/repositories/MemberRepository';
 import {
   gerarAccessToken,
-  gerarRefreshToken,
   verificarRefreshToken,
 } from '@/lib/auth';
 import { RefreshTokenDTO, RefreshTokenResponse } from '@/types/auth';

@@ -62,9 +62,11 @@ describe('GET /api/meetings/[id]', () => {
       _id: 'meeting-1',
       membro1Id: 'membro-1',
       membro2Id: 'membro-2',
-      data: new Date(),
+      dataReuniao: new Date(),
       local: 'Escritório',
-      status: 'agendada' as const,
+      checkIns: [],
+      criadoEm: new Date(),
+      atualizadoEm: new Date(),
     };
 
     mockService.buscarReuniaoPorId.mockResolvedValueOnce(reuniao);
@@ -141,9 +143,11 @@ describe('PATCH /api/meetings/[id]', () => {
       _id: 'meeting-1',
       membro1Id: 'membro-1',
       membro2Id: 'membro-2',
-      data: new Date(),
+      dataReuniao: new Date(),
       local: 'Novo Local',
-      status: 'agendada' as const,
+      checkIns: [],
+      criadoEm: new Date(),
+      atualizadoEm: new Date(),
     };
 
     mockService.atualizarReuniao.mockResolvedValueOnce(reuniaoAtualizada);

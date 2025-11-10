@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { IntentionList } from '@/components/features/intention/IntentionList';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,17 +14,19 @@ import { useToast } from '@/components/ui/toast';
  */
 export default function AdminIntentsPage() {
   const { addToast } = useToast();
-  const [adminToken, setAdminToken] = useState<string>('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    // Tenta recuperar o token do localStorage
-    const savedToken = localStorage.getItem('admin_token');
-    if (savedToken) {
-      setAdminToken(savedToken);
-      setIsAuthenticated(true);
+  // Inicialização lazy do estado para evitar setState em useEffect
+  const [adminToken, setAdminToken] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('admin_token') || '';
     }
-  }, []);
+    return '';
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return !!localStorage.getItem('admin_token');
+    }
+    return false;
+  });
 
   const handleLogin = () => {
     if (adminToken.trim()) {

@@ -61,6 +61,21 @@ export function ReferralStatusUpdate({
   // Status disponíveis para transição
   const statusDisponiveis = transicoesValidas[referral.status] || [];
 
+  if (!podeAtualizar) {
+    return (
+      <div className="flex items-center gap-2">
+        <ReferralStatusBadge status={referral.status} />
+        {referral.status === 'fechada' || referral.status === 'recusada' ? (
+          <span className="text-sm text-gray-500">Status final</span>
+        ) : (
+          <span className="text-sm text-gray-500">
+            Apenas o destinatário pode atualizar
+          </span>
+        )}
+      </div>
+    );
+  }
+
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -88,23 +103,8 @@ export function ReferralStatusUpdate({
         setIsSubmitting(false);
       }
     },
-    [novoStatus, observacoes, referral._id, onUpdate, statusDisponiveis]
+    [novoStatus, observacoes, referral._id, onUpdate, statusDisponiveis, addToast]
   );
-
-  if (!podeAtualizar) {
-    return (
-      <div className="flex items-center gap-2">
-        <ReferralStatusBadge status={referral.status} />
-        {referral.status === 'fechada' || referral.status === 'recusada' ? (
-          <span className="text-sm text-gray-500">Status final</span>
-        ) : (
-          <span className="text-sm text-gray-500">
-            Apenas o destinatário pode atualizar
-          </span>
-        )}
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-3">

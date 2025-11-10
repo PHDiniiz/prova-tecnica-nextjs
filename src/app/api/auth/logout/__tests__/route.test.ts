@@ -62,11 +62,7 @@ jest.mock('@/lib/repositories/TokenRepository', () => ({
 
 describe('POST /api/auth/logout', () => {
   it('deve fazer logout com sucesso mesmo sem token', async () => {
-    const request = new NextRequest('http://localhost:3000/api/auth/logout', {
-      method: 'POST',
-    });
-
-    const response = await POST(request);
+    const response = await POST();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -75,14 +71,7 @@ describe('POST /api/auth/logout', () => {
   });
 
   it('deve fazer logout com sucesso com token', async () => {
-    const request = new NextRequest('http://localhost:3000/api/auth/logout', {
-      method: 'POST',
-      headers: {
-        Authorization: 'Bearer valid-token',
-      },
-    });
-
-    const response = await POST(request);
+    const response = await POST();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -91,11 +80,7 @@ describe('POST /api/auth/logout', () => {
   });
 
   it('deve retornar sucesso mesmo em caso de erro interno', async () => {
-    const request = new NextRequest('http://localhost:3000/api/auth/logout', {
-      method: 'POST',
-    });
-
-    const response = await POST(request);
+    const response = await POST();
     const data = await response.json();
 
     expect(response.status).toBe(200);

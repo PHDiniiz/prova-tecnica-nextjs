@@ -7,6 +7,24 @@ import {
 } from '@/types/dashboard';
 
 /**
+ * Tipo para item de agregação de indicações
+ */
+interface IndicacaoAgregada {
+  _id: ObjectId | string;
+  total: number;
+  fechadas?: number;
+  valorTotal?: number;
+}
+
+/**
+ * Tipo para item de agregação de obrigados
+ */
+interface ObrigadoAgregado {
+  _id: ObjectId | string;
+  total: number;
+}
+
+/**
  * Repositório para operações de dashboard e métricas
  * Responsabilidade única: Acesso a dados agregados para dashboard
  */
@@ -488,7 +506,7 @@ export class DashboardRepository {
       });
 
       // Popular indicações feitas
-      dados.indicacoesFeitas.forEach((item: any) => {
+      dados.indicacoesFeitas.forEach((item: IndicacaoAgregada) => {
         const membroId = item._id?.toString() || '';
         const performance = performanceMap.get(membroId);
         if (performance) {
@@ -497,20 +515,22 @@ export class DashboardRepository {
       });
 
       // Popular indicações recebidas
-      dados.indicacoesRecebidas.forEach((item: any) => {
+      dados.indicacoesRecebidas.forEach((item: IndicacaoAgregada) => {
         const membroId = item._id?.toString() || '';
         const performance = performanceMap.get(membroId);
         if (performance) {
           performance.totalIndicacoesRecebidas = item.total;
-          performance.indicacoesFechadas = item.fechadas || 0;
+          performance.indicacoesFechadas = item.fechadas ?? 0;
           performance.valorTotalGerado = item.valorTotal || 0;
           performance.taxaFechamento =
-            item.total > 0 ? Math.round((item.fechadas / item.total) * 100 * 100) / 100 : 0;
+            item.total > 0 && item.fechadas !== undefined
+              ? Math.round((item.fechadas / item.total) * 100 * 100) / 100
+              : 0;
         }
       });
 
       // Popular obrigados recebidos
-      dados.obrigadosRecebidos.forEach((item: any) => {
+      dados.obrigadosRecebidos.forEach((item: ObrigadoAgregado) => {
         const membroId = item._id?.toString() || '';
         const performance = performanceMap.get(membroId);
         if (performance) {

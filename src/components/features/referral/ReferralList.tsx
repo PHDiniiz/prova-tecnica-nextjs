@@ -1,14 +1,13 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useReferrals } from '@/hooks/useReferrals';
-import { Referral, ReferralStatus, AtualizarStatusIndicacaoDTO } from '@/types/referral';
+import { ReferralStatus, AtualizarStatusIndicacaoDTO } from '@/types/referral';
 import { ReferralCard } from './ReferralCard';
 import { ReferralStatusUpdate } from './ReferralStatusUpdate';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ReferralStatusBadge } from './ReferralStatusBadge';
 import { SearchInput } from '@/components/ui/search-input';
 
 interface ReferralListProps {
@@ -31,14 +30,14 @@ export function ReferralList({
   const [searchTerm, setSearchTerm] = useState('');
   const limite = 20;
 
-  const { listarIndicacoes, atualizarStatus, isUpdatingStatus } = useReferrals(membroId);
-
   const {
     data,
     isLoading,
     error,
     refetch,
-  } = listarIndicacoes({
+    atualizarStatus,
+    isUpdatingStatus,
+  } = useReferrals(membroId, {
     tipo: tipoSelecionado,
     status: filtroStatus !== 'todos' ? filtroStatus : undefined,
     page: pagina,
@@ -53,7 +52,7 @@ export function ReferralList({
   const handleStatusUpdate = useCallback(
     async (id: string, dto: AtualizarStatusIndicacaoDTO) => {
       await atualizarStatus({ id, dto });
-      refetch();
+      await refetch();
     },
     [atualizarStatus, refetch]
   );

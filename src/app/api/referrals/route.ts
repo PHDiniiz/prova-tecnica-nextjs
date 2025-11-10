@@ -136,13 +136,21 @@ export async function GET(request: NextRequest) {
     const service = new ReferralService();
     
     // Busca indicações feitas
-    const filtroFeitas: any = { membroIndicadorId: membroId };
+    const filtroFeitas: {
+      membroIndicadorId: string;
+      status?: ReferralStatus;
+      search?: string;
+    } = { membroIndicadorId: membroId };
     if (status) filtroFeitas.status = status;
     if (search) filtroFeitas.search = search;
     const indicacoesFeitas = tipo === 'recebidas' ? [] : await service.buscarTodasIndicacoes(filtroFeitas);
 
     // Busca indicações recebidas
-    const filtroRecebidas: any = { membroIndicadoId: membroId };
+    const filtroRecebidas: {
+      membroIndicadoId: string;
+      status?: ReferralStatus;
+      search?: string;
+    } = { membroIndicadoId: membroId };
     if (status) filtroRecebidas.status = status;
     if (search) filtroRecebidas.search = search;
     const indicacoesRecebidas = tipo === 'feitas' ? [] : await service.buscarTodasIndicacoes(filtroRecebidas);
@@ -152,7 +160,6 @@ export async function GET(request: NextRequest) {
     const total = todasIndicacoes.length;
     const inicio = (pagina - 1) * limite;
     const fim = inicio + limite;
-    const indicacoesPaginadas = todasIndicacoes.slice(inicio, fim);
     const totalPaginas = Math.ceil(total / limite);
 
     return NextResponse.json(

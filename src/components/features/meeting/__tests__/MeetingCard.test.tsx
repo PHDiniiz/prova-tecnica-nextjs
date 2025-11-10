@@ -48,8 +48,8 @@ describe('MeetingCard', () => {
     const meetingCompleto: Meeting = {
       ...mockMeeting,
       checkIns: [
-        { membroId: 'membro-1', presente: true },
-        { membroId: 'membro-2', presente: true },
+        { membroId: 'membro-1', dataCheckIn: new Date(), presente: true },
+        { membroId: 'membro-2', dataCheckIn: new Date(), presente: true },
       ],
     };
 
@@ -68,8 +68,8 @@ describe('MeetingCard', () => {
     const meetingComCheckIns: Meeting = {
       ...mockMeeting,
       checkIns: [
-        { membroId: 'membro-1', presente: true },
-        { membroId: 'membro-2', presente: false },
+        { membroId: 'membro-1', dataCheckIn: new Date(), presente: true },
+        { membroId: 'membro-2', dataCheckIn: new Date(), presente: false },
       ],
     };
 

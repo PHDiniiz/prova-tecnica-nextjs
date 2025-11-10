@@ -1,4 +1,4 @@
-import { MongoClient, Db } from 'mongodb';
+import { MongoClient, Db, ClientSession } from 'mongodb';
 
 // Interface para garantir tipagem
 interface MongoConnection {
@@ -85,7 +85,7 @@ export async function getMongoClient(): Promise<MongoClient> {
  * Garante atomicidade das operações
  */
 export async function executarTransaction<T>(
-  callback: (session: any) => Promise<T>
+  callback: (session: ClientSession) => Promise<T>
 ): Promise<T> {
   const client = await getMongoClient();
   const session = client.startSession();

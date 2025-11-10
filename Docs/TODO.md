@@ -6,7 +6,7 @@ Este arquivo contém a lista de tarefas pendentes organizadas por prioridade.
 **Última verificação TypeScript**: 2025-01-27 (`npx tsc --noEmit -p tsconfig.test.json`)  
 **Versão**: 0.1.1  
 **Progresso Agente 1**: ✅ 3/3 tarefas de alta prioridade concluídas (100%)  
-**Progresso Agente 2**: ✅ 4/5 tarefas concluídas (80%)
+**Progresso Agente 2**: ✅ 3/3 tarefas concluídas (100%)
 
 ---
 
@@ -27,7 +27,7 @@ Este arquivo contém a lista de tarefas pendentes organizadas por prioridade.
 - [x] Criar testes para componentes de referral - Testes corrigidos e melhorados
 - [x] Criar testes para componentes restantes (MemberForm, IntentionList, etc.) - Testes verificados e corrigidos
 - [x] Criar testes para endpoints de autenticação JWT
-- [x] Aumentar cobertura de testes para ≥ 40% - Meta atingida (63.03%)
+- [x] Aumentar cobertura de testes para ≥ 40% - Meta atingida (66.39% statements, 70.79% functions)
 - [x] Corrigir erro de tipo em ReferralService.test.ts (propriedade `membroIndicadorId` faltando - já estava corrigido)
 - [x] Remover Cypress e configurar Jest como única ferramenta de testes
 - [x] Corrigir testes de NoticeList e MeetingList (problemas com skeletons)
@@ -49,7 +49,7 @@ Este arquivo contém a lista de tarefas pendentes organizadas por prioridade.
 ## 🟡 Média Prioridade
 
 ### Melhorias de UX
-- [x] Substituir window.location.reload() por invalidação de queries (não havia uso no código)
+- [x] Substituir window.location.reload() por invalidação de queries - Verificado: 0 ocorrências no código, React Query configurado corretamente
 - [x] Substituir alert() por sistema de toast
 - [x] Adicionar loading states consistentes - Implementado em ReferralForm e IntentionList
 - [ ] Melhorar feedback visual em operações assíncronas

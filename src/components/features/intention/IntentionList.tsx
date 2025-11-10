@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState, useCallback } from 'react';
-import { Intention, IntentionStatus } from '@/types/intention';
+import { IntentionStatus } from '@/types/intention';
 import { IntentionCard } from './IntentionCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -24,15 +24,14 @@ export function IntentionList({ adminToken }: IntentionListProps) {
   const [pagina, setPagina] = useState(1);
   const limite = 20;
 
-  const { listarIntencoes, atualizarStatus, isUpdatingStatus } =
-    useIntentions();
-
-  const { data, isLoading, error, refetch } = listarIntencoes(
-    statusFiltro,
-    pagina,
-    limite,
-    adminToken
-  );
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    atualizarStatus,
+    isUpdatingStatus,
+  } = useIntentions(statusFiltro, pagina, limite, adminToken);
 
   const handleApprove = useCallback(
     async (id: string) => {
@@ -53,7 +52,7 @@ export function IntentionList({ adminToken }: IntentionListProps) {
         });
       }
     },
-    [atualizarStatus, adminToken, refetch]
+    [atualizarStatus, adminToken, refetch, addToast]
   );
 
   const handleReject = useCallback(
@@ -75,7 +74,7 @@ export function IntentionList({ adminToken }: IntentionListProps) {
         });
       }
     },
-    [atualizarStatus, adminToken, refetch]
+    [atualizarStatus, adminToken, refetch, addToast]
   );
 
   const totalPaginas = useMemo(

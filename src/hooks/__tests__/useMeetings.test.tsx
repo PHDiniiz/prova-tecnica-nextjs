@@ -42,9 +42,11 @@ describe('useMeetings', () => {
           _id: 'meeting-1',
           membro1Id: 'membro-1',
           membro2Id: 'membro-2',
-          data: new Date().toISOString(),
+          dataReuniao: new Date().toISOString(),
           local: 'Escritório',
-          status: 'agendada' as const,
+          checkIns: [],
+          criadoEm: new Date().toISOString(),
+          atualizadoEm: new Date().toISOString(),
         },
       ],
     };
@@ -152,9 +154,11 @@ describe('useCreateMeeting', () => {
         _id: 'meeting-1',
         membro1Id: 'membro-1',
         membro2Id: 'membro-2',
-        data: new Date().toISOString(),
+        dataReuniao: new Date().toISOString(),
         local: 'Escritório',
-        status: 'agendada' as const,
+        checkIns: [],
+        criadoEm: new Date().toISOString(),
+        atualizadoEm: new Date().toISOString(),
       },
       message: 'Reunião criada com sucesso',
     };
@@ -171,7 +175,7 @@ describe('useCreateMeeting', () => {
     const dto: CriarMeetingDTO = {
       membro1Id: 'membro-1',
       membro2Id: 'membro-2',
-      data: new Date(),
+      dataReuniao: new Date(),
       local: 'Escritório',
     };
 
@@ -209,7 +213,7 @@ describe('useCreateMeeting', () => {
     const dto: CriarMeetingDTO = {
       membro1Id: 'membro-1',
       membro2Id: 'membro-2',
-      data: new Date(),
+      dataReuniao: new Date(),
       local: 'Escritório',
     };
 
@@ -236,9 +240,11 @@ describe('useUpdateMeeting', () => {
         _id: 'meeting-1',
         membro1Id: 'membro-1',
         membro2Id: 'membro-2',
-        data: new Date().toISOString(),
+        dataReuniao: new Date().toISOString(),
         local: 'Novo Local',
-        status: 'agendada' as const,
+        checkIns: [],
+        criadoEm: new Date().toISOString(),
+        atualizadoEm: new Date().toISOString(),
       },
       message: 'Reunião atualizada com sucesso',
     };
@@ -288,10 +294,15 @@ describe('useCheckIn', () => {
         _id: 'meeting-1',
         membro1Id: 'membro-1',
         membro2Id: 'membro-2',
-        checkInMembro1: {
-          presente: true,
-          observacoes: 'Presente',
-        },
+        checkIns: [
+          {
+            membroId: 'membro-1',
+            dataCheckIn: new Date().toISOString(),
+            presente: true,
+          },
+        ],
+        criadoEm: new Date().toISOString(),
+        atualizadoEm: new Date().toISOString(),
       },
       message: 'Check-in registrado com sucesso',
     };
@@ -306,8 +317,8 @@ describe('useCheckIn', () => {
     });
 
     const checkIn: CheckInDTO = {
+      membroId: 'membro-1',
       presente: true,
-      observacoes: 'Presente',
     };
 
     await waitFor(async () => {
@@ -346,6 +357,7 @@ describe('useCheckIn', () => {
     });
 
     const checkIn: CheckInDTO = {
+      membroId: 'membro-1',
       presente: true,
     };
 

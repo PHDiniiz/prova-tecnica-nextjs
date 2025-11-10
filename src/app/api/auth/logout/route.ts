@@ -16,7 +16,7 @@ import { NextRequest, NextResponse } from 'next/server';
  * Por enquanto, o logout é apenas informativo, pois os tokens JWT
  * são stateless. O cliente deve remover os tokens do storage.
  */
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     // Em uma implementação futura, poderíamos invalidar o refresh token
     // em uma blacklist no banco de dados

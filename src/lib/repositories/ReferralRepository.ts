@@ -1,4 +1,4 @@
-import { Db, ObjectId } from 'mongodb';
+import { Db, ObjectId, Filter } from 'mongodb';
 import { Referral, ReferralStatus } from '@/types/referral';
 
 /**
@@ -17,12 +17,12 @@ export class ReferralRepository {
     search?: string;
   }): Promise<Referral[]> {
     try {
-      const query: any = {};
+      const query: Filter<Referral> = {};
       if (filtro?.membroIndicadorId) {
-        query.membroIndicadorId = new ObjectId(filtro.membroIndicadorId) as any;
+        query.membroIndicadorId = new ObjectId(filtro.membroIndicadorId) as unknown as string;
       }
       if (filtro?.membroIndicadoId) {
-        query.membroIndicadoId = new ObjectId(filtro.membroIndicadoId) as any;
+        query.membroIndicadoId = new ObjectId(filtro.membroIndicadoId) as unknown as string;
       }
       if (filtro?.status) {
         query.status = filtro.status;
@@ -60,7 +60,7 @@ export class ReferralRepository {
     try {
       const indicacao = await this.db
         .collection<Referral>('referrals')
-        .findOne({ _id: new ObjectId(id) as any });
+        .findOne({ _id: new ObjectId(id) as unknown as string });
 
       if (!indicacao) return null;
 
@@ -82,7 +82,7 @@ export class ReferralRepository {
   async criar(indicacao: Omit<Referral, '_id'>): Promise<Referral> {
     try {
       const agora = new Date();
-      const novaIndicacao: any = {
+      const novaIndicacao = {
         ...indicacao,
         membroIndicadorId: new ObjectId(indicacao.membroIndicadorId),
         membroIndicadoId: new ObjectId(indicacao.membroIndicadoId),
@@ -91,8 +91,8 @@ export class ReferralRepository {
       };
 
       const result = await this.db
-        .collection<Referral>('referrals')
-        .insertOne(novaIndicacao);
+        .collection('referrals')
+        .insertOne(novaIndicacao as any);
 
       return {
         ...indicacao,
@@ -115,7 +115,7 @@ export class ReferralRepository {
     observacoes?: string
   ): Promise<Referral | null> {
     try {
-      const updateData: any = {
+      const updateData: Partial<Referral> & { atualizadoEm: Date } = {
         status,
         atualizadoEm: new Date(),
       };
@@ -127,7 +127,7 @@ export class ReferralRepository {
       const result = await this.db
         .collection<Referral>('referrals')
         .findOneAndUpdate(
-          { _id: new ObjectId(id) as any },
+          { _id: new ObjectId(id) as unknown as string },
           {
             $set: updateData,
           },

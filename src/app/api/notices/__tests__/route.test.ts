@@ -83,6 +83,8 @@ describe('GET /api/notices', () => {
         conteudo: 'Conteúdo do aviso',
         tipo: 'info' as const,
         ativo: true,
+        criadoEm: new Date(),
+        atualizadoEm: new Date(),
       },
     ];
 
@@ -156,9 +158,11 @@ describe('POST /api/notices', () => {
       conteudo: 'Conteúdo do aviso',
       tipo: 'info' as const,
       ativo: true,
+      criadoEm: new Date(),
+      atualizadoEm: new Date(),
     };
 
-    mockService.criarAviso.mockResolvedValueOnce(avisoCriado);
+    mockService.criarAviso.mockResolvedValueOnce(avisoCriado as any);
 
     const requestBody = {
       titulo: 'Novo Aviso',

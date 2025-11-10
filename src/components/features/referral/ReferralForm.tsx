@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -64,7 +64,7 @@ export function ReferralForm({
     isCreateError,
     createError,
     resetCreate,
-  } = useReferrals(membroId);
+  } = useReferrals(membroId, {});
 
   // Filtra membros ativos excluindo o próprio membro
   const membrosDisponiveis = useMemo(

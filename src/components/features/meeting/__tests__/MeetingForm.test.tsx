@@ -34,8 +34,24 @@ function createWrapper() {
 
 describe('MeetingForm', () => {
   const mockMembros = [
-    { _id: 'membro-1', nome: 'João Silva', empresa: 'Empresa A', ativo: true },
-    { _id: 'membro-2', nome: 'Maria Santos', empresa: 'Empresa B', ativo: true },
+    {
+      _id: 'membro-1',
+      nome: 'João Silva',
+      email: 'joao@empresa.com',
+      empresa: 'Empresa A',
+      ativo: true,
+      criadoEm: new Date(),
+      atualizadoEm: new Date(),
+    },
+    {
+      _id: 'membro-2',
+      nome: 'Maria Santos',
+      email: 'maria@empresa.com',
+      empresa: 'Empresa B',
+      ativo: true,
+      criadoEm: new Date(),
+      atualizadoEm: new Date(),
+    },
   ];
 
   beforeEach(() => {
@@ -76,6 +92,7 @@ describe('MeetingForm', () => {
       dataReuniao: new Date('2025-01-15T10:00:00Z'),
       local: 'Escritório',
       observacoes: 'Observações',
+      checkIns: [],
       criadoEm: new Date(),
       atualizadoEm: new Date(),
     };
