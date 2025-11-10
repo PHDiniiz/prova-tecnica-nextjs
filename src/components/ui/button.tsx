@@ -54,16 +54,16 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         whileTap={{ scale: 0.97 }}
         whileHover={{ scale: 1.02 }}
         className={cn(
-          'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed',
+          'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
           // Variantes
           variant === 'primary' &&
-            'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800',
+            'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80',
           variant === 'secondary' &&
-            'bg-gray-200 text-gray-900 hover:bg-gray-300 active:bg-gray-400',
+            'bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70',
           variant === 'outline' &&
-            'border-2 border-gray-400 text-gray-700 hover:bg-gray-100 active:bg-gray-200',
+            'border-2 border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground active:bg-accent/80',
           variant === 'ghost' &&
-            'text-gray-700 hover:bg-gray-100 active:bg-gray-200',
+            'text-foreground hover:bg-accent hover:text-accent-foreground active:bg-accent/80',
           // Tamanhos
           size === 'sm' && 'px-3 py-1.5 text-sm',
           size === 'md' && 'px-4 py-2 text-base',

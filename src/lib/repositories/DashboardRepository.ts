@@ -453,30 +453,36 @@ export class DashboardRepository {
                 },
               },
             ],
-            // Obrigados recebidos por membro
-            obrigadosRecebidos: [
-              {
-                $match: {
-                  criadoEm: {
-                    $gte: dataInicio,
-                    $lte: dataFim,
-                  },
-                  publico: true,
-                },
-              },
-              {
-                $group: {
-                  _id: '$membroIndicadorId',
-                  total: { $sum: 1 },
-                },
-              },
-            ],
           },
         },
       ];
 
       const resultado = await this.db.collection('referrals').aggregate(pipeline).toArray();
       const dados = resultado[0];
+
+      // Buscar obrigados recebidos por membro na collection correta
+      const pipelineObrigados = [
+        {
+          $match: {
+            publico: true,
+            criadoEm: {
+              $gte: dataInicio,
+              $lte: dataFim,
+            },
+          },
+        },
+        {
+          $group: {
+            _id: '$membroIndicadorId',
+            total: { $sum: 1 },
+          },
+        },
+      ];
+
+      const resultadoObrigados = await this.db
+        .collection('obrigados')
+        .aggregate(pipelineObrigados)
+        .toArray();
 
       // Buscar todos os membros ativos para popular dados
       const membros = await this.db
@@ -530,11 +536,12 @@ export class DashboardRepository {
       });
 
       // Popular obrigados recebidos
-      dados.obrigadosRecebidos.forEach((item: ObrigadoAgregado) => {
-        const membroId = item._id?.toString() || '';
+      resultadoObrigados.forEach((item) => {
+        const obrigadoItem = item as unknown as ObrigadoAgregado;
+        const membroId = obrigadoItem._id?.toString() || '';
         const performance = performanceMap.get(membroId);
         if (performance) {
-          performance.totalObrigadosRecebidos = item.total;
+          performance.totalObrigadosRecebidos = obrigadoItem.total;
         }
       });
 

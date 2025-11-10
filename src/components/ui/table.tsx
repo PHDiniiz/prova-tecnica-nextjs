@@ -18,8 +18,8 @@ export const Table = forwardRef<HTMLTableElement, TableProps>(
           ref={ref}
           className={cn(
             'w-full border-collapse',
-            variant === 'striped' && 'divide-y divide-gray-200 dark:divide-gray-700',
-            variant === 'bordered' && 'border border-gray-200 dark:border-gray-700',
+            variant === 'striped' && 'divide-y divide-border',
+            variant === 'bordered' && 'border border-border',
             className
           )}
           {...props}
@@ -38,7 +38,7 @@ export const TableHeader = forwardRef<
   return (
     <thead
       ref={ref}
-      className={cn('bg-gray-50 dark:bg-gray-800', className)}
+      className={cn('bg-muted', className)}
       {...props}
     />
   );
@@ -50,7 +50,7 @@ export const TableBody = forwardRef<
   HTMLTableSectionElement,
   HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => {
-  return <tbody ref={ref} className={cn('divide-y divide-gray-200 dark:divide-gray-700', className)} {...props} />;
+  return <tbody ref={ref} className={cn('divide-y divide-border', className)} {...props} />;
 });
 
 TableBody.displayName = 'TableBody';
@@ -62,7 +62,7 @@ export const TableFooter = forwardRef<
   return (
     <tfoot
       ref={ref}
-      className={cn('bg-gray-50 dark:bg-gray-800 font-medium', className)}
+      className={cn('bg-muted font-medium', className)}
       {...props}
     />
   );
@@ -80,8 +80,8 @@ export const TableRow = forwardRef<
     <tr
       ref={ref}
       className={cn(
-        'border-b border-gray-200 dark:border-gray-700 transition-colors',
-        variant === 'hover' && 'hover:bg-gray-50 dark:hover:bg-gray-800',
+        'border-b border-border transition-colors',
+        variant === 'hover' && 'hover:bg-muted',
         className
       )}
       {...props}
@@ -99,7 +99,7 @@ export const TableHead = forwardRef<
     <th
       ref={ref}
       className={cn(
-        'px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider',
+        'px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider',
         className
       )}
       {...props}
@@ -119,7 +119,7 @@ export const TableCell = forwardRef<
     <td
       ref={ref}
       colSpan={colSpan}
-      className={cn('px-4 py-3 text-sm text-gray-900 dark:text-gray-100', className)}
+      className={cn('px-4 py-3 text-sm text-foreground', className)}
       {...props}
     />
   );
@@ -134,7 +134,7 @@ export const TableCaption = forwardRef<
   return (
     <caption
       ref={ref}
-      className={cn('mt-4 text-sm text-gray-500 dark:text-gray-400', className)}
+      className={cn('mt-4 text-sm text-muted-foreground', className)}
       {...props}
     />
   );

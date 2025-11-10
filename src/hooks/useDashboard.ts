@@ -42,7 +42,7 @@ export function useDashboard(options: UseDashboardOptions) {
   const { periodo = 'mensal', membroId, adminToken, enabled = true } = options;
 
   return useQuery<DashboardApiResponse, Error>({
-    queryKey: ['dashboard', periodo, membroId],
+    queryKey: ['dashboard', periodo, membroId, adminToken],
     queryFn: async () => {
       const params = new URLSearchParams({
         periodo,

@@ -683,4 +683,4 @@ Este projeto é privado e proprietário.
 
 ---
 
-**Desenvolvido com ❤️ pela equipe Durch Soluções**
+**Desenvolvido com ❤️ por Pedro Henrique Diniz <Durch Soluções>**

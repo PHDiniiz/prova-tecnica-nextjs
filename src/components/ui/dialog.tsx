@@ -68,7 +68,7 @@ export const Dialog = ({ open, onOpenChange, children, className }: DialogProps)
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+            className="fixed inset-0 z-50 bg-black/50 dark:bg-black/80 backdrop-blur-sm"
             onClick={() => onOpenChange(false)}
             aria-hidden="true"
           />
@@ -103,7 +103,7 @@ export const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ duration: 0.2 }}
         className={cn(
-          'relative w-full bg-white dark:bg-gray-800 rounded-lg shadow-xl',
+          'relative w-full bg-popover text-popover-foreground rounded-lg border shadow-xl',
           'max-h-[90vh] overflow-y-auto',
           size === 'sm' && 'max-w-sm',
           size === 'md' && 'max-w-md',
@@ -145,7 +145,7 @@ export const DialogTitle = forwardRef<HTMLHeadingElement, DialogTitleProps>(
       <h2
         ref={ref}
         className={cn(
-          'text-lg font-semibold leading-none tracking-tight text-gray-900 dark:text-gray-100',
+          'text-lg font-semibold leading-none tracking-tight text-popover-foreground',
           className
         )}
         {...props}
@@ -163,7 +163,7 @@ export const DialogDescription = forwardRef<HTMLParagraphElement, DialogDescript
     return (
       <p
         ref={ref}
-        className={cn('text-sm text-gray-500 dark:text-gray-400', className)}
+        className={cn('text-sm text-muted-foreground', className)}
         {...props}
       >
         {children}

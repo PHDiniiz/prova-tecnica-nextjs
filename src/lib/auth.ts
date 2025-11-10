@@ -283,3 +283,31 @@ export function extrairInfoDoToken(
   }
 }
 
+/**
+ * Resultado da extração de membro ou admin token
+ */
+export interface ExtrairMembroOuAdminResult {
+  membroId: string | null;
+  isAdmin: boolean;
+}
+
+/**
+ * Extrai o membroId do token JWT ou verifica se é admin_token
+ * Verifica admin_token primeiro, depois JWT
+ * 
+ * @param request - Request do Next.js
+ * @returns Objeto com membroId (se JWT válido) e flag isAdmin
+ */
+export function extrairMembroIdOuAdminToken(
+  request: NextRequest
+): ExtrairMembroOuAdminResult {
+  // Verifica admin_token primeiro
+  if (verificarAdminToken(request)) {
+    return { membroId: null, isAdmin: true };
+  }
+  
+  // Depois verifica JWT
+  const membroId = extrairMembroIdDoToken(request);
+  return { membroId, isAdmin: false };
+}
+

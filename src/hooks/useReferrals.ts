@@ -71,6 +71,10 @@ export function useReferrals(
   const listarIndicacoes = useQuery<ListarIndicacoesResponse, Error>({
     queryKey: ['referrals', membroId, tipo, status, page, limit, search],
     queryFn: async () => {
+      // Verifica se admin_token está disponível
+      const adminToken = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
+      const token = adminToken || membroId;
+
       const params = new URLSearchParams({
         tipo,
         page: page.toString(),
@@ -86,7 +90,7 @@ export function useReferrals(
       const response = await fetch(`/api/referrals?${params.toString()}`, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${membroId}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -100,7 +104,7 @@ export function useReferrals(
 
       return data;
     },
-    enabled: !!membroId,
+    enabled: !!membroId || (typeof window !== 'undefined' && !!localStorage.getItem('admin_token')),
     staleTime: 5 * 1000, // 5 segundos
     refetchOnWindowFocus: true,
     refetchOnMount: true,
@@ -115,11 +119,15 @@ export function useReferrals(
     CriarIndicacaoDTO
   >({
     mutationFn: async (dto: CriarIndicacaoDTO) => {
+      // Verifica se admin_token está disponível
+      const adminToken = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
+      const token = adminToken || membroId;
+
       const response = await fetch('/api/referrals', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${membroId}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(dto),
       });
@@ -149,11 +157,15 @@ export function useReferrals(
     { id: string; dto: AtualizarStatusIndicacaoDTO }
   >({
     mutationFn: async ({ id, dto }) => {
+      // Verifica se admin_token está disponível
+      const adminToken = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
+      const token = adminToken || membroId;
+
       const response = await fetch(`/api/referrals/${id}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${membroId}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(dto),
       });

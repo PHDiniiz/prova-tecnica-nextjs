@@ -57,6 +57,11 @@ export function ReferralList({
     [atualizarStatus, refetch]
   );
 
+  const handleSearch = useCallback((value: string) => {
+    setSearchTerm(value);
+    setPagina(1); // Resetar página ao buscar
+  }, []);
+
   const statusDisponiveis: (ReferralStatus | 'todos')[] = [
     'todos',
     'nova',
@@ -97,11 +102,6 @@ export function ReferralList({
       </Card>
     );
   }
-
-  const handleSearch = useCallback((value: string) => {
-    setSearchTerm(value);
-    setPagina(1); // Resetar página ao buscar
-  }, []);
 
   return (
     <div className="space-y-6">

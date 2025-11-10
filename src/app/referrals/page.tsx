@@ -40,6 +40,15 @@ export default function ReferralsPage() {
   const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
+    // Verifica se está no contexto admin
+    const adminToken = localStorage.getItem('admin_token');
+    if (adminToken) {
+      // Se admin_token existe, permite acesso direto
+      setIsAuthenticated(true);
+      carregarMembrosAtivos(adminToken);
+      return;
+    }
+
     // Tenta recuperar o membroId do localStorage
     const savedMembroId = localStorage.getItem('membro_id');
     if (savedMembroId) {
@@ -99,7 +108,7 @@ export default function ReferralsPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>Área de Indicações</CardTitle>
@@ -136,8 +145,7 @@ export default function ReferralsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto">
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
@@ -184,8 +192,7 @@ export default function ReferralsPage() {
         )}
 
         {/* Lista de indicações */}
-        <ReferralList membroId={membroId} />
-      </div>
+        <ReferralList membroId={membroId || ''} />
     </div>
   );
 }

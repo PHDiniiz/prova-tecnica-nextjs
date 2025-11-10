@@ -11,12 +11,10 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={cn(
-          'rounded-lg p-6',
-          variant === 'default' && 'bg-white dark:bg-gray-800 shadow-sm',
-          variant === 'outlined' &&
-            'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700',
-          variant === 'elevated' &&
-            'bg-white dark:bg-gray-800 shadow-lg',
+          'rounded-lg border bg-card text-card-foreground p-6',
+          variant === 'default' && 'shadow-sm',
+          variant === 'outlined' && '',
+          variant === 'elevated' && 'shadow-lg',
           className
         )}
         {...props}
@@ -51,7 +49,7 @@ export const CardTitle = forwardRef<
   return (
     <h3
       ref={ref}
-      className={cn('text-lg font-semibold text-gray-900', className)}
+      className={cn('text-lg font-semibold text-card-foreground', className)}
       {...props}
     />
   );
@@ -66,7 +64,7 @@ export const CardContent = forwardRef<
   return (
     <div
       ref={ref}
-      className={cn('text-gray-700 dark:text-gray-300', className)}
+      className={cn('text-card-foreground', className)}
       {...props}
     />
   );

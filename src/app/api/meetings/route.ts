@@ -3,7 +3,7 @@ import { MeetingService } from '@/services/MeetingService';
 import { CriarMeetingDTO, MeetingFiltros } from '@/types/meeting';
 import { ZodError } from 'zod';
 import { BusinessError } from '@/lib/errors/BusinessError';
-import { extrairMembroIdDoToken, respostaNaoAutorizado } from '@/lib/auth';
+import { extrairMembroIdDoToken, extrairMembroIdOuAdminToken, respostaNaoAutorizado } from '@/lib/auth';
 
 /**
  * API Route para listar reuniões
@@ -25,8 +25,42 @@ import { extrairMembroIdDoToken, respostaNaoAutorizado } from '@/lib/auth';
  */
 export async function GET(request: NextRequest) {
   try {
-    const membroId = extrairMembroIdDoToken(request);
+    const { membroId, isAdmin } = extrairMembroIdOuAdminToken(request);
     
+    // Se for admin, permite acesso sem restrição de membro
+    if (isAdmin) {
+      const { searchParams } = new URL(request.url);
+      const membroIdFiltro = searchParams.get('membroId');
+      const dataInicio = searchParams.get('dataInicio');
+      const dataFim = searchParams.get('dataFim');
+
+      const filtro: MeetingFiltros = {};
+      
+      // Se admin fornecer membroId, filtra por ele
+      if (membroIdFiltro) {
+        filtro.membroId = membroIdFiltro;
+      }
+      
+      if (dataInicio) {
+        filtro.dataInicio = new Date(dataInicio);
+      }
+      if (dataFim) {
+        filtro.dataFim = new Date(dataFim);
+      }
+
+      const service = new MeetingService();
+      const reunioes = await service.listarReunioes(filtro);
+
+      return NextResponse.json(
+        {
+          success: true,
+          data: reunioes,
+        },
+        { status: 200 }
+      );
+    }
+
+    // Lógica original para membros autenticados
     if (!membroId) {
       return respostaNaoAutorizado();
     }

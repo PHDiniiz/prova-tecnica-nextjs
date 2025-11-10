@@ -5,6 +5,7 @@ import { ZodError } from 'zod';
 import { BusinessError } from '@/lib/errors/BusinessError';
 import {
   extrairMembroIdAtivoDoToken,
+  extrairMembroIdOuAdminToken,
   respostaNaoAutorizado,
   respostaMembroInativo,
 } from '@/lib/auth';
@@ -127,9 +128,66 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
-    const { membroId, isInactive } = extrairMembroIdAtivoDoToken(request);
+    const { membroId, isAdmin } = extrairMembroIdOuAdminToken(request);
     
-    if (!membroId) {
+    // Se for admin, permite acesso sem restrição de membro
+    if (isAdmin) {
+      const { searchParams } = new URL(request.url);
+      const tipo = searchParams.get('tipo') || 'ambas';
+      const status = searchParams.get('status') as ReferralStatus | null;
+      const search = searchParams.get('search') || '';
+      const pagina = parseInt(searchParams.get('page') || '1', 10);
+      const limite = Math.min(parseInt(searchParams.get('limit') || '20', 10), 100);
+
+      const service = new ReferralService();
+      
+      // Para admin, busca todas as indicações sem filtro de membro
+      const filtroGeral: {
+        status?: ReferralStatus;
+        search?: string;
+      } = {};
+      if (status) filtroGeral.status = status;
+      if (search) filtroGeral.search = search;
+      
+      const todasIndicacoes = await service.buscarTodasIndicacoes(filtroGeral);
+      
+      // Separa indicações feitas e recebidas
+      // Para admin, todas as indicações têm membroIndicadorId e membroIndicadoId
+      const indicacoesFeitas = tipo === 'recebidas' 
+        ? [] 
+        : todasIndicacoes;
+      const indicacoesRecebidas = tipo === 'feitas' 
+        ? [] 
+        : todasIndicacoes;
+
+      // Aplica paginação
+      const total = todasIndicacoes.length;
+      const inicio = (pagina - 1) * limite;
+      const fim = inicio + limite;
+      const totalPaginas = Math.ceil(total / limite);
+
+      return NextResponse.json(
+        {
+          success: true,
+          data: {
+            feitas: indicacoesFeitas.slice(inicio, fim),
+            recebidas: indicacoesRecebidas.slice(inicio, fim),
+          },
+          pagination: {
+            page: pagina,
+            limit: limite,
+            total,
+            totalPages: totalPaginas,
+          },
+        },
+        { status: 200 }
+      );
+    }
+
+    // Lógica original para membros autenticados
+    const { membroId: membroIdAtivo, isInactive } = extrairMembroIdAtivoDoToken(request);
+    
+    if (!membroIdAtivo) {
       if (isInactive) {
         return respostaMembroInativo();
       }
@@ -150,7 +208,7 @@ export async function GET(request: NextRequest) {
       membroIndicadorId: string;
       status?: ReferralStatus;
       search?: string;
-    } = { membroIndicadorId: membroId };
+    } = { membroIndicadorId: membroIdAtivo };
     if (status) filtroFeitas.status = status;
     if (search) filtroFeitas.search = search;
     const indicacoesFeitas = tipo === 'recebidas' ? [] : await service.buscarTodasIndicacoes(filtroFeitas);
@@ -160,7 +218,7 @@ export async function GET(request: NextRequest) {
       membroIndicadoId: string;
       status?: ReferralStatus;
       search?: string;
-    } = { membroIndicadoId: membroId };
+    } = { membroIndicadoId: membroIdAtivo };
     if (status) filtroRecebidas.status = status;
     if (search) filtroRecebidas.search = search;
     const indicacoesRecebidas = tipo === 'feitas' ? [] : await service.buscarTodasIndicacoes(filtroRecebidas);
