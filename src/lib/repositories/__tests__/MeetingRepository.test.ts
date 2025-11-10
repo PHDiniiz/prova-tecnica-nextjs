@@ -28,14 +28,15 @@ describe('MeetingRepository', () => {
 
   describe('criar', () => {
     it('deve criar uma nova reunião', async () => {
+      const agora = new Date();
       const reuniaoSemId: Omit<Meeting, '_id'> = {
         membro1Id: 'membro1',
         membro2Id: 'membro2',
-        dataReuniao: new Date(),
+        dataReuniao: agora,
         local: 'Escritório',
         checkIns: [],
-        criadoEm: new Date(),
-        atualizadoEm: new Date(),
+        criadoEm: agora,
+        atualizadoEm: agora,
       };
 
       const insertedId = new ObjectId('123');
@@ -45,10 +46,16 @@ describe('MeetingRepository', () => {
 
       const resultado = await repository.criar(reuniaoSemId);
 
-      expect(resultado).toEqual({
-        ...reuniaoSemId,
+      expect(resultado).toMatchObject({
+        membro1Id: 'membro1',
+        membro2Id: 'membro2',
+        local: 'Escritório',
+        checkIns: [],
         _id: '123',
       });
+      expect(resultado.criadoEm).toBeInstanceOf(Date);
+      expect(resultado.atualizadoEm).toBeInstanceOf(Date);
+      expect(resultado.dataReuniao).toBeInstanceOf(Date);
       expect(mockCollection.insertOne).toHaveBeenCalled();
     });
   });

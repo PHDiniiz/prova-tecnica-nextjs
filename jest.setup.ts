@@ -1,6 +1,27 @@
 // Importa os matchers customizados do jest-dom
 import '@testing-library/jest-dom';
 
+// Configurar variáveis de ambiente para testes
+//
+// Estas são as variáveis de ambiente padrão usadas durante a execução dos testes.
+// O Next.js carrega automaticamente .env.test quando NODE_ENV=test, mas garantimos
+// valores padrão aqui para que os testes funcionem mesmo sem o arquivo .env.test.
+//
+// IMPORTANTE: Estes são valores de TESTE apenas, não usar em produção!
+// Para sobrescrever estes valores, crie um arquivo .env.test na raiz do projeto.
+if (!process.env.MONGODB_URI) {
+  process.env.MONGODB_URI = 'mongodb+srv://dbAdmin:NjcyEKTrJRFRWfVG@cluster0.x7lixdk.mongodb.net';
+}
+if (!process.env.MONGODB_DB_NAME) {
+  process.env.MONGODB_DB_NAME = 'app';
+}
+if (!process.env.ADMIN_TOKEN) {
+  process.env.ADMIN_TOKEN = 'd021d22df2dfa077499ca09b19b3ad62c044ef3dcdd2517ea7c6f9f740d91682';
+}
+if (!process.env.NEXT_PUBLIC_APP_URL) {
+  process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000';
+}
+
 // Mock do MongoDB para evitar problemas com ESM
 jest.mock('mongodb', () => {
   // Mock do ObjectId

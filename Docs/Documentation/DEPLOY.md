@@ -38,9 +38,9 @@ Certifique-se de que seu código está no GitHub, GitLab ou Bitbucket.
 
 - **Framework Preset**: Next.js
 - **Root Directory**: `./` (raiz do projeto)
-- **Build Command**: `yarn build`
+- **Build Command**: `pnpm build`
 - **Output Directory**: `.next` (padrão do Next.js)
-- **Install Command**: `yarn install`
+- **Install Command**: `pnpm install`
 
 #### Environment Variables
 
@@ -77,17 +77,17 @@ Configure as seguintes variáveis no painel do Vercel:
 
 ```bash
 # Instalar dependências
-yarn install
+pnpm install
 
 # Criar build de produção
-yarn build
+pnpm build
 ```
 
 ### Passo 2: Executar em Produção
 
 ```bash
 # Iniciar servidor de produção
-yarn start
+pnpm start
 ```
 
 ### Passo 3: Usar PM2 (Recomendado para servidores)
@@ -212,7 +212,7 @@ Use `.env.local` (não commitar no Git).
 
 **Solução:**
 1. Verifique logs do build no Vercel
-2. Execute `yarn build` localmente para ver erros
+2. Execute `pnpm build` localmente para ver erros
 3. Verifique se todas as dependências estão no `package.json`
 
 ### Erro: "Environment variables not found"
@@ -226,7 +226,7 @@ Use `.env.local` (não commitar no Git).
 
 **Solução:**
 1. Verifique se todas as dependências estão no `package.json`
-2. Execute `yarn install` localmente
+2. Execute `pnpm install` localmente
 3. Verifique se não há imports de arquivos inexistentes
 
 ### Performance Lenta

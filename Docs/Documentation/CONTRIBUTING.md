@@ -34,7 +34,7 @@ cd prova-tecnica-nextjs
 
 ```bash
 # Instale dependências
-yarn install
+pnpm install
 
 # Configure variáveis de ambiente
 cp .env.example .env.local
@@ -63,16 +63,13 @@ git checkout -b docs/nome-da-doc
 
 ```bash
 # Execute testes
-yarn test
+pnpm test
 
 # Verifique tipos
-yarn typecheck
+pnpm typecheck
 
 # Execute linter
-yarn lint
-
-# Verifique gerenciador de pacotes
-yarn verify-package-manager
+pnpm lint
 ```
 
 ### 6. Commit suas Mudanças
@@ -253,13 +250,13 @@ describe('ComponentName', () => {
 
 ```bash
 # Todos os testes
-yarn test
+pnpm test
 
 # Com cobertura
-yarn test:coverage
+pnpm test:coverage
 
 # Apenas arquivo específico
-yarn test src/components/Button.test.tsx
+pnpm test src/components/Button.test.tsx
 ```
 
 ### Boas Práticas
@@ -277,11 +274,11 @@ yarn test src/components/Button.test.tsx
 Antes de abrir um PR, verifique:
 
 - [ ] Código segue os padrões do projeto
-- [ ] Testes passam (`yarn test`)
+- [ ] Testes passam (`pnpm test`)
 - [ ] Cobertura de testes mantida ou aumentada
-- [ ] TypeScript sem erros (`yarn typecheck`)
-- [ ] ESLint sem erros (`yarn lint`)
-- [ ] Yarn está sendo usado (verificado por `yarn verify-package-manager`)
+- [ ] TypeScript sem erros (`pnpm typecheck`)
+- [ ] ESLint sem erros (`pnpm lint`)
+- [ ] pnpm está sendo usado (verificado pelo `packageManager` no `package.json`)
 - [ ] Documentação atualizada (se necessário)
 - [ ] Commits seguem padrão semântico
 
