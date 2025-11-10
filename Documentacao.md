@@ -3077,6 +3077,7 @@ O sistema completo de indicações foi implementado com sucesso:
 - 🚧 Autenticação JWT para membros (substituir sistema temporário)
 - 📋 Testes com cobertura ≥ 95% (em progresso)
 - 📋 Refinamentos e otimizações
+- 📋 Configuração do CI/CD (GitHub Actions) - workflow comentado temporariamente
 
 Com cobertura de testes de **95%+** (meta), o sistema garantirá confiabilidade e alto padrão de qualidade.
 
