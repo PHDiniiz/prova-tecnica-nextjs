@@ -2,12 +2,12 @@
 
 Este arquivo contém a lista de tarefas pendentes organizadas por prioridade.
 
-**Última atualização**: 2025-01-27  
-**Última verificação TypeScript**: 2025-01-27 (`npx tsc --noEmit -p tsconfig.test.json`)  
-**Versão**: 0.2.0  
-**Status dos Agentes**: ✅ Todos os agentes concluídos (2025-01-27)
+**Última atualização**: 2025-11-10  
+**Última verificação TypeScript**: 2025-11-10 (`npx tsc --noEmit -p tsconfig.test.json`)  
+**Versão**: 0.2.1  
+**Status dos Agentes**: ✅ Todos os agentes concluídos e arquivos removidos (2025-11-10)
 - **Agente 1**: ✅ 4/4 tarefas concluídas (100%) - Lint pendente para execução futura
-- **Agente 2**: ✅ 3/3 tarefas concluídas (100%)
+- **Agente 2**: ✅ 6/6 tarefas concluídas (100%) - Fluxo de admissão completo validado, testes de console.log adicionados (4 testes novos), endpoints e componentes verificados, testes de integração validados
 - **Agente 3**: ✅ 3/3 tarefas concluídas (100%) - Pendências futuras documentadas
 
 ---
@@ -48,6 +48,7 @@ Este arquivo contém a lista de tarefas pendentes organizadas por prioridade.
 - [x] Criar API_REFERENCE.md com especificação completa da API
 - [x] Atualizar README.md com instruções detalhadas de instalação e execução
 - [x] Adicionar troubleshooting e soluções para problemas comuns
+- [x] Completar seção "Estrutura de Componentes Frontend" no ARQUITETURA.md (Agente 1)
 
 ---
 

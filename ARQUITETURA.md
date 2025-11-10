@@ -283,6 +283,500 @@ graph TB
     style OnFocus fill:#c8e6c9
 ```
 
+## 🧩 Estrutura de Componentes Frontend
+
+A arquitetura de componentes do frontend segue uma abordagem baseada em **Atomic Design adaptado**, organizando os componentes em camadas hierárquicas que promovem reutilização, manutenibilidade e escalabilidade.
+
+### Organização de Pastas
+
+```
+src/
+├── components/
+│   ├── ui/                    # Componentes base reutilizáveis
+│   │   ├── button.tsx
+│   │   ├── input.tsx
+│   │   ├── card.tsx
+│   │   ├── dialog.tsx
+│   │   ├── form.tsx
+│   │   ├── table.tsx
+│   │   ├── badge.tsx
+│   │   ├── skeleton.tsx
+│   │   └── toast.tsx
+│   │
+│   └── features/              # Componentes de features específicas
+│       ├── intention/
+│       │   ├── IntentionForm.tsx
+│       │   ├── IntentionList.tsx
+│       │   └── IntentionCard.tsx
+│       ├── referral/
+│       │   ├── ReferralForm.tsx
+│       │   ├── ReferralList.tsx
+│       │   ├── ReferralCard.tsx
+│       │   └── ReferralStatusBadge.tsx
+│       ├── meeting/
+│       ├── notice/
+│       ├── obrigado/
+│       ├── member/
+│       └── dashboard/
+│
+├── hooks/                      # Custom Hooks (lógica de negócio)
+│   ├── useIntentions.ts
+│   ├── useReferrals.ts
+│   ├── useMeetings.ts
+│   ├── useNotices.ts
+│   ├── useObrigados.ts
+│   └── useDashboard.ts
+│
+└── services/                   # Camada de serviços (comunicação com API)
+    ├── IntentionService.ts
+    ├── ReferralService.ts
+    ├── MeetingService.ts
+    ├── NoticeService.ts
+    ├── ObrigadoService.ts
+    ├── MemberService.ts
+    ├── InviteService.ts
+    └── DashboardService.ts
+```
+
+### Hierarquia de Componentes
+
+```mermaid
+graph TB
+    subgraph "UI Components Layer"
+        Button[Button]
+        Input[Input]
+        Card[Card]
+        Dialog[Dialog]
+        Table[Table]
+        Badge[Badge]
+        Skeleton[Skeleton]
+        Toast[Toast]
+    end
+
+    subgraph "Feature Components Layer"
+        IntentionForm[IntentionForm]
+        IntentionList[IntentionList]
+        ReferralForm[ReferralForm]
+        ReferralList[ReferralList]
+        MeetingForm[MeetingForm]
+        NoticeForm[NoticeForm]
+        DashboardPage[DashboardPage]
+    end
+
+    subgraph "Custom Hooks Layer"
+        useIntentions[useIntentions]
+        useReferrals[useReferrals]
+        useMeetings[useMeetings]
+        useNotices[useNotices]
+        useDashboard[useDashboard]
+    end
+
+    subgraph "Services Layer"
+        IntentionService[IntentionService]
+        ReferralService[ReferralService]
+        MeetingService[MeetingService]
+        NoticeService[NoticeService]
+        DashboardService[DashboardService]
+    end
+
+    subgraph "Pages Layer"
+        IntentionPage[app/intention/page.tsx]
+        ReferralsPage[app/referrals/page.tsx]
+        MeetingsPage[app/meetings/page.tsx]
+        NoticesPage[app/notices/page.tsx]
+        DashboardPageRoute[app/admin/dashboard/page.tsx]
+    end
+
+    IntentionForm --> Button
+    IntentionForm --> Input
+    IntentionForm --> Card
+    ReferralForm --> Button
+    ReferralForm --> Input
+    ReferralForm --> Card
+    ReferralList --> Table
+    ReferralList --> Badge
+    ReferralList --> Card
+    DashboardPage --> Card
+    DashboardPage --> Skeleton
+
+    IntentionForm --> useIntentions
+    IntentionList --> useIntentions
+    ReferralForm --> useReferrals
+    ReferralList --> useReferrals
+    MeetingForm --> useMeetings
+    NoticeForm --> useNotices
+    DashboardPage --> useDashboard
+
+    useIntentions --> IntentionService
+    useReferrals --> ReferralService
+    useMeetings --> MeetingService
+    useNotices --> NoticeService
+    useDashboard --> DashboardService
+
+    IntentionPage --> IntentionForm
+    IntentionPage --> IntentionList
+    ReferralsPage --> ReferralForm
+    ReferralsPage --> ReferralList
+    MeetingsPage --> MeetingForm
+    NoticesPage --> NoticeForm
+    DashboardPageRoute --> DashboardPage
+
+    style Button fill:#c8e6c9
+    style Input fill:#c8e6c9
+    style Card fill:#c8e6c9
+    style IntentionForm fill:#fff9c4
+    style ReferralForm fill:#fff9c4
+    style useIntentions fill:#e1f5ff
+    style IntentionService fill:#ffccbc
+```
+
+### Padrões de Componentização
+
+#### 1. Componentes UI (Base)
+- **Propósito**: Componentes primitivos e reutilizáveis
+- **Características**:
+  - Altamente reutilizáveis
+  - Sem lógica de negócio
+  - Estilizados com TailwindCSS
+  - Baseados em ShadCN/UI
+  - Totalmente tipados com TypeScript
+  - Testados individualmente
+
+**Exemplo**: `Button`, `Input`, `Card`, `Dialog`
+
+#### 2. Componentes de Features
+- **Propósito**: Componentes específicos de cada funcionalidade
+- **Características**:
+  - Compostos por componentes UI
+  - Contêm lógica de apresentação
+  - Utilizam Custom Hooks para lógica de negócio
+  - Integrados com React Query
+  - Suportam UI otimista
+  - Estados de loading consistentes
+
+**Exemplo**: `IntentionForm`, `ReferralList`, `DashboardPage`
+
+#### 3. Custom Hooks
+- **Propósito**: Encapsular lógica de negócio e estado assíncrono
+- **Características**:
+  - Utilizam React Query (TanStack Query)
+  - Gerenciam mutations e queries
+  - Implementam refetch automático (onFocus, onMount, onInterval)
+  - Invalidação inteligente de cache
+  - Tratamento de erros centralizado
+
+**Exemplo**: `useIntentions`, `useReferrals`, `useDashboard`
+
+#### 4. Services Layer
+- **Propósito**: Abstração da comunicação com a API
+- **Características**:
+  - Funções assíncronas tipadas
+  - Tratamento de erros padronizado
+  - Transformação de dados (DTOs)
+  - Validação de respostas
+
+**Exemplo**: `IntentionService`, `ReferralService`, `DashboardService`
+
+### Fluxo de Dados Component → API
+
+```mermaid
+sequenceDiagram
+    participant User as Usuário
+    participant Component as Feature Component
+    participant Hook as Custom Hook
+    participant Service as Service Layer
+    participant API as API Route
+    participant Repository as Repository
+    participant DB as MongoDB
+
+    User->>Component: 1. Interage com UI
+    Component->>Hook: 2. Chama mutation/query
+    Hook->>Service: 3. Executa função do service
+    Service->>API: 4. HTTP Request (fetch)
+    API->>Repository: 5. Chama método do repository
+    Repository->>DB: 6. Query MongoDB
+    DB-->>Repository: 7. Retorna dados
+    Repository-->>API: 8. Dados transformados
+    API-->>Service: 9. Response JSON
+    Service-->>Hook: 10. Dados tipados
+    Hook->>Hook: 11. Atualiza cache React Query
+    Hook-->>Component: 12. Estado atualizado
+    Component->>User: 13. UI atualizada (otimista)
+```
+
+### Princípios de Design
+
+1. **Reutilização**: Componentes UI são reutilizados em múltiplas features
+2. **Separação de Responsabilidades**: UI, lógica e dados em camadas distintas
+3. **Tipagem Forte**: TypeScript strict em todos os componentes
+4. **Testabilidade**: Cada componente possui testes unitários
+5. **Performance**: Uso de `useMemo`, `useCallback` e React Query cache
+6. **Acessibilidade**: Componentes seguem padrões WCAG
+7. **Responsividade**: Mobile-first com TailwindCSS breakpoints
+
+### Estados de Loading
+
+Todos os componentes que consomem dados externos implementam estados de loading consistentes:
+
+- **Skeleton**: Para carregamento inicial de listas
+- **Spinner**: Para ações de submit (botões)
+- **Empty State**: Para listas vazias
+- **Error State**: Para tratamento de erros com feedback visual
+
+### UI Otimista
+
+Componentes de criação/edição implementam UI otimista:
+- Atualização imediata da UI antes da confirmação do servidor
+- Rollback automático em caso de erro
+- Feedback visual claro (toast notifications)
+
+## 🧩 Estrutura de Componentes Frontend
+
+A arquitetura de componentes do frontend segue uma abordagem baseada em **Atomic Design adaptado**, organizando os componentes em camadas hierárquicas que promovem reutilização, manutenibilidade e escalabilidade.
+
+### Organização de Pastas
+
+```
+src/
+├── components/
+│   ├── ui/                    # Componentes base reutilizáveis
+│   │   ├── button.tsx
+│   │   ├── input.tsx
+│   │   ├── card.tsx
+│   │   ├── dialog.tsx
+│   │   ├── form.tsx
+│   │   ├── table.tsx
+│   │   ├── badge.tsx
+│   │   ├── skeleton.tsx
+│   │   └── toast.tsx
+│   │
+│   └── features/              # Componentes de features específicas
+│       ├── intention/
+│       │   ├── IntentionForm.tsx
+│       │   ├── IntentionList.tsx
+│       │   └── IntentionCard.tsx
+│       ├── referral/
+│       │   ├── ReferralForm.tsx
+│       │   ├── ReferralList.tsx
+│       │   ├── ReferralCard.tsx
+│       │   └── ReferralStatusBadge.tsx
+│       ├── meeting/
+│       ├── notice/
+│       ├── obrigado/
+│       ├── member/
+│       └── dashboard/
+│
+├── hooks/                      # Custom Hooks (lógica de negócio)
+│   ├── useIntentions.ts
+│   ├── useReferrals.ts
+│   ├── useMeetings.ts
+│   ├── useNotices.ts
+│   ├── useObrigados.ts
+│   └── useDashboard.ts
+│
+└── services/                   # Camada de serviços (comunicação com API)
+    ├── IntentionService.ts
+    ├── ReferralService.ts
+    ├── MeetingService.ts
+    ├── NoticeService.ts
+    ├── ObrigadoService.ts
+    ├── MemberService.ts
+    ├── InviteService.ts
+    └── DashboardService.ts
+```
+
+### Hierarquia de Componentes
+
+```mermaid
+graph TB
+    subgraph "UI Components Layer"
+        Button[Button]
+        Input[Input]
+        Card[Card]
+        Dialog[Dialog]
+        Table[Table]
+        Badge[Badge]
+        Skeleton[Skeleton]
+        Toast[Toast]
+    end
+
+    subgraph "Feature Components Layer"
+        IntentionForm[IntentionForm]
+        IntentionList[IntentionList]
+        ReferralForm[ReferralForm]
+        ReferralList[ReferralList]
+        MeetingForm[MeetingForm]
+        NoticeForm[NoticeForm]
+        DashboardPage[DashboardPage]
+    end
+
+    subgraph "Custom Hooks Layer"
+        useIntentions[useIntentions]
+        useReferrals[useReferrals]
+        useMeetings[useMeetings]
+        useNotices[useNotices]
+        useDashboard[useDashboard]
+    end
+
+    subgraph "Services Layer"
+        IntentionService[IntentionService]
+        ReferralService[ReferralService]
+        MeetingService[MeetingService]
+        NoticeService[NoticeService]
+        DashboardService[DashboardService]
+    end
+
+    subgraph "Pages Layer"
+        IntentionPage[app/intention/page.tsx]
+        ReferralsPage[app/referrals/page.tsx]
+        MeetingsPage[app/meetings/page.tsx]
+        NoticesPage[app/notices/page.tsx]
+        DashboardPageRoute[app/admin/dashboard/page.tsx]
+    end
+
+    IntentionForm --> Button
+    IntentionForm --> Input
+    IntentionForm --> Card
+    ReferralForm --> Button
+    ReferralForm --> Input
+    ReferralForm --> Card
+    ReferralList --> Table
+    ReferralList --> Badge
+    ReferralList --> Card
+    DashboardPage --> Card
+    DashboardPage --> Skeleton
+
+    IntentionForm --> useIntentions
+    IntentionList --> useIntentions
+    ReferralForm --> useReferrals
+    ReferralList --> useReferrals
+    MeetingForm --> useMeetings
+    NoticeForm --> useNotices
+    DashboardPage --> useDashboard
+
+    useIntentions --> IntentionService
+    useReferrals --> ReferralService
+    useMeetings --> MeetingService
+    useNotices --> NoticeService
+    useDashboard --> DashboardService
+
+    IntentionPage --> IntentionForm
+    IntentionPage --> IntentionList
+    ReferralsPage --> ReferralForm
+    ReferralsPage --> ReferralList
+    MeetingsPage --> MeetingForm
+    NoticesPage --> NoticeForm
+    DashboardPageRoute --> DashboardPage
+
+    style Button fill:#c8e6c9
+    style Input fill:#c8e6c9
+    style Card fill:#c8e6c9
+    style IntentionForm fill:#fff9c4
+    style ReferralForm fill:#fff9c4
+    style useIntentions fill:#e1f5ff
+    style IntentionService fill:#ffccbc
+```
+
+### Padrões de Componentização
+
+#### 1. Componentes UI (Base)
+- **Propósito**: Componentes primitivos e reutilizáveis
+- **Características**:
+  - Altamente reutilizáveis
+  - Sem lógica de negócio
+  - Estilizados com TailwindCSS
+  - Baseados em ShadCN/UI
+  - Totalmente tipados com TypeScript
+  - Testados individualmente
+
+**Exemplo**: `Button`, `Input`, `Card`, `Dialog`
+
+#### 2. Componentes de Features
+- **Propósito**: Componentes específicos de cada funcionalidade
+- **Características**:
+  - Compostos por componentes UI
+  - Contêm lógica de apresentação
+  - Utilizam Custom Hooks para lógica de negócio
+  - Integrados com React Query
+  - Suportam UI otimista
+  - Estados de loading consistentes
+
+**Exemplo**: `IntentionForm`, `ReferralList`, `DashboardPage`
+
+#### 3. Custom Hooks
+- **Propósito**: Encapsular lógica de negócio e estado assíncrono
+- **Características**:
+  - Utilizam React Query (TanStack Query)
+  - Gerenciam mutations e queries
+  - Implementam refetch automático (onFocus, onMount, onInterval)
+  - Invalidação inteligente de cache
+  - Tratamento de erros centralizado
+
+**Exemplo**: `useIntentions`, `useReferrals`, `useDashboard`
+
+#### 4. Services Layer
+- **Propósito**: Abstração da comunicação com a API
+- **Características**:
+  - Funções assíncronas tipadas
+  - Tratamento de erros padronizado
+  - Transformação de dados (DTOs)
+  - Validação de respostas
+
+**Exemplo**: `IntentionService`, `ReferralService`, `DashboardService`
+
+### Fluxo de Dados Component → API
+
+```mermaid
+sequenceDiagram
+    participant User as Usuário
+    participant Component as Feature Component
+    participant Hook as Custom Hook
+    participant Service as Service Layer
+    participant API as API Route
+    participant Repository as Repository
+    participant DB as MongoDB
+
+    User->>Component: 1. Interage com UI
+    Component->>Hook: 2. Chama mutation/query
+    Hook->>Service: 3. Executa função do service
+    Service->>API: 4. HTTP Request (fetch)
+    API->>Repository: 5. Chama método do repository
+    Repository->>DB: 6. Query MongoDB
+    DB-->>Repository: 7. Retorna dados
+    Repository-->>API: 8. Dados transformados
+    API-->>Service: 9. Response JSON
+    Service-->>Hook: 10. Dados tipados
+    Hook->>Hook: 11. Atualiza cache React Query
+    Hook-->>Component: 12. Estado atualizado
+    Component->>User: 13. UI atualizada (otimista)
+```
+
+### Princípios de Design
+
+1. **Reutilização**: Componentes UI são reutilizados em múltiplas features
+2. **Separação de Responsabilidades**: UI, lógica e dados em camadas distintas
+3. **Tipagem Forte**: TypeScript strict em todos os componentes
+4. **Testabilidade**: Cada componente possui testes unitários
+5. **Performance**: Uso de `useMemo`, `useCallback` e React Query cache
+6. **Acessibilidade**: Componentes seguem padrões WCAG
+7. **Responsividade**: Mobile-first com TailwindCSS breakpoints
+
+### Estados de Loading
+
+Todos os componentes que consomem dados externos implementam estados de loading consistentes:
+
+- **Skeleton**: Para carregamento inicial de listas
+- **Spinner**: Para ações de submit (botões)
+- **Empty State**: Para listas vazias
+- **Error State**: Para tratamento de erros com feedback visual
+
+### UI Otimista
+
+Componentes de criação/edição implementam UI otimista:
+- Atualização imediata da UI antes da confirmação do servidor
+- Rollback automático em caso de erro
+- Feedback visual claro (toast notifications)
+
 ## 🗄 Estrutura de Dados e Relacionamentos
 
 ```mermaid
@@ -785,7 +1279,7 @@ O sistema foi projetado para escalar horizontalmente:
 ---
 
 **Última atualização**: 2025-01-27  
-**Versão da Arquitetura**: 1.0.0
+**Versão da Arquitetura**: 1.1.0
 
 **Desenvolvido com ❤️ pela equipe Durch Soluções**
 
