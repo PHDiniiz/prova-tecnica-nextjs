@@ -3,7 +3,11 @@ import { ReferralService } from '@/services/ReferralService';
 import { CriarIndicacaoDTO, ReferralStatus } from '@/types/referral';
 import { ZodError } from 'zod';
 import { BusinessError } from '@/lib/errors/BusinessError';
-import { extrairMembroIdDoToken, respostaNaoAutorizado } from '@/lib/auth';
+import {
+  extrairMembroIdAtivoDoToken,
+  respostaNaoAutorizado,
+  respostaMembroInativo,
+} from '@/lib/auth';
 
 /**
  * API Route para criar uma nova indicação de negócio
@@ -38,9 +42,12 @@ import { extrairMembroIdDoToken, respostaNaoAutorizado } from '@/lib/auth';
  */
 export async function POST(request: NextRequest) {
   try {
-    const membroId = extrairMembroIdDoToken(request);
+    const { membroId, isInactive } = extrairMembroIdAtivoDoToken(request);
     
     if (!membroId) {
+      if (isInactive) {
+        return respostaMembroInativo();
+      }
       return respostaNaoAutorizado();
     }
 
@@ -120,9 +127,12 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
-    const membroId = extrairMembroIdDoToken(request);
+    const { membroId, isInactive } = extrairMembroIdAtivoDoToken(request);
     
     if (!membroId) {
+      if (isInactive) {
+        return respostaMembroInativo();
+      }
       return respostaNaoAutorizado();
     }
 

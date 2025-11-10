@@ -40,6 +40,20 @@ export function respostaNaoAutorizado() {
 }
 
 /**
+ * Retorna uma resposta de erro de membro inativo
+ */
+export function respostaMembroInativo() {
+  return NextResponse.json(
+    {
+      success: false,
+      error: 'Membro inativo',
+      message: 'Apenas membros ativos podem realizar esta ação',
+    },
+    { status: 403 }
+  );
+}
+
+/**
  * Obtém o secret JWT das variáveis de ambiente
  */
 function getJwtSecret(): string {
@@ -199,6 +213,49 @@ export function extrairMembroIdDoToken(
   } catch (error) {
     console.error('Erro ao extrair membroId do token:', error);
     return null;
+  }
+}
+
+/**
+ * Resultado da extração de membro ativo do token
+ */
+export interface ExtrairMembroAtivoResult {
+  membroId: string | null;
+  isInactive: boolean; // true se o token é válido mas o membro está inativo
+}
+
+/**
+ * Extrai o membroId do token JWT do header Authorization, validando se o membro está ativo
+ * Retorna objeto com membroId e flag indicando se o membro está inativo
+ */
+export function extrairMembroIdAtivoDoToken(
+  request: NextRequest
+): ExtrairMembroAtivoResult {
+  try {
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader) {
+      return { membroId: null, isInactive: false };
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    if (!token) {
+      return { membroId: null, isInactive: false };
+    }
+
+    const decoded = verificarToken(token);
+    if (!decoded || !decoded.membroId) {
+      return { membroId: null, isInactive: false };
+    }
+
+    // Valida se o membro está ativo
+    if (decoded.isActive === false) {
+      return { membroId: null, isInactive: true };
+    }
+
+    return { membroId: decoded.membroId, isInactive: false };
+  } catch (error) {
+    console.error('Erro ao extrair membroId ativo do token:', error);
+    return { membroId: null, isInactive: false };
   }
 }
 

@@ -5,9 +5,31 @@ import { PATCH } from '../route';
 import { ReferralService } from '@/services/ReferralService';
 import { NextRequest } from 'next/server';
 import { BusinessError } from '@/lib/errors/BusinessError';
+import { extrairMembroIdAtivoDoToken } from '@/lib/auth';
 
 // Mock do ReferralService
 jest.mock('@/services/ReferralService');
+
+// Mock do auth
+jest.mock('@/lib/auth', () => ({
+  extrairMembroIdAtivoDoToken: jest.fn(),
+  respostaNaoAutorizado: jest.fn(() => ({
+    json: async () => ({
+      success: false,
+      error: 'Não autorizado',
+      message: 'Token de autenticação inválido ou ausente',
+    }),
+    status: 401,
+  })),
+  respostaMembroInativo: jest.fn(() => ({
+    json: async () => ({
+      success: false,
+      error: 'Membro inativo',
+      message: 'Apenas membros ativos podem realizar esta ação',
+    }),
+    status: 403,
+  })),
+}));
 
 // Mock do NextRequest para testes
 jest.mock('next/server', () => ({
@@ -56,6 +78,12 @@ describe('PATCH /api/referrals/[id]/status', () => {
     (ReferralService as jest.MockedClass<typeof ReferralService>).mockImplementation(
       () => mockService
     );
+
+    // Mock padrão: membro ativo
+    (extrairMembroIdAtivoDoToken as jest.Mock).mockReturnValue({
+      membroId: membroToken,
+      isInactive: false,
+    });
   });
 
   it('deve atualizar status com sucesso', async () => {
@@ -109,6 +137,11 @@ describe('PATCH /api/referrals/[id]/status', () => {
   });
 
   it('deve retornar erro 401 quando token não é fornecido', async () => {
+    (extrairMembroIdAtivoDoToken as jest.Mock).mockReturnValue({
+      membroId: null,
+      isInactive: false,
+    });
+
     const request = new NextRequest(
       'http://localhost:3000/api/referrals/referral-1/status',
       {
@@ -127,6 +160,36 @@ describe('PATCH /api/referrals/[id]/status', () => {
     expect(response.status).toBe(401);
     expect(data.success).toBe(false);
     expect(data.error).toBe('Não autorizado');
+  });
+
+  it('deve retornar erro 403 quando membro está inativo', async () => {
+    (extrairMembroIdAtivoDoToken as jest.Mock).mockReturnValue({
+      membroId: null,
+      isInactive: true,
+    });
+
+    const request = new NextRequest(
+      'http://localhost:3000/api/referrals/referral-1/status',
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'em-contato' }),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${membroToken}`,
+        },
+      }
+    );
+
+    const params = Promise.resolve({ id: 'referral-1' });
+    const response = await PATCH(request, { params });
+    const data = await response.json();
+
+    expect(response.status).toBe(403);
+    expect(data.success).toBe(false);
+    expect(data.error).toBe('Membro inativo');
+    expect(data.message).toBe('Apenas membros ativos podem realizar esta ação');
+    expect(mockService.buscarIndicacaoPorId).not.toHaveBeenCalled();
+    expect(mockService.atualizarStatusIndicacao).not.toHaveBeenCalled();
   });
 
   it('deve retornar erro 404 quando indicação não é encontrada', async () => {

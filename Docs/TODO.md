@@ -7,8 +7,8 @@ Este arquivo contém a lista de tarefas pendentes organizadas por prioridade.
 **Versão**: 0.2.0  
 **Status dos Agentes**: ✅ Todos os agentes concluídos (2025-01-27)
 - **Agente 1**: ✅ 4/4 tarefas concluídas (100%) - Lint pendente para execução futura
-- **Agente 2**: ✅ 6/6 tarefas concluídas (100%) - Fluxo de admissão completo validado, testes de console.log adicionados
-- **Agente 3**: ✅ 3/3 tarefas concluídas (100%) - Pendências futuras documentadas
+- **Agente 2**: ✅ 3/3 tarefas concluídas (100%)
+- **Agente 3**: ✅ 6/6 tarefas concluídas (100%) - Validação de membro ativo implementada
 
 ---
 
@@ -35,6 +35,9 @@ Este arquivo contém a lista de tarefas pendentes organizadas por prioridade.
 - [x] Corrigir testes de NoticeList e MeetingList (problemas com skeletons)
 - [x] Adicionar testes de edge cases em hooks (useReferrals)
 - [x] Implementar testes nos arquivos vazios - 6 arquivos implementados (42+ testes novos)
+- [x] Adicionar validação de membro ativo no token JWT - Implementado em todas as rotas de indicações
+- [x] Adicionar testes de autenticação para membro inativo - 3 novos testes adicionados
+- [x] Criar testes de integração end-to-end para sistema de indicações - Expandido com 2 novos grupos de testes
 - [ ] Corrigir 67 testes falhando - Pendência futura (autenticação 401, mocks, ToastProvider)
 - [ ] Aumentar cobertura de testes para 99.9% - Pendência futura (atual: 66.39% statements)
 

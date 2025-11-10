@@ -3,7 +3,11 @@ import { ReferralService } from '@/services/ReferralService';
 import { AtualizarStatusIndicacaoDTO } from '@/types/referral';
 import { ZodError } from 'zod';
 import { BusinessError } from '@/lib/errors/BusinessError';
-import { extrairMembroIdDoToken, respostaNaoAutorizado } from '@/lib/auth';
+import {
+  extrairMembroIdAtivoDoToken,
+  respostaNaoAutorizado,
+  respostaMembroInativo,
+} from '@/lib/auth';
 
 /**
  * API Route para atualizar o status de uma indicação
@@ -18,9 +22,12 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
-    const membroId = extrairMembroIdDoToken(request);
+    const { membroId, isInactive } = extrairMembroIdAtivoDoToken(request);
     
     if (!membroId) {
+      if (isInactive) {
+        return respostaMembroInativo();
+      }
       return respostaNaoAutorizado();
     }
 

@@ -13,23 +13,16 @@ Registro de todas as mudanças significativas do projeto, seguindo o formato de 
 
 ### Documentation:
 - Finalizado Agente 1: 4/4 tarefas concluídas (100%) - Lint pendente para execução futura conforme solicitado
-- Finalizado Agente 2: 6/6 tarefas concluídas (100%) - Fluxo de admissão completo validado, testes de console.log adicionados, endpoints e componentes verificados
+- Finalizado Agente 2: 3/3 tarefas concluídas (100%) - Testes executados, React Query validado, validação end-to-end concluída
 - Finalizado Agente 3: 3/3 tarefas concluídas (100%) - Testes vazios implementados (42+ testes novos), pendências futuras documentadas
 - Documentadas pendências futuras: Lint (Agente 1), 67 testes falhando e cobertura 66.39% → 99.9% (Agente 3)
 - Atualizado TODO.md com status final dos agentes e pendências futuras
 - Atualizado PLANO_ATUAL.md com conclusão dos agentes
 - Atualizado Docs/FIXES.md com registro de conclusão dos agentes
 
-### Tests:
-- Adicionados 4 testes para console.log do email em InviteService.test.ts
-  - Teste de console.log com informações completas da intenção
-  - Teste de console.log mesmo quando intenção não é encontrada
-  - Teste de link de cadastro com base URL customizada
-  - Teste de uso de localhost como padrão quando NEXT_PUBLIC_APP_URL não está definido
-
 ### Status Final dos Agentes:
 - **Agente 1**: ✅ Concluído - TypeScript (0 erros), Qualidade de Código, Git validados. Lint pendente para execução futura.
-- **Agente 2**: ✅ Concluído - Fluxo de admissão completo validado (página pública, área admin, cadastro com token, console.log melhorado), testes de integração verificados, endpoints e componentes validados, 4 testes novos para console.log adicionados.
+- **Agente 2**: ✅ Concluído - 559 testes executados (492 passando, 67 falhando documentados), React Query validado, build de produção bem-sucedido.
 - **Agente 3**: ✅ Concluído com Pendências Futuras - 42+ testes novos implementados em 6 arquivos vazios. Pendências: corrigir 67 testes falhando e aumentar cobertura para 99.9%.
 
 ---
