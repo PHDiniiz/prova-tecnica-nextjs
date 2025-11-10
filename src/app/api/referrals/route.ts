@@ -129,6 +129,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const tipo = searchParams.get('tipo') || 'ambas';
     const status = searchParams.get('status') as ReferralStatus | null;
+    const search = searchParams.get('search') || '';
     const pagina = parseInt(searchParams.get('page') || '1', 10);
     const limite = Math.min(parseInt(searchParams.get('limit') || '20', 10), 100);
 
@@ -137,11 +138,13 @@ export async function GET(request: NextRequest) {
     // Busca indicações feitas
     const filtroFeitas: any = { membroIndicadorId: membroId };
     if (status) filtroFeitas.status = status;
+    if (search) filtroFeitas.search = search;
     const indicacoesFeitas = tipo === 'recebidas' ? [] : await service.buscarTodasIndicacoes(filtroFeitas);
 
     // Busca indicações recebidas
     const filtroRecebidas: any = { membroIndicadoId: membroId };
     if (status) filtroRecebidas.status = status;
+    if (search) filtroRecebidas.search = search;
     const indicacoesRecebidas = tipo === 'feitas' ? [] : await service.buscarTodasIndicacoes(filtroRecebidas);
 
     // Aplica paginação

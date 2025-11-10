@@ -1,5 +1,10 @@
 import { Db, ObjectId } from 'mongodb';
-import { PeriodoFiltro, DashboardMetrics, MemberPerformance } from '@/types/dashboard';
+import {
+  PeriodoFiltro,
+  DashboardMetrics,
+  MemberPerformance,
+  VariacaoMetrica,
+} from '@/types/dashboard';
 
 /**
  * Repositório para operações de dashboard e métricas
@@ -36,63 +41,250 @@ export class DashboardRepository {
   }
 
   /**
+   * Calcula as datas do período anterior baseado no período atual
+   */
+  private calcularPeriodoAnterior(periodo: PeriodoFiltro): {
+    dataInicio: Date;
+    dataFim: Date;
+    descricao: string;
+  } {
+    const agora = new Date();
+
+    switch (periodo) {
+      case 'semanal': {
+        // Semana anterior (7 dias antes)
+        const dataFim = new Date(agora);
+        dataFim.setDate(agora.getDate() - 7);
+        dataFim.setHours(23, 59, 59, 999);
+        const dataInicio = new Date(dataFim);
+        dataInicio.setDate(dataFim.getDate() - 7);
+        dataInicio.setHours(0, 0, 0, 0);
+        return { dataInicio, dataFim, descricao: 'vs semana anterior' };
+      }
+      case 'mensal': {
+        // Mês anterior
+        const dataFim = new Date(agora.getFullYear(), agora.getMonth(), 0, 23, 59, 59, 999);
+        const dataInicio = new Date(agora.getFullYear(), agora.getMonth() - 1, 1, 0, 0, 0, 0);
+        return { dataInicio, dataFim, descricao: 'vs mês anterior' };
+      }
+      case 'acumulado':
+      default: {
+        // Para acumulado, comparar com período de 1 ano atrás até hoje
+        const dataFim = new Date(agora);
+        dataFim.setHours(23, 59, 59, 999);
+        const dataInicio = new Date(agora.getFullYear() - 1, agora.getMonth(), agora.getDate());
+        dataInicio.setHours(0, 0, 0, 0);
+        return { dataInicio, dataFim, descricao: 'vs ano anterior' };
+      }
+    }
+  }
+
+  /**
+   * Calcula variação percentual entre dois valores
+   */
+  private calcularVariacao(
+    valorAtual: number,
+    valorAnterior: number,
+    descricaoPeriodo: string
+  ): VariacaoMetrica | undefined {
+    if (valorAnterior === 0) {
+      // Se não havia valor anterior, não há comparação
+      return undefined;
+    }
+
+    const variacaoPercentual = ((valorAtual - valorAnterior) / valorAnterior) * 100;
+    const tipo: 'positivo' | 'negativo' | 'neutro' =
+      Math.abs(variacaoPercentual) < 0.01
+        ? 'neutro'
+        : variacaoPercentual > 0
+          ? 'positivo'
+          : 'negativo';
+
+    return {
+      valor: Math.round(variacaoPercentual * 100) / 100, // Arredondar para 2 casas decimais
+      tipo,
+      periodo: descricaoPeriodo,
+    };
+  }
+
+  /**
+   * Busca métricas básicas para um período específico (usado para comparações)
+   */
+  private async buscarMetricasBasicas(
+    dataInicio: Date,
+    dataFim: Date
+  ): Promise<{
+    membrosAtivos: number;
+    indicacoesMes: number;
+    obrigadosMes: number;
+    taxaConversaoIntencoes: number;
+    taxaFechamentoIndicacoes: number;
+    valorTotalEstimado: number;
+    tempoMedioFechamento: number;
+  }> {
+    // Total de membros ativos (não depende do período)
+    const totalMembrosAtivos = await this.db
+      .collection('members')
+      .countDocuments({ ativo: true });
+
+    // Indicações do período
+    const indicacoesMes = await this.db.collection('referrals').countDocuments({
+      criadoEm: {
+        $gte: dataInicio,
+        $lte: dataFim,
+      },
+    });
+
+    // Obrigados do período
+    const obrigadosMes = await this.db.collection('obrigados').countDocuments({
+      publico: true,
+      criadoEm: {
+        $gte: dataInicio,
+        $lte: dataFim,
+      },
+    });
+
+    // Taxa de conversão de intenções (aprovadas / total)
+    const totalIntencoes = await this.db.collection('intentions').countDocuments({
+      criadoEm: {
+        $gte: dataInicio,
+        $lte: dataFim,
+      },
+    });
+    const intencoesAprovadas = await this.db.collection('intentions').countDocuments({
+      status: 'approved',
+      criadoEm: {
+        $gte: dataInicio,
+        $lte: dataFim,
+      },
+    });
+    const taxaConversaoIntencoes =
+      totalIntencoes > 0 ? (intencoesAprovadas / totalIntencoes) * 100 : 0;
+
+    // Taxa de fechamento de indicações (fechadas / total do período)
+    const totalIndicacoes = await this.db.collection('referrals').countDocuments({
+      criadoEm: {
+        $gte: dataInicio,
+        $lte: dataFim,
+      },
+    });
+    const indicacoesFechadas = await this.db.collection('referrals').countDocuments({
+      status: 'fechada',
+      criadoEm: {
+        $gte: dataInicio,
+        $lte: dataFim,
+      },
+    });
+    const taxaFechamentoIndicacoes =
+      totalIndicacoes > 0 ? (indicacoesFechadas / totalIndicacoes) * 100 : 0;
+
+    // Valor total estimado das indicações fechadas
+    const pipelineValor = [
+      {
+        $match: {
+          status: 'fechada',
+          valorEstimado: { $exists: true, $ne: null },
+          criadoEm: {
+            $gte: dataInicio,
+            $lte: dataFim,
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          valorTotal: { $sum: '$valorEstimado' },
+        },
+      },
+    ];
+
+    const resultadoValor = await this.db
+      .collection('referrals')
+      .aggregate(pipelineValor)
+      .toArray();
+
+    const valorTotalEstimado = resultadoValor[0]?.valorTotal || 0;
+
+    // Tempo médio de fechamento (em dias)
+    const pipelineTempoMedio = [
+      {
+        $match: {
+          status: 'fechada',
+          criadoEm: {
+            $exists: true,
+            $ne: null,
+            $gte: dataInicio,
+            $lte: dataFim,
+          },
+          atualizadoEm: { $exists: true, $ne: null },
+        },
+      },
+      {
+        $project: {
+          diasFechamento: {
+            $divide: [
+              {
+                $subtract: ['$atualizadoEm', '$criadoEm'],
+              },
+              1000 * 60 * 60 * 24, // Converter milissegundos para dias
+            ],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          tempoMedio: { $avg: '$diasFechamento' },
+        },
+      },
+    ];
+
+    const resultadoTempoMedio = await this.db
+      .collection('referrals')
+      .aggregate(pipelineTempoMedio)
+      .toArray();
+
+    const tempoMedioFechamento = resultadoTempoMedio[0]?.tempoMedio || 0;
+
+    return {
+      membrosAtivos: totalMembrosAtivos,
+      indicacoesMes,
+      obrigadosMes,
+      taxaConversaoIntencoes: Math.round(taxaConversaoIntencoes * 100) / 100,
+      taxaFechamentoIndicacoes: Math.round(taxaFechamentoIndicacoes * 100) / 100,
+      valorTotalEstimado,
+      tempoMedioFechamento: Math.round(tempoMedioFechamento * 100) / 100,
+    };
+  }
+
+  /**
    * Busca métricas gerais do dashboard
    */
   async buscarMetricasGerais(periodo: PeriodoFiltro): Promise<DashboardMetrics> {
     try {
       const { dataInicio, dataFim } = this.calcularPeriodo(periodo);
 
-      // Total de membros ativos
-      const totalMembrosAtivos = await this.db
-        .collection('members')
-        .countDocuments({ ativo: true });
+      // Buscar métricas do período atual
+      const metricasAtuais = await this.buscarMetricasBasicas(dataInicio, dataFim);
 
       // Total de indicações (todas)
       const totalIndicacoes = await this.db.collection('referrals').countDocuments({});
-
-      // Indicações do período
-      const indicacoesMes = await this.db.collection('referrals').countDocuments({
-        criadoEm: {
-          $gte: dataInicio,
-          $lte: dataFim,
-        },
-      });
 
       // Total de obrigados
       const totalObrigados = await this.db
         .collection('obrigados')
         .countDocuments({ publico: true });
 
-      // Obrigados do período
-      const obrigadosMes = await this.db.collection('obrigados').countDocuments({
-        publico: true,
-        criadoEm: {
-          $gte: dataInicio,
-          $lte: dataFim,
-        },
-      });
-
-      // Taxa de conversão de intenções (aprovadas / total)
-      const totalIntencoes = await this.db.collection('intentions').countDocuments({});
-      const intencoesAprovadas = await this.db.collection('intentions').countDocuments({
-        status: 'approved',
-      });
-      const taxaConversaoIntencoes =
-        totalIntencoes > 0 ? (intencoesAprovadas / totalIntencoes) * 100 : 0;
-
-      // Taxa de fechamento de indicações (fechadas / total)
-      const indicacoesFechadas = await this.db.collection('referrals').countDocuments({
-        status: 'fechada',
-      });
-      const taxaFechamentoIndicacoes =
-        totalIndicacoes > 0 ? (indicacoesFechadas / totalIndicacoes) * 100 : 0;
-
-      // Valor total estimado das indicações fechadas
-      const pipelineValor = [
+      // Valor médio por indicação fechada
+      const pipelineValorMedio = [
         {
           $match: {
             status: 'fechada',
             valorEstimado: { $exists: true, $ne: null },
+            criadoEm: {
+              $gte: dataInicio,
+              $lte: dataFim,
+            },
           },
         },
         {
@@ -104,29 +296,79 @@ export class DashboardRepository {
         },
       ];
 
-      const resultadoValor = await this.db
+      const resultadoValorMedio = await this.db
         .collection('referrals')
-        .aggregate(pipelineValor)
+        .aggregate(pipelineValorMedio)
         .toArray();
 
-      const valorTotalEstimado = resultadoValor[0]?.valorTotal || 0;
-      const countFechadasComValor = resultadoValor[0]?.count || 0;
+      const countFechadasComValor = resultadoValorMedio[0]?.count || 0;
       const valorMedioIndicacao =
-        countFechadasComValor > 0 ? valorTotalEstimado / countFechadasComValor : 0;
+        countFechadasComValor > 0
+          ? (resultadoValorMedio[0]?.valorTotal || 0) / countFechadasComValor
+          : 0;
+
+      // Buscar métricas do período anterior para comparação
+      const { dataInicio: dataInicioAnterior, dataFim: dataFimAnterior, descricao } =
+        this.calcularPeriodoAnterior(periodo);
+      const metricasAnteriores = await this.buscarMetricasBasicas(
+        dataInicioAnterior,
+        dataFimAnterior
+      );
+
+      // Calcular variações
+      const variacoes = {
+        membrosAtivos: this.calcularVariacao(
+          metricasAtuais.membrosAtivos,
+          metricasAnteriores.membrosAtivos,
+          descricao
+        ),
+        indicacoesMes: this.calcularVariacao(
+          metricasAtuais.indicacoesMes,
+          metricasAnteriores.indicacoesMes,
+          descricao
+        ),
+        obrigadosMes: this.calcularVariacao(
+          metricasAtuais.obrigadosMes,
+          metricasAnteriores.obrigadosMes,
+          descricao
+        ),
+        taxaConversaoIntencoes: this.calcularVariacao(
+          metricasAtuais.taxaConversaoIntencoes,
+          metricasAnteriores.taxaConversaoIntencoes,
+          descricao
+        ),
+        taxaFechamentoIndicacoes: this.calcularVariacao(
+          metricasAtuais.taxaFechamentoIndicacoes,
+          metricasAnteriores.taxaFechamentoIndicacoes,
+          descricao
+        ),
+        valorTotalEstimado: this.calcularVariacao(
+          metricasAtuais.valorTotalEstimado,
+          metricasAnteriores.valorTotalEstimado,
+          descricao
+        ),
+        tempoMedioFechamento: this.calcularVariacao(
+          metricasAtuais.tempoMedioFechamento,
+          metricasAnteriores.tempoMedioFechamento,
+          descricao
+        ),
+      };
 
       return {
-        membrosAtivos: totalMembrosAtivos,
+        membrosAtivos: metricasAtuais.membrosAtivos,
         totalIndicacoes,
-        indicacoesMes,
+        indicacoesMes: metricasAtuais.indicacoesMes,
         totalObrigados,
-        obrigadosMes,
-        taxaConversaoIntencoes: Math.round(taxaConversaoIntencoes * 100) / 100,
-        taxaFechamentoIndicacoes: Math.round(taxaFechamentoIndicacoes * 100) / 100,
-        valorTotalEstimado,
+        obrigadosMes: metricasAtuais.obrigadosMes,
+        taxaConversaoIntencoes: metricasAtuais.taxaConversaoIntencoes,
+        taxaFechamentoIndicacoes: metricasAtuais.taxaFechamentoIndicacoes,
+        valorTotalEstimado: metricasAtuais.valorTotalEstimado,
         valorMedioIndicacao: Math.round(valorMedioIndicacao * 100) / 100,
+        tempoMedioFechamento: metricasAtuais.tempoMedioFechamento,
         periodo,
         dataInicio,
         dataFim,
+        variacoes,
       };
     } catch (error) {
       console.error('Erro ao buscar métricas gerais:', error);

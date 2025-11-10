@@ -10,6 +10,10 @@ jest.mock('@/hooks/useNotices', () => ({
   useNotices: jest.fn(),
 }));
 
+jest.mock('@/components/ui/skeleton', () => ({
+  Skeleton: ({ className }: any) => <div data-testid="skeleton" className={className} />,
+}));
+
 const { useNotices: mockUseNotices } = require('@/hooks/useNotices');
 
 function createWrapper() {
@@ -35,11 +39,13 @@ describe('NoticeList', () => {
       data: null,
       isLoading: true,
       error: null,
+      refetch: jest.fn(),
     });
 
     render(<NoticeList publico={true} />, { wrapper: createWrapper() });
 
-    const skeletons = document.querySelectorAll('[class*="skeleton"]');
+    // Verifica se há elementos Skeleton renderizados
+    const skeletons = screen.getAllByTestId('skeleton');
     expect(skeletons.length).toBeGreaterThan(0);
   });
 

@@ -157,6 +157,7 @@ export class ReferralService {
     membroIndicadorId?: string;
     membroIndicadoId?: string;
     status?: ReferralStatus;
+    search?: string;
   }): Promise<Referral[]> {
     try {
       await this.initRepositories();

@@ -92,6 +92,7 @@ describe('ReferralService', () => {
 
       const indicacaoCriada: Referral = {
         _id: '123',
+        membroIndicadorId: 'membro-1',
         ...dadosIndicacao,
         status: 'nova',
         criadoEm: new Date(),

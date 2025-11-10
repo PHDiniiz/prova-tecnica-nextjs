@@ -191,6 +191,7 @@ describe('useReferrals', () => {
 
       const dto: CriarIndicacaoDTO = {
         membroIndicadoId: 'membro-2',
+        empresaContato: 'Empresa Teste',
         descricao: 'Indicação de negócio',
         valorEstimado: 10000,
       };
@@ -225,6 +226,7 @@ describe('useReferrals', () => {
 
       const dto: CriarIndicacaoDTO = {
         membroIndicadoId: 'membro-2',
+        empresaContato: 'Empresa Teste',
         descricao: 'Indicação de negócio',
         valorEstimado: 10000,
       };
@@ -258,6 +260,7 @@ describe('useReferrals', () => {
 
       const dto: CriarIndicacaoDTO = {
         membroIndicadoId: 'membro-2',
+        empresaContato: 'Empresa Teste',
         descricao: 'Indicação de negócio',
         valorEstimado: 10000,
       };
@@ -356,6 +359,127 @@ describe('useReferrals', () => {
       });
 
       expect(result.current.isUpdateStatusError).toBe(true);
+    });
+
+    it('deve tratar erro de rede ao atualizar status', async () => {
+      (global.fetch as jest.Mock).mockRejectedValueOnce(
+        new Error('Network error')
+      );
+
+      const { result } = renderHook(() => useReferrals('membro-1'), {
+        wrapper: createWrapper(),
+      });
+
+      const dto: AtualizarStatusIndicacaoDTO = {
+        status: 'em-contato',
+      };
+
+      await waitFor(async () => {
+        await expect(
+          result.current.atualizarStatus({
+            id: 'referral-1',
+            dto,
+          })
+        ).rejects.toThrow('Network error');
+      });
+
+      expect(result.current.isUpdateStatusError).toBe(true);
+    });
+  });
+
+  describe('Edge cases e tratamento de erros', () => {
+    it('deve tratar erro 500 da API ao listar', async () => {
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: async () => ({
+          success: false,
+          message: 'Erro interno do servidor',
+        }),
+      });
+
+      const { result } = renderHook(() => useReferrals('membro-1'), {
+        wrapper: createWrapper(),
+      });
+
+      const { result: queryResult } = renderHook(
+        () => result.current.listarIndicacoes(),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => {
+        expect(queryResult.current.isError).toBe(true);
+        expect(queryResult.current.error?.message).toContain('Erro interno do servidor');
+      });
+    });
+
+    it('deve resetar estado de criação após sucesso', async () => {
+      const mockResponse = {
+        success: true,
+        data: { _id: 'referral-1' },
+        message: 'Sucesso',
+      };
+
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      const { result } = renderHook(() => useReferrals('membro-1'), {
+        wrapper: createWrapper(),
+      });
+
+      const dto: CriarIndicacaoDTO = {
+        membroIndicadoId: 'membro-2',
+        descricao: 'Teste',
+        empresaContato: 'Empresa Teste',
+      };
+
+      await result.current.criarIndicacao(dto);
+
+      await waitFor(() => {
+        expect(result.current.isCreateSuccess).toBe(true);
+      });
+
+      result.current.resetCreate();
+
+      // Após reset, os estados devem voltar ao inicial
+      expect(result.current.isCreateSuccess).toBe(false);
+      expect(result.current.isCreateError).toBe(false);
+      expect(result.current.createError).toBe(null);
+    });
+
+    it('deve resetar estado de atualização após sucesso', async () => {
+      const mockResponse = {
+        success: true,
+        data: { _id: 'referral-1', status: 'em-contato' },
+        message: 'Sucesso',
+      };
+
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      const { result } = renderHook(() => useReferrals('membro-1'), {
+        wrapper: createWrapper(),
+      });
+
+      await result.current.atualizarStatus({
+        id: 'referral-1',
+        dto: { status: 'em-contato' },
+      });
+
+      await waitFor(() => {
+        expect(result.current.isUpdateStatusSuccess).toBe(true);
+      });
+
+      result.current.resetUpdateStatus();
+
+      // Após reset, os estados devem voltar ao inicial
+      expect(result.current.isUpdateStatusSuccess).toBe(false);
+      expect(result.current.isUpdateStatusError).toBe(false);
+      expect(result.current.updateStatusError).toBe(null);
     });
   });
 });

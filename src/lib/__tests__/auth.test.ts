@@ -10,26 +10,22 @@ import {
   verificarAdminToken,
   respostaNaoAutorizado,
 } from '../auth';
+import { TokenRepository } from '../repositories/TokenRepository';
 
 // Mock do NextRequest e NextResponse
 jest.mock('next/server', () => ({
   NextRequest: class NextRequest {
     url: string;
-    headers: Headers;
+    private _headers: Headers;
 
     constructor(url: string, init?: { headers?: HeadersInit }) {
       this.url = url;
-      this.headers = new Headers(init?.headers);
+      this._headers = new Headers(init?.headers);
     }
 
-    headers = {
-      get: (name: string) => {
-        if (name === 'Authorization' && this.headers) {
-          return this.headers.get('Authorization');
-        }
-        return null;
-      },
-    } as any;
+    get headers(): Headers {
+      return this._headers;
+    }
   },
   NextResponse: {
     json: (data: any, init?: { status?: number }) => {
@@ -42,15 +38,20 @@ jest.mock('next/server', () => ({
   },
 }));
 
-// Mock do MongoDB e TokenRepository
-jest.mock('@/lib/mongodb');
+// Mock do MongoDB
+jest.mock('@/lib/mongodb', () => ({
+  getDatabase: jest.fn(),
+}));
+
+// Mock do TokenRepository - será configurado nos testes específicos
 jest.mock('@/lib/repositories/TokenRepository');
 
 describe('auth.ts', () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
-    jest.resetModules();
+    // Não resetar módulos para manter os mocks configurados
+    // jest.resetModules();
     process.env = {
       ...originalEnv,
       JWT_SECRET: 'test-secret-key-for-jwt-tokens',
@@ -62,6 +63,7 @@ describe('auth.ts', () => {
 
   afterEach(() => {
     process.env = originalEnv;
+    jest.clearAllMocks();
   });
 
   describe('gerarAccessToken', () => {
@@ -80,7 +82,12 @@ describe('auth.ts', () => {
     });
 
     it('deve lançar erro se JWT_SECRET não estiver configurado', () => {
+      const originalSecret = process.env.JWT_SECRET;
       delete process.env.JWT_SECRET;
+
+      // Recarrega o módulo para forçar a leitura da nova variável de ambiente
+      jest.resetModules();
+      const { gerarAccessToken: gerarAccessTokenReloaded } = require('../auth');
 
       const payload = {
         membroId: 'membro-123',
@@ -88,7 +95,11 @@ describe('auth.ts', () => {
         isActive: true,
       };
 
-      expect(() => gerarAccessToken(payload)).toThrow('JWT_SECRET não configurado');
+      expect(() => gerarAccessTokenReloaded(payload)).toThrow('JWT_SECRET não configurado');
+      
+      // Restaura o valor original
+      process.env.JWT_SECRET = originalSecret;
+      jest.resetModules();
     });
   });
 
@@ -107,14 +118,23 @@ describe('auth.ts', () => {
     });
 
     it('deve lançar erro se JWT_SECRET não estiver configurado', () => {
+      const originalSecret = process.env.JWT_SECRET;
       delete process.env.JWT_SECRET;
+
+      // Recarrega o módulo para forçar a leitura da nova variável de ambiente
+      jest.resetModules();
+      const { gerarRefreshToken: gerarRefreshTokenReloaded } = require('../auth');
 
       const payload = {
         membroId: 'membro-123',
         email: 'test@test.com',
       };
 
-      expect(() => gerarRefreshToken(payload)).toThrow('JWT_SECRET não configurado');
+      expect(() => gerarRefreshTokenReloaded(payload)).toThrow('JWT_SECRET não configurado');
+      
+      // Restaura o valor original
+      process.env.JWT_SECRET = originalSecret;
+      jest.resetModules();
     });
   });
 
@@ -190,15 +210,30 @@ describe('auth.ts', () => {
   });
 
   describe('verificarTokenComBlacklist', () => {
-    it('deve verificar token normalmente se não estiver na blacklist', async () => {
-      const { TokenRepository } = await import('@/lib/repositories/TokenRepository');
-      const mockTokenRepository = {
-        estaNaBlacklist: jest.fn().mockResolvedValue(false),
-      };
+    beforeEach(() => {
+      // Garante que os mocks estão configurados antes de cada teste
+      jest.clearAllMocks();
+    });
 
-      jest.spyOn(TokenRepository.prototype, 'estaNaBlacklist').mockImplementation(
-        mockTokenRepository.estaNaBlacklist
-      );
+    it('deve verificar token normalmente se não estiver na blacklist', async () => {
+      // Importa os módulos necessários dentro do teste para garantir que os mocks estão aplicados
+      const { getDatabase } = require('@/lib/mongodb');
+      const { TokenRepository } = require('@/lib/repositories/TokenRepository');
+      
+      // Cria mock da função estaNaBlacklist
+      const mockEstaNaBlacklist = jest.fn().mockResolvedValue(false);
+      const mockDb = {} as any;
+      
+      // Configura o mock do getDatabase
+      (getDatabase as jest.Mock).mockResolvedValue(mockDb);
+      
+      // Cria instância mockada do TokenRepository
+      const mockTokenRepository = {
+        estaNaBlacklist: mockEstaNaBlacklist,
+      } as any;
+      
+      // Configura o mock do TokenRepository para retornar instância mockada
+      (TokenRepository as jest.MockedClass<typeof TokenRepository>).mockImplementation(() => mockTokenRepository);
 
       const payload = {
         membroId: 'membro-123',
@@ -211,17 +246,28 @@ describe('auth.ts', () => {
 
       expect(decoded).not.toBeNull();
       expect(decoded?.membroId).toBe('membro-123');
+      expect(mockEstaNaBlacklist).toHaveBeenCalledWith(token);
     });
 
     it('deve retornar null se token estiver na blacklist', async () => {
-      const { TokenRepository } = await import('@/lib/repositories/TokenRepository');
+      // Importa os módulos necessários dentro do teste para garantir que os mocks estão aplicados
+      const { getDatabase } = require('@/lib/mongodb');
+      const { TokenRepository } = require('@/lib/repositories/TokenRepository');
+      
+      // Cria mock da função estaNaBlacklist
+      const mockEstaNaBlacklist = jest.fn().mockResolvedValue(true);
+      const mockDb = {} as any;
+      
+      // Configura o mock do getDatabase
+      (getDatabase as jest.Mock).mockResolvedValue(mockDb);
+      
+      // Cria instância mockada do TokenRepository
       const mockTokenRepository = {
-        estaNaBlacklist: jest.fn().mockResolvedValue(true),
-      };
-
-      jest.spyOn(TokenRepository.prototype, 'estaNaBlacklist').mockImplementation(
-        mockTokenRepository.estaNaBlacklist
-      );
+        estaNaBlacklist: mockEstaNaBlacklist,
+      } as any;
+      
+      // Configura o mock do TokenRepository para retornar instância mockada
+      (TokenRepository as jest.MockedClass<typeof TokenRepository>).mockImplementation(() => mockTokenRepository);
 
       const token = gerarAccessToken({
         membroId: 'membro-123',
@@ -232,14 +278,12 @@ describe('auth.ts', () => {
       const decoded = await verificarTokenComBlacklist(token);
 
       expect(decoded).toBeNull();
+      expect(mockEstaNaBlacklist).toHaveBeenCalledWith(token);
     });
   });
 
   describe('extrairMembroIdDoToken', () => {
-    it('deve extrair membroId de um token válido', async () => {
-      const { TokenRepository } = await import('@/lib/repositories/TokenRepository');
-      jest.spyOn(TokenRepository.prototype, 'estaNaBlacklist').mockResolvedValue(false);
-
+    it('deve extrair membroId de um token válido', () => {
       const payload = {
         membroId: 'membro-123',
         email: 'test@test.com',
@@ -247,39 +291,36 @@ describe('auth.ts', () => {
       };
 
       const token = gerarAccessToken(payload);
-      const { NextRequest } = await import('next/server');
+      const { NextRequest } = require('next/server');
       const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      const membroId = await extrairMembroIdDoToken(request);
+      const membroId = extrairMembroIdDoToken(request);
 
       expect(membroId).toBe('membro-123');
     });
 
-    it('deve retornar null se não houver header Authorization', async () => {
-      const { NextRequest } = await import('next/server');
+    it('deve retornar null se não houver header Authorization', () => {
+      const { NextRequest } = require('next/server');
       const request = new NextRequest('http://localhost:3000/api/test');
 
-      const membroId = await extrairMembroIdDoToken(request);
+      const membroId = extrairMembroIdDoToken(request);
 
       expect(membroId).toBeNull();
     });
 
-    it('deve retornar null se token for inválido', async () => {
-      const { TokenRepository } = await import('@/lib/repositories/TokenRepository');
-      jest.spyOn(TokenRepository.prototype, 'estaNaBlacklist').mockResolvedValue(false);
-
-      const { NextRequest } = await import('next/server');
+    it('deve retornar null se token for inválido', () => {
+      const { NextRequest } = require('next/server');
       const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
           Authorization: 'Bearer invalid-token',
         },
       });
 
-      const membroId = await extrairMembroIdDoToken(request);
+      const membroId = extrairMembroIdDoToken(request);
 
       expect(membroId).toBeNull();
     });

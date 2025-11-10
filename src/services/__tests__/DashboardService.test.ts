@@ -49,9 +49,11 @@ describe('DashboardService', () => {
         taxaFechamentoIndicacoes: 20,
         valorTotalEstimado: 1000000,
         valorMedioIndicacao: 20000,
+        tempoMedioFechamento: 15.5,
         periodo: 'mensal' as PeriodoFiltro,
         dataInicio: new Date(),
         dataFim: new Date(),
+        variacoes: {},
       };
 
       mockRepository.buscarMetricasGerais.mockResolvedValueOnce(metricasMock);
@@ -149,9 +151,11 @@ describe('DashboardService', () => {
         taxaFechamentoIndicacoes: 20,
         valorTotalEstimado: 1000000,
         valorMedioIndicacao: 20000,
+        tempoMedioFechamento: 15.5,
         periodo: 'mensal' as PeriodoFiltro,
         dataInicio: new Date(),
         dataFim: new Date(),
+        variacoes: {},
       };
 
       const performanceMock = [
@@ -191,9 +195,11 @@ describe('DashboardService', () => {
         taxaFechamentoIndicacoes: 20,
         valorTotalEstimado: 1000000,
         valorMedioIndicacao: 20000,
+        tempoMedioFechamento: 15.5,
         periodo: 'mensal' as PeriodoFiltro,
         dataInicio: new Date(),
         dataFim: new Date(),
+        variacoes: {},
       };
 
       const performanceIndividualMock = {

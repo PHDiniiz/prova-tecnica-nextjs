@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ReferralStatusBadge } from './ReferralStatusBadge';
+import { SearchInput } from '@/components/ui/search-input';
 
 interface ReferralListProps {
   membroId: string;
@@ -27,6 +28,7 @@ export function ReferralList({
   const [filtroStatus, setFiltroStatus] = useState<ReferralStatus | 'todos'>(status || 'todos');
   const [tipoSelecionado, setTipoSelecionado] = useState<'feitas' | 'recebidas' | 'ambas'>(tipo);
   const [pagina, setPagina] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
   const limite = 20;
 
   const { listarIndicacoes, atualizarStatus, isUpdatingStatus } = useReferrals(membroId);
@@ -41,6 +43,7 @@ export function ReferralList({
     status: filtroStatus !== 'todos' ? filtroStatus : undefined,
     page: pagina,
     limit: limite,
+    search: searchTerm || undefined,
   });
 
   const indicacoesFeitas = data?.data.feitas || [];
@@ -96,15 +99,30 @@ export function ReferralList({
     );
   }
 
+  const handleSearch = useCallback((value: string) => {
+    setSearchTerm(value);
+    setPagina(1); // Resetar página ao buscar
+  }, []);
+
   return (
     <div className="space-y-6">
+      {/* Busca */}
+      <div className="w-full">
+        <SearchInput
+          placeholder="Buscar por empresa, descrição..."
+          onSearch={handleSearch}
+          className="w-full"
+        />
+      </div>
+
       {/* Filtros */}
       <div className="flex flex-wrap gap-4 items-center">
         <div className="flex-1 min-w-[200px]">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="filtro-tipo" className="block text-sm font-medium text-gray-700 mb-2">
             Tipo
           </label>
           <select
+            id="filtro-tipo"
             value={tipoSelecionado}
             onChange={(e) => {
               setTipoSelecionado(e.target.value as 'feitas' | 'recebidas' | 'ambas');
@@ -119,10 +137,11 @@ export function ReferralList({
         </div>
 
         <div className="flex-1 min-w-[200px]">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="filtro-status" className="block text-sm font-medium text-gray-700 mb-2">
             Status
           </label>
           <select
+            id="filtro-status"
             value={filtroStatus}
             onChange={(e) => {
               setFiltroStatus(e.target.value as ReferralStatus | 'todos');

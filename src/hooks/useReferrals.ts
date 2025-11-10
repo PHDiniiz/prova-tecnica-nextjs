@@ -52,6 +52,7 @@ interface ListarIndicacoesOptions {
   status?: ReferralStatus;
   page?: number;
   limit?: number;
+  search?: string;
 }
 
 /**
@@ -64,10 +65,10 @@ export function useReferrals(membroId: string) {
    * Query para listar indicações
    */
   const listarIndicacoes = (options: ListarIndicacoesOptions = {}) => {
-    const { tipo = 'ambas', status, page = 1, limit = 20 } = options;
+    const { tipo = 'ambas', status, page = 1, limit = 20, search } = options;
 
     return useQuery<ListarIndicacoesResponse, Error>({
-      queryKey: ['referrals', membroId, tipo, status, page, limit],
+      queryKey: ['referrals', membroId, tipo, status, page, limit, search],
       queryFn: async () => {
         const params = new URLSearchParams({
           tipo,
@@ -76,6 +77,9 @@ export function useReferrals(membroId: string) {
         });
         if (status) {
           params.append('status', status);
+        }
+        if (search) {
+          params.append('search', search);
         }
 
         const response = await fetch(`/api/referrals?${params.toString()}`, {

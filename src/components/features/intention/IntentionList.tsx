@@ -5,6 +5,7 @@ import { Intention, IntentionStatus } from '@/types/intention';
 import { IntentionCard } from './IntentionCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/components/ui/toast';
 import { useIntentions } from '@/hooks/useIntentions';
 
@@ -86,7 +87,13 @@ export function IntentionList({ adminToken }: IntentionListProps) {
     return (
       <div className="space-y-4">
         {[...Array(3)].map((_, i) => (
-          <Skeleton key={i} className="h-48 w-full" />
+          <Card key={i} variant="outlined">
+            <CardContent className="pt-6">
+              <Skeleton className="h-6 w-3/4 mb-4" />
+              <Skeleton className="h-4 w-full mb-2" />
+              <Skeleton className="h-4 w-2/3" />
+            </CardContent>
+          </Card>
         ))}
       </div>
     );

@@ -1,5 +1,6 @@
 'use client';
 
+import { memo, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
@@ -34,7 +35,7 @@ interface MetricCardProps {
  * />
  * ```
  */
-export function MetricCard({
+export const MetricCard = memo(function MetricCard({
   titulo,
   valor,
   variacao,
@@ -42,34 +43,40 @@ export function MetricCard({
   variant = 'default',
   className,
 }: MetricCardProps) {
-  const formatarValor = (val: string | number): string => {
-    if (typeof val === 'number') {
+  const valorFormatado = useMemo(() => {
+    if (typeof valor === 'number') {
       // Formatar números grandes com separador de milhar
-      return new Intl.NumberFormat('pt-BR').format(val);
+      return new Intl.NumberFormat('pt-BR').format(valor);
     }
-    return val;
-  };
+    return valor;
+  }, [valor]);
 
-  const formatarVariacao = (variacao: MetricCardProps['variacao']): string => {
+  const variacaoFormatada = useMemo(() => {
     if (!variacao) return '';
     const sinal = variacao.tipo === 'positivo' ? '+' : variacao.tipo === 'negativo' ? '-' : '';
     const periodo = variacao.periodo ? ` ${variacao.periodo}` : '';
     return `${sinal}${variacao.valor}%${periodo}`;
-  };
+  }, [variacao]);
 
-  const variantStyles = {
-    default: 'border-gray-200 bg-white',
-    primary: 'border-blue-200 bg-blue-50',
-    success: 'border-green-200 bg-green-50',
-    warning: 'border-yellow-200 bg-yellow-50',
-    danger: 'border-red-200 bg-red-50',
-  };
+  const variantStyles = useMemo(
+    () => ({
+      default: 'border-gray-200 bg-white',
+      primary: 'border-blue-200 bg-blue-50',
+      success: 'border-green-200 bg-green-50',
+      warning: 'border-yellow-200 bg-yellow-50',
+      danger: 'border-red-200 bg-red-50',
+    }),
+    []
+  );
 
-  const variacaoStyles = {
-    positivo: 'text-green-600',
-    negativo: 'text-red-600',
-    neutro: 'text-gray-600',
-  };
+  const variacaoStyles = useMemo(
+    () => ({
+      positivo: 'text-green-600',
+      negativo: 'text-red-600',
+      neutro: 'text-gray-600',
+    }),
+    []
+  );
 
   return (
     <motion.div
@@ -93,10 +100,10 @@ export function MetricCard({
         </CardHeader>
         <CardContent>
           <div className="space-y-1">
-            <div className="text-2xl font-bold text-gray-900">{formatarValor(valor)}</div>
+            <div className="text-2xl font-bold text-gray-900">{valorFormatado}</div>
             {variacao && (
               <div className={cn('text-xs font-medium', variacaoStyles[variacao.tipo])}>
-                {formatarVariacao(variacao)}
+                {variacaoFormatada}
               </div>
             )}
           </div>
@@ -104,5 +111,5 @@ export function MetricCard({
       </Card>
     </motion.div>
   );
-}
+});
 

@@ -5,6 +5,8 @@ import {
   RefreshTokenPayload,
   DecodedToken,
 } from '@/types/auth';
+import { getDatabase } from '@/lib/mongodb';
+import { TokenRepository } from '@/lib/repositories/TokenRepository';
 
 /**
  * Verifica se o token de autenticação admin é válido
@@ -70,6 +72,10 @@ export function gerarAccessToken(payload: {
     } as SignOptions);
   } catch (error) {
     console.error('Erro ao gerar access token:', error);
+    // Preserva mensagem original se for erro de configuração
+    if (error instanceof Error && error.message.includes('JWT_SECRET')) {
+      throw error;
+    }
     throw new Error('Não foi possível gerar o token de acesso');
   }
 }
@@ -95,6 +101,10 @@ export function gerarRefreshToken(payload: {
     } as SignOptions);
   } catch (error) {
     console.error('Erro ao gerar refresh token:', error);
+    // Preserva mensagem original se for erro de configuração
+    if (error instanceof Error && error.message.includes('JWT_SECRET')) {
+      throw error;
+    }
     throw new Error('Não foi possível gerar o refresh token');
   }
 }
@@ -135,6 +145,30 @@ export function verificarRefreshToken(token: string): RefreshTokenPayload | null
     return decoded;
   } catch (error) {
     // Token inválido ou expirado
+    return null;
+  }
+}
+
+/**
+ * Verifica um token JWT considerando a blacklist
+ */
+export async function verificarTokenComBlacklist(
+  token: string
+): Promise<DecodedToken | null> {
+  try {
+    // Verifica blacklist primeiro
+    const db = await getDatabase();
+    const tokenRepository = new TokenRepository(db);
+
+    const estaBlacklisted = await tokenRepository.estaNaBlacklist(token);
+    if (estaBlacklisted) {
+      return null; // Token está na blacklist
+    }
+
+    // Verifica token normalmente
+    return verificarToken(token);
+  } catch (error) {
+    console.error('Erro ao verificar token com blacklist:', error);
     return null;
   }
 }

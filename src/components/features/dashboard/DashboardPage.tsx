@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { PeriodoFiltro } from '@/types/dashboard';
 import { useDashboard } from '@/hooks/useDashboard';
 import { MetricCard } from './MetricCard';
 import { PerformanceChart } from './PerformanceChart';
+import { TrendChart } from './TrendChart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,47 +36,63 @@ export function DashboardPage({ adminToken }: DashboardPageProps) {
     enabled: !!adminToken,
   });
 
-  // Calcular variações (simulado - em produção viria do backend)
+  // Calcular métricas formatadas usando dados do backend
   const metricas = useMemo(() => {
     if (!data?.data?.metricasGerais) return null;
 
     const m = data.data.metricasGerais;
+    const variacoes = m.variacoes || {};
+
     return {
       membrosAtivos: {
         valor: m.membrosAtivos,
-        variacao: { valor: 2, tipo: 'positivo' as const, periodo: 'vs mês anterior' },
+        variacao: variacoes.membrosAtivos,
       },
       indicacoesMes: {
         valor: m.indicacoesMes,
-        variacao: { valor: 10, tipo: 'positivo' as const, periodo: 'vs mês anterior' },
+        variacao: variacoes.indicacoesMes,
       },
       obrigadosMes: {
         valor: m.obrigadosMes,
-        variacao: { valor: 5, tipo: 'positivo' as const, periodo: 'vs mês anterior' },
+        variacao: variacoes.obrigadosMes,
       },
       taxaConversao: {
         valor: `${m.taxaConversaoIntencoes.toFixed(1)}%`,
-        variacao: { valor: 2.5, tipo: 'positivo' as const, periodo: 'vs mês anterior' },
+        variacao: variacoes.taxaConversaoIntencoes,
       },
       taxaFechamento: {
         valor: `${m.taxaFechamentoIndicacoes.toFixed(1)}%`,
-        variacao: { valor: 3.2, tipo: 'positivo' as const, periodo: 'vs mês anterior' },
+        variacao: variacoes.taxaFechamentoIndicacoes,
       },
       valorTotal: {
         valor: new Intl.NumberFormat('pt-BR', {
           style: 'currency',
           currency: 'BRL',
         }).format(m.valorTotalEstimado),
-        variacao: { valor: 15, tipo: 'positivo' as const, periodo: 'vs mês anterior' },
+        variacao: variacoes.valorTotalEstimado,
+      },
+      tempoMedioFechamento: {
+        valor: `${m.tempoMedioFechamento.toFixed(1)} dias`,
+        variacao: variacoes.tempoMedioFechamento,
       },
     };
   }, [data]);
 
-  const periodos: { value: PeriodoFiltro; label: string }[] = [
-    { value: 'semanal', label: 'Semanal' },
-    { value: 'mensal', label: 'Mensal' },
-    { value: 'acumulado', label: 'Acumulado' },
-  ];
+  const periodos: { value: PeriodoFiltro; label: string }[] = useMemo(
+    () => [
+      { value: 'semanal', label: 'Semanal' },
+      { value: 'mensal', label: 'Mensal' },
+      { value: 'acumulado', label: 'Acumulado' },
+    ],
+    []
+  );
+
+  const handlePeriodoChange = useCallback(
+    (novoPeriodo: PeriodoFiltro) => {
+      setPeriodo(novoPeriodo);
+    },
+    []
+  );
 
   if (error) {
     return (
@@ -116,7 +133,7 @@ export function DashboardPage({ adminToken }: DashboardPageProps) {
             {periodos.map((p) => (
               <Button
                 key={p.value}
-                onClick={() => setPeriodo(p.value)}
+                onClick={() => handlePeriodoChange(p.value)}
                 variant={periodo === p.value ? 'primary' : 'outline'}
                 size="sm"
               >
@@ -129,7 +146,7 @@ export function DashboardPage({ adminToken }: DashboardPageProps) {
         {/* Métricas principais */}
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[...Array(6)].map((_, i) => (
+            {[...Array(7)].map((_, i) => (
               <Skeleton key={i} className="h-32 w-full" />
             ))}
           </div>
@@ -171,27 +188,53 @@ export function DashboardPage({ adminToken }: DashboardPageProps) {
               variacao={metricas.valorTotal.variacao}
               variant="warning"
             />
+            <MetricCard
+              titulo="Tempo Médio de Fechamento"
+              valor={metricas.tempoMedioFechamento.valor}
+              variacao={metricas.tempoMedioFechamento.variacao}
+              variant="default"
+            />
           </div>
         ) : null}
 
-        {/* Gráfico de performance */}
-        {isLoading ? (
-          <Skeleton className="h-96 w-full" />
-        ) : data?.data?.performanceMembros && data.data.performanceMembros.length > 0 ? (
-          <PerformanceChart
-            dados={data.data.performanceMembros}
-            titulo="Top 10 Membros por Indicações Recebidas"
-            maxItems={10}
-          />
-        ) : (
-          <Card variant="outlined">
-            <CardContent className="pt-6">
-              <div className="text-center text-gray-500 py-8">
-                Nenhum dado de performance disponível para o período selecionado
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {/* Gráficos */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Gráfico de performance */}
+          {isLoading ? (
+            <Skeleton className="h-96 w-full" />
+          ) : data?.data?.performanceMembros && data.data.performanceMembros.length > 0 ? (
+            <PerformanceChart
+              dados={data.data.performanceMembros}
+              titulo="Top 10 Membros por Indicações Recebidas"
+              maxItems={10}
+            />
+          ) : (
+            <Card variant="outlined">
+              <CardContent className="pt-6">
+                <div className="text-center text-gray-500 py-8">
+                  Nenhum dado de performance disponível para o período selecionado
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Gráfico de tendência (placeholder - dados históricos serão implementados futuramente) */}
+          {!isLoading && (
+            <Card variant="outlined">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold">
+                  Tendência de Indicações
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center text-gray-500 py-8">
+                  Gráfico de tendência será implementado quando dados históricos estiverem
+                  disponíveis
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );

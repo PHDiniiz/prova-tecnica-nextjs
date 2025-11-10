@@ -34,22 +34,57 @@ describe('DashboardRepository', () => {
   });
 
   describe('buscarMetricasGerais', () => {
-    it('deve buscar métricas gerais para período mensal', async () => {
+    it('deve buscar métricas gerais para período mensal com variações', async () => {
+      // Período atual
       mockCollection.countDocuments
         .mockResolvedValueOnce(100) // membros ativos
-        .mockResolvedValueOnce(500) // total indicações
         .mockResolvedValueOnce(50) // indicações mês
-        .mockResolvedValueOnce(200) // total obrigados
         .mockResolvedValueOnce(20) // obrigados mês
         .mockResolvedValueOnce(300) // total intenções
         .mockResolvedValueOnce(150) // intenções aprovadas
-        .mockResolvedValueOnce(100); // indicações fechadas
+        .mockResolvedValueOnce(100) // total indicações período
+        .mockResolvedValueOnce(50) // indicações fechadas período
+        // Período anterior
+        .mockResolvedValueOnce(90) // membros ativos anterior
+        .mockResolvedValueOnce(40) // indicações mês anterior
+        .mockResolvedValueOnce(15) // obrigados mês anterior
+        .mockResolvedValueOnce(250) // total intenções anterior
+        .mockResolvedValueOnce(120) // intenções aprovadas anterior
+        .mockResolvedValueOnce(80) // total indicações período anterior
+        .mockResolvedValueOnce(40) // indicações fechadas período anterior
+        // Totais
+        .mockResolvedValueOnce(500) // total indicações
+        .mockResolvedValueOnce(200); // total obrigados
 
-      mockCollection.aggregate.mockReturnValueOnce({
-        toArray: jest.fn().mockResolvedValueOnce([
-          { valorTotal: 1000000, count: 50 },
-        ]),
-      });
+      // Agregações para período atual
+      mockCollection.aggregate
+        .mockReturnValueOnce({
+          toArray: jest.fn().mockResolvedValueOnce([
+            { valorTotal: 1000000 },
+          ]),
+        })
+        .mockReturnValueOnce({
+          toArray: jest.fn().mockResolvedValueOnce([
+            { tempoMedio: 15.5 },
+          ]),
+        })
+        // Agregações para período anterior
+        .mockReturnValueOnce({
+          toArray: jest.fn().mockResolvedValueOnce([
+            { valorTotal: 800000 },
+          ]),
+        })
+        .mockReturnValueOnce({
+          toArray: jest.fn().mockResolvedValueOnce([
+            { tempoMedio: 18.2 },
+          ]),
+        })
+        // Valor médio
+        .mockReturnValueOnce({
+          toArray: jest.fn().mockResolvedValueOnce([
+            { valorTotal: 1000000, count: 50 },
+          ]),
+        });
 
       const resultado = await repository.buscarMetricasGerais('mensal');
 
@@ -58,26 +93,57 @@ describe('DashboardRepository', () => {
       expect(resultado.indicacoesMes).toBe(50);
       expect(resultado.totalObrigados).toBe(200);
       expect(resultado.obrigadosMes).toBe(20);
+      expect(resultado.tempoMedioFechamento).toBe(15.5);
       expect(resultado.periodo).toBe('mensal');
-      expect(mockCollection.countDocuments).toHaveBeenCalledTimes(8);
+      
+      // Verificar variações
+      expect(resultado.variacoes).toBeDefined();
+      expect(resultado.variacoes?.membrosAtivos?.valor).toBeCloseTo(11.11, 1);
+      expect(resultado.variacoes?.membrosAtivos?.tipo).toBe('positivo');
+      expect(resultado.variacoes?.indicacoesMes?.valor).toBeCloseTo(25, 1);
+      expect(resultado.variacoes?.tempoMedioFechamento?.valor).toBeCloseTo(-14.84, 1);
+      expect(resultado.variacoes?.tempoMedioFechamento?.tipo).toBe('negativo');
     });
 
     it('deve calcular taxa de conversão corretamente', async () => {
       mockCollection.countDocuments
         .mockResolvedValueOnce(100)
-        .mockResolvedValueOnce(500)
         .mockResolvedValueOnce(50)
-        .mockResolvedValueOnce(200)
         .mockResolvedValueOnce(20)
         .mockResolvedValueOnce(200) // total intenções
         .mockResolvedValueOnce(100) // intenções aprovadas (50%)
-        .mockResolvedValueOnce(100);
+        .mockResolvedValueOnce(100)
+        .mockResolvedValueOnce(50)
+        // Período anterior
+        .mockResolvedValueOnce(90)
+        .mockResolvedValueOnce(40)
+        .mockResolvedValueOnce(15)
+        .mockResolvedValueOnce(180)
+        .mockResolvedValueOnce(90)
+        .mockResolvedValueOnce(80)
+        .mockResolvedValueOnce(40)
+        // Totais
+        .mockResolvedValueOnce(500)
+        .mockResolvedValueOnce(200);
 
-      mockCollection.aggregate.mockReturnValueOnce({
-        toArray: jest.fn().mockResolvedValueOnce([
-          { valorTotal: 1000000, count: 50 },
-        ]),
-      });
+      mockCollection.aggregate
+        .mockReturnValueOnce({
+          toArray: jest.fn().mockResolvedValueOnce([{ valorTotal: 1000000 }]),
+        })
+        .mockReturnValueOnce({
+          toArray: jest.fn().mockResolvedValueOnce([{ tempoMedio: 15 }]),
+        })
+        .mockReturnValueOnce({
+          toArray: jest.fn().mockResolvedValueOnce([{ valorTotal: 800000 }]),
+        })
+        .mockReturnValueOnce({
+          toArray: jest.fn().mockResolvedValueOnce([{ tempoMedio: 18 }]),
+        })
+        .mockReturnValueOnce({
+          toArray: jest.fn().mockResolvedValueOnce([
+            { valorTotal: 1000000, count: 50 },
+          ]),
+        });
 
       const resultado = await repository.buscarMetricasGerais('mensal');
 
@@ -93,16 +159,87 @@ describe('DashboardRepository', () => {
         .mockResolvedValueOnce(0)
         .mockResolvedValueOnce(0)
         .mockResolvedValueOnce(0)
+        // Período anterior
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(0)
+        // Totais
+        .mockResolvedValueOnce(0)
         .mockResolvedValueOnce(0);
 
-      mockCollection.aggregate.mockReturnValueOnce({
-        toArray: jest.fn().mockResolvedValueOnce([]),
-      });
+      mockCollection.aggregate
+        .mockReturnValueOnce({
+          toArray: jest.fn().mockResolvedValueOnce([]),
+        })
+        .mockReturnValueOnce({
+          toArray: jest.fn().mockResolvedValueOnce([]),
+        })
+        .mockReturnValueOnce({
+          toArray: jest.fn().mockResolvedValueOnce([]),
+        })
+        .mockReturnValueOnce({
+          toArray: jest.fn().mockResolvedValueOnce([]),
+        })
+        .mockReturnValueOnce({
+          toArray: jest.fn().mockResolvedValueOnce([]),
+        });
 
       const resultado = await repository.buscarMetricasGerais('mensal');
 
       expect(resultado.taxaConversaoIntencoes).toBe(0);
       expect(resultado.taxaFechamentoIndicacoes).toBe(0);
+      expect(resultado.tempoMedioFechamento).toBe(0);
+    });
+
+    it('deve calcular tempo médio de fechamento corretamente', async () => {
+      mockCollection.countDocuments
+        .mockResolvedValueOnce(100)
+        .mockResolvedValueOnce(50)
+        .mockResolvedValueOnce(20)
+        .mockResolvedValueOnce(200)
+        .mockResolvedValueOnce(100)
+        .mockResolvedValueOnce(100)
+        .mockResolvedValueOnce(50)
+        // Período anterior
+        .mockResolvedValueOnce(90)
+        .mockResolvedValueOnce(40)
+        .mockResolvedValueOnce(15)
+        .mockResolvedValueOnce(180)
+        .mockResolvedValueOnce(90)
+        .mockResolvedValueOnce(80)
+        .mockResolvedValueOnce(40)
+        // Totais
+        .mockResolvedValueOnce(500)
+        .mockResolvedValueOnce(200);
+
+      // Tempo médio de 20 dias
+      mockCollection.aggregate
+        .mockReturnValueOnce({
+          toArray: jest.fn().mockResolvedValueOnce([{ valorTotal: 1000000 }]),
+        })
+        .mockReturnValueOnce({
+          toArray: jest.fn().mockResolvedValueOnce([{ tempoMedio: 20.5 }]),
+        })
+        .mockReturnValueOnce({
+          toArray: jest.fn().mockResolvedValueOnce([{ valorTotal: 800000 }]),
+        })
+        .mockReturnValueOnce({
+          toArray: jest.fn().mockResolvedValueOnce([{ tempoMedio: 25.0 }]),
+        })
+        .mockReturnValueOnce({
+          toArray: jest.fn().mockResolvedValueOnce([
+            { valorTotal: 1000000, count: 50 },
+          ]),
+        });
+
+      const resultado = await repository.buscarMetricasGerais('mensal');
+
+      expect(resultado.tempoMedioFechamento).toBe(20.5);
+      expect(resultado.variacoes?.tempoMedioFechamento?.valor).toBeCloseTo(-18, 1);
     });
   });
 

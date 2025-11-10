@@ -77,9 +77,11 @@ describe('GET /api/dashboard', () => {
       taxaFechamentoIndicacoes: 20,
       valorTotalEstimado: 1000000,
       valorMedioIndicacao: 20000,
+      tempoMedioFechamento: 15.5,
       periodo: 'mensal' as const,
       dataInicio: new Date(),
       dataFim: new Date(),
+      variacoes: {},
     };
 
     const performanceMock = [
@@ -150,9 +152,11 @@ describe('GET /api/dashboard', () => {
         taxaFechamentoIndicacoes: 20,
         valorTotalEstimado: 1000000,
         valorMedioIndicacao: 20000,
+        tempoMedioFechamento: 15.5,
         periodo: 'mensal' as const,
         dataInicio: new Date(),
         dataFim: new Date(),
+        variacoes: {},
       },
     });
 
@@ -186,9 +190,11 @@ describe('GET /api/dashboard', () => {
         taxaFechamentoIndicacoes: 20,
         valorTotalEstimado: 1000000,
         valorMedioIndicacao: 20000,
+        tempoMedioFechamento: 15.5,
         periodo: 'mensal' as const,
         dataInicio: new Date(),
         dataFim: new Date(),
+        variacoes: {},
       },
       performanceIndividual: {
         membroId,

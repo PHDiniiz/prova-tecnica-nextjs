@@ -1,3 +1,5 @@
+/// <reference types="jest" />
+
 // Importa os matchers customizados do jest-dom
 import '@testing-library/jest-dom';
 
@@ -20,6 +22,15 @@ if (!process.env.ADMIN_TOKEN) {
 }
 if (!process.env.NEXT_PUBLIC_APP_URL) {
   process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000';
+}
+if (!process.env.JWT_SECRET) {
+  process.env.JWT_SECRET = 'test-jwt-secret-key-for-testing-only';
+}
+if (!process.env.JWT_ACCESS_EXPIRES_IN) {
+  process.env.JWT_ACCESS_EXPIRES_IN = '15m';
+}
+if (!process.env.JWT_REFRESH_EXPIRES_IN) {
+  process.env.JWT_REFRESH_EXPIRES_IN = '7d';
 }
 
 // Mock do MongoDB para evitar problemas com ESM
@@ -99,24 +110,52 @@ jest.mock('@faker-js/faker', () => {
 // Polyfill para Request/Response (necessário para testes de API Routes)
 if (typeof global.Request === 'undefined') {
   global.Request = class Request {
+    private _url: string;
+    method: string;
+    headers: Headers;
+    body: BodyInit | null;
+    
     constructor(input: string | Request, init?: RequestInit) {
       // Implementação básica para testes
-      this.url = typeof input === 'string' ? input : input.url;
+      this._url = typeof input === 'string' ? input : input.url;
       this.method = init?.method || 'GET';
       this.headers = new Headers(init?.headers);
       this.body = init?.body || null;
     }
-    url: string;
-    method: string;
-    headers: Headers;
-    body: BodyInit | null;
+    
+    get url(): string {
+      return this._url;
+    }
+    
     async json() {
       if (this.body) {
         return JSON.parse(this.body as string);
       }
       return {};
     }
-  } as any;
+  } as unknown as typeof Request;
+}
+
+if (typeof global.Response === 'undefined') {
+  global.Response = class Response {
+    constructor(public body?: BodyInit | null, public init?: ResponseInit) {}
+    status = this.init?.status || 200;
+    statusText = this.init?.statusText || 'OK';
+    headers = new Headers(this.init?.headers);
+    ok = this.status >= 200 && this.status < 300;
+    async json() {
+      if (this.body) {
+        return JSON.parse(this.body as string);
+      }
+      return {};
+    }
+    async text() {
+      if (this.body) {
+        return typeof this.body === 'string' ? this.body : JSON.stringify(this.body);
+      }
+      return '';
+    }
+  } as unknown as typeof Response;
 }
 
 // Mock do Next.js router

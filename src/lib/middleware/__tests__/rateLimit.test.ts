@@ -7,6 +7,27 @@ jest.mock('@/lib/mongodb', () => ({
   getDatabase: jest.fn(),
 }));
 
+// Mock do NextRequest para evitar problemas com propriedade url readonly
+jest.mock('next/server', () => {
+  const actual = jest.requireActual('next/server');
+  return {
+    ...actual,
+    NextRequest: class MockNextRequest {
+      url: string;
+      private _headers: Headers;
+      
+      constructor(url: string, init?: { headers?: HeadersInit }) {
+        this.url = url;
+        this._headers = new Headers(init?.headers);
+      }
+      
+      get headers(): Headers {
+        return this._headers;
+      }
+    },
+  };
+});
+
 describe('RateLimiter', () => {
   let rateLimiter: RateLimiter;
   let mockCollection: any;

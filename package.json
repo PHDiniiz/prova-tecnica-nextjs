@@ -1,6 +1,6 @@
 {
   "name": "prova-tecnica-nextjs",
-  "version": "0.0.2",
+  "version": "0.1.1",
   "private": true,
   "packageManager": "pnpm@10.19.0",
   "engines": {
@@ -16,8 +16,7 @@
     "test:coverage": "jest --coverage",
     "typecheck": "pnpm tsc --noEmit -p tsconfig.json",
     "test:unit": "jest --coverage",
-    "test:e2e": "cypress run",
-    "test:e2e:open": "cypress open",
+    "test:integration": "jest --testPathPattern=integration",
     "ci:checks": "pnpm typecheck && pnpm lint && pnpm test:unit"
   },
   "dependencies": {
@@ -47,7 +46,6 @@
     "@types/node": "^24.0.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "cypress": "^15.6.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.1",
     "husky": "^9.1.7",

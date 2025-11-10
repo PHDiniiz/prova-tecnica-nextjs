@@ -10,6 +10,10 @@ jest.mock('@/hooks/useMeetings', () => ({
   useMeetings: jest.fn(),
 }));
 
+jest.mock('@/components/ui/skeleton', () => ({
+  Skeleton: ({ className }: any) => <div data-testid="skeleton" className={className} />,
+}));
+
 const { useMeetings: mockUseMeetings } = require('@/hooks/useMeetings');
 
 function createWrapper() {
@@ -44,7 +48,7 @@ describe('MeetingList', () => {
     );
 
     // Verifica se há skeletons (componente Skeleton)
-    const skeletons = document.querySelectorAll('[class*="skeleton"]');
+    const skeletons = screen.getAllByTestId('skeleton');
     expect(skeletons.length).toBeGreaterThan(0);
   });
 
@@ -69,7 +73,7 @@ describe('MeetingList', () => {
     mockUseMeetings.mockReturnValue({
       data: null,
       isLoading: false,
-      error: new Error('Erro ao carregar'),
+      error: new Error('Erro ao carregar reuniões'),
       refetch: mockRefetch,
     });
 
@@ -78,8 +82,8 @@ describe('MeetingList', () => {
       { wrapper: createWrapper() }
     );
 
-    expect(screen.getByText(/erro ao carregar reuniões/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /tentar novamente/i })).toBeInTheDocument();
+    expect(screen.getByText(/Erro ao carregar reuniões/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Tentar Novamente/i })).toBeInTheDocument();
   });
 });
 

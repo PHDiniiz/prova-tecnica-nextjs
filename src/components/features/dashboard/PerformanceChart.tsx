@@ -1,5 +1,6 @@
 'use client';
 
+import { memo, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MemberPerformance } from '@/types/dashboard';
 import { cn } from '@/lib/utils';
@@ -27,21 +28,29 @@ interface PerformanceChartProps {
  * />
  * ```
  */
-export function PerformanceChart({
+export const PerformanceChart = memo(function PerformanceChart({
   dados,
   titulo = 'Performance dos Membros',
   maxItems = 10,
   className,
 }: PerformanceChartProps) {
   // Ordenar por total de indicações recebidas e limitar
-  const dadosOrdenados = [...dados]
-    .sort((a, b) => b.totalIndicacoesRecebidas - a.totalIndicacoesRecebidas)
-    .slice(0, maxItems);
+  const dadosOrdenados = useMemo(
+    () =>
+      [...dados]
+        .sort((a, b) => b.totalIndicacoesRecebidas - a.totalIndicacoesRecebidas)
+        .slice(0, maxItems),
+    [dados, maxItems]
+  );
 
   // Calcular valor máximo para normalizar as barras
-  const maxIndicacoes = Math.max(
-    ...dadosOrdenados.map((d) => d.totalIndicacoesRecebidas),
-    1
+  const maxIndicacoes = useMemo(
+    () =>
+      Math.max(
+        ...dadosOrdenados.map((d) => d.totalIndicacoesRecebidas),
+        1
+      ),
+    [dadosOrdenados]
   );
 
   return (
@@ -87,5 +96,5 @@ export function PerformanceChart({
       </CardContent>
     </Card>
   );
-}
+});
 

@@ -14,6 +14,7 @@ export class ReferralRepository {
     membroIndicadorId?: string;
     membroIndicadoId?: string;
     status?: ReferralStatus;
+    search?: string;
   }): Promise<Referral[]> {
     try {
       const query: any = {};
@@ -25,6 +26,13 @@ export class ReferralRepository {
       }
       if (filtro?.status) {
         query.status = filtro.status;
+      }
+      if (filtro?.search) {
+        // Busca case-insensitive em empresaContato e descricao
+        query.$or = [
+          { empresaContato: { $regex: filtro.search, $options: 'i' } },
+          { descricao: { $regex: filtro.search, $options: 'i' } },
+        ];
       }
 
       const indicacoes = await this.db

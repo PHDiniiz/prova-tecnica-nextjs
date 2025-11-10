@@ -227,7 +227,7 @@ describe('useCreateObrigado', () => {
       wrapper,
     });
 
-    const dto: CriarObrigadoDTO = {
+    const dto: CriarObrigadoDTO & { membroId: string } = {
       indicacaoId: 'indicacao-1',
       mensagem: 'Muito obrigado!',
       publico: true,

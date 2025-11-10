@@ -68,8 +68,8 @@ export function useDashboard(options: UseDashboardOptions) {
       return response.json();
     },
     enabled: enabled && !!adminToken,
-    staleTime: 1000 * 60 * 5, // 5 minutos - dados de dashboard não mudam frequentemente
-    gcTime: 1000 * 60 * 10, // 10 minutos - manter em cache por mais tempo
+    staleTime: 1000 * 60 * 10, // 10 minutos - dados de dashboard não mudam frequentemente
+    gcTime: 1000 * 60 * 30, // 30 minutos - manter em cache por mais tempo
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,

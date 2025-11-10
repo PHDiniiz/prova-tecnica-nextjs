@@ -283,7 +283,7 @@ export function ReferralForm({
                 disabled={isCreating || membrosDisponiveis.length === 0}
                 className="flex-1"
               >
-                Criar Indicação
+                {isCreating ? 'Criando...' : 'Criar Indicação'}
               </Button>
               {onCancel && (
                 <Button
