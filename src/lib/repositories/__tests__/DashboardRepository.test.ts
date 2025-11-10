@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { DashboardRepository } from '../DashboardRepository';
 import { Db } from 'mongodb';
 import { PeriodoFiltro } from '@/types/dashboard';

@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { GET } from '../route';
 import { DashboardService } from '@/services/DashboardService';
 import { NextRequest } from 'next/server';
@@ -161,7 +164,7 @@ describe('GET /api/dashboard', () => {
     });
 
     const response = await GET(request);
-    const data = await response.json();
+    await response.json();
 
     expect(response.status).toBe(200);
     expect(mockService.obterDashboard).toHaveBeenCalledWith({
@@ -213,7 +216,7 @@ describe('GET /api/dashboard', () => {
     );
 
     const response = await GET(request);
-    const data = await response.json();
+    await response.json();
 
     expect(response.status).toBe(200);
     expect(mockService.obterDashboard).toHaveBeenCalledWith({

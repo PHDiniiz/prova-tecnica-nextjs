@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { MeetingRepository } from '../MeetingRepository';
 import { Db, ObjectId } from 'mongodb';
 import { Meeting, CheckIn } from '@/types/meeting';

@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { GET, POST } from '../route';
 import { NoticeService } from '@/services/NoticeService';
 import { NextRequest } from 'next/server';
@@ -80,6 +83,8 @@ describe('GET /api/notices', () => {
         conteudo: 'Conteúdo do aviso',
         tipo: 'info' as const,
         ativo: true,
+        criadoEm: new Date(),
+        atualizadoEm: new Date(),
       },
     ];
 
@@ -110,7 +115,7 @@ describe('GET /api/notices', () => {
     });
 
     const response = await GET(request);
-    const data = await response.json();
+    await response.json();
 
     expect(response.status).toBe(200);
     expect(mockService.listarAvisos).toHaveBeenCalled();
@@ -153,6 +158,8 @@ describe('POST /api/notices', () => {
       conteudo: 'Conteúdo do aviso',
       tipo: 'info' as const,
       ativo: true,
+      criadoEm: new Date(),
+      atualizadoEm: new Date(),
     };
 
     mockService.criarAviso.mockResolvedValueOnce(avisoCriado);

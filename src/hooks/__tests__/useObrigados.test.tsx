@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode } from 'react';
@@ -140,7 +143,7 @@ describe('useCreateObrigado', () => {
       wrapper: createWrapper(),
     });
 
-    const dto: CriarObrigadoDTO = {
+    const dto: CriarObrigadoDTO & { membroId: string } = {
       indicacaoId: 'indicacao-1',
       mensagem: 'Muito obrigado pela indicação!',
       publico: true,
@@ -179,7 +182,7 @@ describe('useCreateObrigado', () => {
       wrapper: createWrapper(),
     });
 
-    const dto: CriarObrigadoDTO = {
+    const dto: CriarObrigadoDTO & { membroId: string } = {
       indicacaoId: 'indicacao-1',
       mensagem: 'Muito obrigado!',
       publico: true,
@@ -224,7 +227,7 @@ describe('useCreateObrigado', () => {
       wrapper,
     });
 
-    const dto: CriarObrigadoDTO = {
+    const dto: CriarObrigadoDTO & { membroId: string } = {
       indicacaoId: 'indicacao-1',
       mensagem: 'Muito obrigado!',
       publico: true,

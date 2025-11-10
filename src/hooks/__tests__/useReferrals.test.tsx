@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode } from 'react';
@@ -188,6 +191,7 @@ describe('useReferrals', () => {
 
       const dto: CriarIndicacaoDTO = {
         membroIndicadoId: 'membro-2',
+        empresaContato: 'Empresa ABC',
         descricao: 'Indicação de negócio',
         valorEstimado: 10000,
       };
@@ -222,6 +226,7 @@ describe('useReferrals', () => {
 
       const dto: CriarIndicacaoDTO = {
         membroIndicadoId: 'membro-2',
+        empresaContato: 'Empresa ABC',
         descricao: 'Indicação de negócio',
         valorEstimado: 10000,
       };
@@ -255,6 +260,7 @@ describe('useReferrals', () => {
 
       const dto: CriarIndicacaoDTO = {
         membroIndicadoId: 'membro-2',
+        empresaContato: 'Empresa ABC',
         descricao: 'Indicação de negócio',
         valorEstimado: 10000,
       };

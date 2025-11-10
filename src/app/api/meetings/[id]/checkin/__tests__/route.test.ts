@@ -1,10 +1,31 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { POST } from '../route';
 import { MeetingService } from '@/services/MeetingService';
 import { NextRequest } from 'next/server';
-import { BusinessError } from '@/lib/errors/BusinessError';
 
 // Mock do MeetingService
 jest.mock('@/services/MeetingService');
+
+// Mock da função de autenticação
+jest.mock('@/lib/auth', () => ({
+  extrairMembroIdDoToken: jest.fn(async (request: NextRequest) => {
+    const authHeader = request.headers.get('Authorization');
+    if (authHeader?.includes('Bearer membro-token-123')) {
+      return 'membro-token-123';
+    }
+    return null;
+  }),
+  respostaNaoAutorizado: jest.fn(() => ({
+    json: async () => ({
+      success: false,
+      error: 'Não autorizado',
+      message: 'Token de autenticação inválido ou ausente',
+    }),
+    status: 401,
+  })),
+}));
 
 // Mock do NextRequest para testes
 jest.mock('next/server', () => ({
@@ -59,11 +80,16 @@ describe('POST /api/meetings/[id]/checkin', () => {
       _id: 'meeting-1',
       membro1Id: 'membro-1',
       membro2Id: 'membro-2',
-      checkInMembro1: {
-        presente: true,
-        observacoes: 'Presente',
-      },
-      status: 'agendada' as const,
+      dataReuniao: new Date(),
+      checkIns: [
+        {
+          membroId: 'membro-1',
+          dataCheckIn: new Date(),
+          presente: true,
+        },
+      ],
+      criadoEm: new Date(),
+      atualizadoEm: new Date(),
     };
 
     mockService.registrarCheckIn.mockResolvedValueOnce(reuniaoAtualizada);
@@ -71,7 +97,6 @@ describe('POST /api/meetings/[id]/checkin', () => {
     const requestBody = {
       membroId: membroToken,
       presente: true,
-      observacoes: 'Presente',
     };
 
     const request = new NextRequest(

@@ -10,7 +10,7 @@ export interface Member {
   cargo?: string;
   linkedin?: string;
   areaAtuacao?: string;
-  intencaoId?: string | null;
+  intencaoId?: string;
   ativo: boolean;
   criadoEm: Date;
   atualizadoEm: Date;

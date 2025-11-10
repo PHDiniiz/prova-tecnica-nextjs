@@ -9,6 +9,7 @@ Sistema completo para digitalizar e otimizar a gestão de grupos de networking, 
 - [Pré-requisitos](#-pré-requisitos)
 - [Instalação](#-instalação)
 - [Configuração](#-configuração)
+- [Autenticação JWT](#-autenticação-jwt)
 - [Scripts Disponíveis](#-scripts-disponíveis)
 - [Estrutura do Projeto](#-estrutura-do-projeto)
 - [Arquitetura](#-arquitetura)
@@ -23,6 +24,7 @@ Sistema completo para digitalizar e otimizar a gestão de grupos de networking, 
 
 - ✅ **Gestão de Membros**: Fluxo completo de admissão (intenção → aprovação → cadastro)
 - ✅ **Sistema de Indicações**: Criação e acompanhamento de indicações de negócios entre membros
+- ✅ **Autenticação JWT**: Sistema completo de autenticação com access token e refresh token
 - ✅ **UI Otimista**: Feedback instantâneo para melhor experiência do usuário
 - ✅ **Realtime Refetch**: Atualizações automáticas em tempo real
 - ✅ **Mobile First**: Design responsivo e otimizado para todos os dispositivos
@@ -47,6 +49,7 @@ Sistema completo para digitalizar e otimizar a gestão de grupos de networking, 
 - **Next.js API Routes** - API REST integrada
 - **MongoDB 7.0.0** - Banco de dados NoSQL
 - **Mongoose** - ODM para MongoDB
+- **jsonwebtoken 9.0.2** - Autenticação JWT
 
 ### Testes
 - **Jest 30.2.0** - Framework de testes
@@ -88,6 +91,9 @@ Edite o arquivo `.env.local` com suas configurações:
 MONGODB_URI=mongodb+srv://usuario:senha@cluster.mongodb.net/
 MONGODB_DB_NAME=networking_group
 ADMIN_TOKEN=seu_token_secreto_aqui
+JWT_SECRET=seu_jwt_secret_super_seguro_aqui_minimo_32_caracteres
+JWT_ACCESS_EXPIRES_IN=15m
+JWT_REFRESH_EXPIRES_IN=7d
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
@@ -107,9 +113,10 @@ Acesse [http://localhost:3000](http://localhost:3000) no navegador.
 | `MONGODB_URI` | URI de conexão do MongoDB | Sim |
 | `MONGODB_DB_NAME` | Nome do banco de dados | Sim |
 | `ADMIN_TOKEN` | Token secreto para acesso administrativo | Sim |
+| `JWT_SECRET` | Secret para tokens JWT (mínimo 32 caracteres) | Sim |
+| `JWT_ACCESS_EXPIRES_IN` | Tempo de expiração do access token (padrão: 15m) | Não |
+| `JWT_REFRESH_EXPIRES_IN` | Tempo de expiração do refresh token (padrão: 7d) | Não |
 | `NEXT_PUBLIC_APP_URL` | URL base da aplicação | Sim |
-| `JWT_SECRET` | Secret para tokens JWT (futuro) | Não |
-| `JWT_EXPIRES_IN` | Tempo de expiração do JWT (futuro) | Não |
 
 ### MongoDB
 
@@ -118,6 +125,67 @@ O projeto utiliza MongoDB como banco de dados. Você pode usar:
 - **MongoDB local** (para desenvolvimento)
 
 Certifique-se de que a string de conexão está correta no `.env.local`.
+
+## 🔐 Autenticação JWT
+
+O sistema implementa autenticação JWT completa com access token e refresh token.
+
+### Fluxo de Autenticação
+
+1. **Login**: O membro faz login com email via `POST /api/auth/login`
+   - Retorna `accessToken` (15 minutos) e `refreshToken` (7 dias)
+   - Verifica se o membro existe e está ativo
+
+2. **Uso do Token**: 
+   - Access token é enviado no header `Authorization: Bearer {accessToken}`
+   - Todas as rotas protegidas validam o token automaticamente
+
+3. **Renovação**: Quando o access token expira, use `POST /api/auth/refresh`
+   - Envia o refresh token
+   - Retorna novo access token
+
+4. **Logout**: `POST /api/auth/logout`
+   - Cliente deve remover tokens do storage
+
+### Endpoints de Autenticação
+
+- `POST /api/auth/login` - Login de membros
+- `POST /api/auth/refresh` - Renovar access token
+- `POST /api/auth/logout` - Logout (informativo)
+
+### Rotas Protegidas
+
+Todas as rotas abaixo requerem autenticação JWT válida:
+
+- `POST /api/referrals` - Criar indicação
+- `GET /api/referrals` - Listar indicações
+- `PATCH /api/referrals/[id]/status` - Atualizar status
+- `POST /api/obrigados` - Criar agradecimento
+- `GET /api/meetings` - Listar reuniões
+- `POST /api/meetings` - Criar reunião
+- `PATCH /api/meetings/[id]` - Atualizar reunião
+- `POST /api/meetings/[id]/checkin` - Realizar check-in
+
+### Exemplo de Uso
+
+```typescript
+// Login
+const response = await fetch('/api/auth/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email: 'membro@example.com' }),
+});
+
+const { accessToken, refreshToken } = await response.json();
+
+// Usar token em requisições
+const data = await fetch('/api/referrals', {
+  headers: {
+    'Authorization': `Bearer ${accessToken}`,
+    'Content-Type': 'application/json',
+  },
+});
+```
 
 ## 📜 Scripts Disponíveis
 
@@ -147,11 +215,15 @@ src/
 ├── app/                    # Next.js App Router
 │   ├── (public)/          # Rotas públicas
 │   │   ├── intention/     # Formulário de intenção
-│   │   └── register/       # Cadastro completo
+│   │   └── register/      # Cadastro completo
 │   ├── (admin)/           # Rotas administrativas
 │   │   ├── intents/       # Gestão de intenções
-│   │   └── referrals/   # Gestão de indicações
+│   │   └── referrals/     # Gestão de indicações
 │   ├── api/               # API Routes
+│   │   ├── auth/          # Endpoints de autenticação JWT
+│   │   │   ├── login/     # Login
+│   │   │   ├── refresh/   # Refresh token
+│   │   │   └── logout/    # Logout
 │   │   ├── intentions/    # Endpoints de intenções
 │   │   ├── invites/       # Endpoints de convites
 │   │   ├── members/       # Endpoints de membros
@@ -176,11 +248,13 @@ src/
 │   └── ReferralService.ts
 │
 ├── lib/                   # Infraestrutura
+│   ├── auth.ts            # Funções de autenticação JWT
 │   ├── mongodb.ts         # Conexão MongoDB
 │   ├── repositories/      # Repositórios de dados
 │   └── utils.ts           # Utilitários
 │
 ├── types/                 # Tipos TypeScript
+│   ├── auth.ts            # Tipos de autenticação JWT
 │   ├── intention.ts
 │   ├── member.ts
 │   ├── invite.ts
@@ -215,6 +289,7 @@ O projeto segue os princípios de **Clean Architecture** e **Clean Code**:
 4. **Infrastructure** (`lib/`)
    - Repositórios
    - Conexão com banco de dados
+   - Autenticação JWT
    - Utilitários
 
 ### Padrões Utilizados
@@ -223,6 +298,7 @@ O projeto segue os princípios de **Clean Architecture** e **Clean Code**:
 - **UI Otimista**: Feedback instantâneo antes da confirmação do servidor
 - **Realtime Refetch**: Atualizações automáticas via TanStack Query
 - **Mobile First**: Design responsivo priorizando mobile
+- **JWT Authentication**: Autenticação stateless com tokens seguros
 
 ## 🎯 Funcionalidades
 
@@ -233,12 +309,23 @@ O projeto segue os princípios de **Clean Architecture** e **Clean Code**:
   - Painel administrativo para aprovação/recusa
   - Sistema de convites com tokens únicos
   - Cadastro completo de membros
+  - Autenticação JWT para membros
 
 - **Sistema de Indicações**
   - Criação de indicações de negócios
   - Acompanhamento de status (nova, em-contato, fechada, recusada)
   - Listagem de indicações feitas e recebidas
   - Validações de negócio (auto-indicação, membros ativos)
+
+- **Sistema de Reuniões**
+  - Criação e gestão de reuniões 1:1
+  - Check-in de presença
+  - Listagem de reuniões
+
+- **Sistema de Avisos**
+  - Criação e gestão de avisos
+  - Tipos de aviso (info, success, warning, urgent)
+  - Listagem pública e administrativa
 
 - **Componentes UI**
   - Button, Input, Textarea, Card, Badge, Skeleton
@@ -249,8 +336,6 @@ O projeto segue os princípios de **Clean Architecture** e **Clean Code**:
 
 - Sistema de "Obrigados" (agradecimentos públicos)
 - Dashboard de performance
-- Sistema de avisos e comunicados
-- Check-in em reuniões
 - Módulo financeiro (mensalidades)
 
 ## 🧪 Testes
@@ -259,8 +344,10 @@ O projeto possui uma estratégia completa de testes:
 
 ### Cobertura Atual
 - **Componentes UI**: Testes unitários completos
+- **Componentes de Features**: Testes para meeting, notice, referral
 - **Hooks**: Testes de lógica e integração
 - **API Routes**: Testes de integração
+- **Autenticação**: Testes para endpoints JWT
 
 ### Executar Testes
 
@@ -291,7 +378,10 @@ pnpm test:watch
 
 ### Variáveis de Ambiente no Vercel
 
-Configure todas as variáveis do `.env.local` no painel do Vercel.
+Configure todas as variáveis do `.env.local` no painel do Vercel, incluindo:
+- `JWT_SECRET` (obrigatório)
+- `JWT_ACCESS_EXPIRES_IN` (opcional)
+- `JWT_REFRESH_EXPIRES_IN` (opcional)
 
 ### MongoDB Atlas
 
@@ -305,7 +395,9 @@ Veja mais detalhes em [DEPLOY.md](./Docs/Documentation/DEPLOY.md).
 
 ## 📚 Documentação Adicional
 
-- **[Documentacao.md](./Documentacao.md)** - Documentação técnica completa
+- **[Documentacao.md](./Docs/Documentacao.md)** - Documentação técnica completa
+- **[TODO.md](./Docs/TODO.md)** - Checklist de tarefas pendentes
+- **[CORRECOES.md](./Docs/CORRECOES.md)** - Registro de correções e melhorias
 - **[CONTRIBUTING.md](./Docs/Documentation/CONTRIBUTING.md)** - Guia de contribuição
 - **[DEPLOY.md](./Docs/Documentation/DEPLOY.md)** - Guia de deploy
 
@@ -334,3 +426,6 @@ Este projeto é privado e proprietário.
 ---
 
 **Desenvolvido com ❤️ pela equipe Durch Soluções**
+
+**Última atualização**: 2025-01-27
+

@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { ObrigadoService } from '../ObrigadoService';
 import { ObrigadoRepository } from '@/lib/repositories/ObrigadoRepository';
 import { ReferralRepository } from '@/lib/repositories/ReferralRepository';
@@ -8,6 +11,7 @@ import { Referral } from '@/types/referral';
 import { Member } from '@/types/member';
 import { ZodError } from 'zod';
 import { criarIndicacaoFake, criarMembroFake } from '@/tests/helpers/faker';
+import { getDatabase } from '@/lib/mongodb';
 
 jest.mock('@/lib/mongodb', () => ({
   getDatabase: jest.fn(),
@@ -46,8 +50,7 @@ describe('ObrigadoService', () => {
       buscarPorId: jest.fn(),
     } as any;
 
-    const { getDatabase } = require('@/lib/mongodb');
-    getDatabase.mockResolvedValue(mockDb);
+    (getDatabase as jest.Mock).mockResolvedValue(mockDb);
 
     (ObrigadoRepository as jest.MockedClass<typeof ObrigadoRepository>).mockImplementation(
       () => mockObrigadoRepository
@@ -71,8 +74,6 @@ describe('ObrigadoService', () => {
 
     const indicacaoFechada: Referral = {
       _id: indicacaoId,
-      membroIndicadorId,
-      membroIndicadoId,
       ...criarIndicacaoFake(membroIndicadorId, membroIndicadoId),
       status: 'fechada',
       criadoEm: new Date(),

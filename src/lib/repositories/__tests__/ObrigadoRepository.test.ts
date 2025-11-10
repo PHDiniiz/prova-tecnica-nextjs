@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { ObrigadoRepository } from '../ObrigadoRepository';
 import { Db, ObjectId } from 'mongodb';
 import { Obrigado } from '@/types/obrigado';

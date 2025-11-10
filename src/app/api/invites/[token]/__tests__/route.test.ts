@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { GET } from '../route';
 import { InviteService } from '@/services/InviteService';
 import { IntentionService } from '@/services/IntentionService';
@@ -65,6 +68,8 @@ describe('GET /api/invites/[token]', () => {
       empresa: 'Empresa Teste',
       motivo: 'Quero participar do grupo',
       status: 'approved' as const,
+      criadoEm: new Date(),
+      atualizadoEm: new Date(),
     };
 
     mockInviteService.validarConvite.mockResolvedValueOnce(convite);

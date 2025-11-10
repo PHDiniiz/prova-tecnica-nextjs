@@ -56,7 +56,6 @@ export function MeetingCard({
   meeting,
   membroId,
   membroToken,
-  membroNome,
   className,
   onCheckInSuccess,
 }: MeetingCardProps) {

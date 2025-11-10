@@ -1,7 +1,11 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { DashboardService } from '../DashboardService';
 import { DashboardRepository } from '@/lib/repositories/DashboardRepository';
 import { PeriodoFiltro } from '@/types/dashboard';
 import { BusinessError } from '@/lib/errors/BusinessError';
+import { getDatabase } from '@/lib/mongodb';
 
 jest.mock('@/lib/mongodb');
 jest.mock('@/lib/repositories/DashboardRepository');
@@ -24,8 +28,7 @@ describe('DashboardService', () => {
       buscarPerformanceIndividual: jest.fn(),
     } as any;
 
-    const { getDatabase } = require('@/lib/mongodb');
-    getDatabase.mockResolvedValue(mockDb);
+    (getDatabase as jest.Mock).mockResolvedValue(mockDb);
 
     (DashboardRepository as jest.MockedClass<typeof DashboardRepository>).mockImplementation(
       () => mockRepository

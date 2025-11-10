@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 /**
  * Testes de Integração - Fluxo de Indicações
  * 

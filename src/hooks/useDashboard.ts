@@ -69,10 +69,10 @@ export function useDashboard(options: UseDashboardOptions) {
     },
     enabled: enabled && !!adminToken,
     staleTime: 1000 * 60 * 5, // 5 minutos - dados de dashboard não mudam frequentemente
-    gcTime: 1000 * 60 * 10, // 10 minutos - manter em cache por mais tempo
+    gcTime: 1000 * 60 * 30, // 30 minutos - manter em cache por mais tempo (aumentado)
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
+    refetchOnReconnect: false, // Dashboard não precisa refetch em reconnect
     retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });

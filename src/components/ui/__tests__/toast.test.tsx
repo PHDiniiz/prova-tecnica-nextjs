@@ -1,10 +1,13 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ToastProvider, useToast } from '../toast';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Componente de teste que usa o hook useToast
-function TestComponent() {
+const TestComponent = () => {
   const { addToast, removeToast, toasts } = useToast();
 
   return (
@@ -18,7 +21,8 @@ function TestComponent() {
       <div data-testid="toast-count">{toasts.length}</div>
     </div>
   );
-}
+};
+TestComponent.displayName = 'TestComponent';
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -112,7 +116,7 @@ describe('Toast Component', () => {
   });
 
   it('deve renderizar diferentes variantes de toast', async () => {
-    function VariantTestComponent() {
+    const VariantTestComponent = () => {
       const { addToast } = useToast();
       return (
         <div>
@@ -127,7 +131,8 @@ describe('Toast Component', () => {
           </button>
         </div>
       );
-    }
+    };
+    VariantTestComponent.displayName = 'VariantTestComponent';
 
     const user = userEvent.setup({ delay: null });
     render(<VariantTestComponent />, { wrapper: createWrapper() });

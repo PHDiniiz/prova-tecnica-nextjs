@@ -1,7 +1,11 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { InviteService } from '../InviteService';
 import { InviteRepository } from '@/lib/repositories/InviteRepository';
 import { criarConviteFake } from '@/tests/helpers/faker';
 import { Invite } from '@/types/invite';
+import { getDatabase } from '@/lib/mongodb';
 
 jest.mock('@/lib/mongodb', () => ({
   getDatabase: jest.fn(),
@@ -27,8 +31,7 @@ describe('InviteService', () => {
       marcarComoUsado: jest.fn(),
     } as any;
 
-    const { getDatabase } = require('@/lib/mongodb');
-    getDatabase.mockResolvedValue(mockDb);
+    (getDatabase as jest.Mock).mockResolvedValue(mockDb);
 
     (InviteRepository as jest.MockedClass<typeof InviteRepository>).mockImplementation(
       () => mockRepository

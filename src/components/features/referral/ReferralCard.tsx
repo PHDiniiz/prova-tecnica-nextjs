@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Referral, ReferralStatus } from '@/types/referral';
+import { Referral } from '@/types/referral';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -40,7 +40,6 @@ export function ReferralCard({
 }: ReferralCardProps) {
   const [showObrigadoForm, setShowObrigadoForm] = useState(false);
   const isDestinatario = referral.membroIndicadoId === membroId;
-  const podeAtualizarStatus = isDestinatario && tipo === 'recebida';
   const podeCriarObrigado = isDestinatario && tipo === 'recebida' && referral.status === 'fechada';
 
   const formatarData = formatarDataSimples;

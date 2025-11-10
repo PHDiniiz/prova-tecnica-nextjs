@@ -1,14 +1,16 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { IntentionForm } from '../IntentionForm';
 
-// Mock do hook
-jest.mock('@/hooks/useIntentions', () => ({
-  useIntentions: jest.fn(),
-}));
+const mockUseIntentions = jest.fn();
 
-const { useIntentions } = require('@/hooks/useIntentions');
+jest.mock('@/hooks/useIntentions', () => ({
+  useIntentions: mockUseIntentions,
+}));
 
 // Helper para criar QueryClient wrapper
 function createWrapper() {

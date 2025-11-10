@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { GET, PATCH, DELETE } from '../route';
 import { NoticeService } from '@/services/NoticeService';
 import { NextRequest } from 'next/server';
@@ -75,6 +78,8 @@ describe('GET /api/notices/[id]', () => {
       conteudo: 'Conteúdo do aviso',
       tipo: 'info' as const,
       ativo: true,
+      criadoEm: new Date(),
+      atualizadoEm: new Date(),
     };
 
     mockService.buscarAvisoPorId.mockResolvedValueOnce(aviso);
@@ -131,6 +136,8 @@ describe('PATCH /api/notices/[id]', () => {
       conteudo: 'Conteúdo atualizado',
       tipo: 'warning' as const,
       ativo: false,
+      criadoEm: new Date(),
+      atualizadoEm: new Date(),
     };
 
     mockService.atualizarAviso.mockResolvedValueOnce(avisoAtualizado);

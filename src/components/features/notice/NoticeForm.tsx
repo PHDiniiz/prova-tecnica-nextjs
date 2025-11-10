@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Form, FormField, FormLabel } from '@/components/ui/form';
 import { useCreateNotice, useUpdateNotice } from '@/hooks/useNotices';
 import { useToast } from '@/components/ui/toast';
-import { Notice, CriarNoticeDTO, AtualizarNoticeDTO, NoticeType } from '@/types/notice';
+import { Notice, CriarNoticeDTO, AtualizarNoticeDTO } from '@/types/notice';
 
 /**
  * Schema de validação do formulário

@@ -1,14 +1,13 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useReferrals } from '@/hooks/useReferrals';
-import { Referral, ReferralStatus, AtualizarStatusIndicacaoDTO } from '@/types/referral';
+import { ReferralStatus, AtualizarStatusIndicacaoDTO } from '@/types/referral';
 import { ReferralCard } from './ReferralCard';
 import { ReferralStatusUpdate } from './ReferralStatusUpdate';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ReferralStatusBadge } from './ReferralStatusBadge';
 
 interface ReferralListProps {
   membroId: string;

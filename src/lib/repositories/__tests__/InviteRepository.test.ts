@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { InviteRepository } from '../InviteRepository';
 import { Db, ObjectId } from 'mongodb';
 import { Invite } from '@/types/invite';

@@ -30,7 +30,7 @@ export function criarMembroFake(intencaoId?: string, ativo: boolean = true) {
     empresa: faker.company.name(),
     linkedin: `https://linkedin.com/in/${faker.internet.username()}`,
     areaAtuacao: faker.person.jobTitle(),
-    intencaoId: intencaoId || null,
+    intencaoId: intencaoId || undefined,
     ativo,
     criadoEm: new Date(),
     atualizadoEm: new Date(),

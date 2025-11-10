@@ -63,7 +63,7 @@ export function useReferrals(membroId: string) {
   /**
    * Query para listar indicações
    */
-  const listarIndicacoes = (options: ListarIndicacoesOptions = {}) => {
+  const useListarIndicacoes = (options: ListarIndicacoesOptions = {}) => {
     const { tipo = 'ambas', status, page = 1, limit = 20 } = options;
 
     return useQuery<ListarIndicacoesResponse, Error>({
@@ -96,7 +96,9 @@ export function useReferrals(membroId: string) {
         return data;
       },
       enabled: !!membroId,
-      staleTime: 5 * 1000, // 5 segundos
+      staleTime: 1000 * 5, // 5 segundos (dados dinâmicos - mudam frequentemente)
+      gcTime: 1000 * 60 * 10, // 10 minutos no cache
+      refetchInterval: 1000 * 30, // Refetch a cada 30 segundos para dados dinâmicos
       refetchOnWindowFocus: true,
       refetchOnMount: true,
     });
@@ -172,7 +174,7 @@ export function useReferrals(membroId: string) {
 
   return {
     // Listar indicações
-    listarIndicacoes,
+    listarIndicacoes: useListarIndicacoes,
     // Criar indicação
     criarIndicacao: criarIndicacao.mutateAsync,
     isCreating: criarIndicacao.isPending,

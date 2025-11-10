@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 /**
  * Testes de Integração - Fluxo Completo: Intenção → Aprovação → Convite → Membro
  * 
@@ -133,6 +136,7 @@ describe('Fluxo de Integração: Intenção → Membro', () => {
 
       const membro = await memberService.criarMembro({
         ...dadosMembro,
+        intencaoId: intencaoCriada._id,
         token: convite.token,
       });
 

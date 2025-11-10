@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useCheckIn } from '@/hooks/useMeetings';
 import { useToast } from '@/components/ui/toast';

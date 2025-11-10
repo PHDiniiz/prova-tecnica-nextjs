@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { DashboardPage } from '@/components/features/dashboard/DashboardPage';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,17 +12,19 @@ import { Button } from '@/components/ui/button';
  * TODO: Implementar autenticação JWT real
  */
 export default function AdminDashboardPage() {
-  const [adminToken, setAdminToken] = useState<string>('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    // Tenta recuperar o token do localStorage
-    const savedToken = localStorage.getItem('admin_token');
-    if (savedToken) {
-      setAdminToken(savedToken);
-      setIsAuthenticated(true);
+  // Inicialização do estado com valores do localStorage
+  const [adminToken, setAdminToken] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('admin_token') || '';
     }
-  }, []);
+    return '';
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return !!localStorage.getItem('admin_token');
+    }
+    return false;
+  });
 
   const handleLogin = () => {
     if (adminToken.trim()) {

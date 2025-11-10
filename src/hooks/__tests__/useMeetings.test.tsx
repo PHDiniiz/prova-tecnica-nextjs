@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode } from 'react';
@@ -168,7 +171,7 @@ describe('useCreateMeeting', () => {
     const dto: CriarMeetingDTO = {
       membro1Id: 'membro-1',
       membro2Id: 'membro-2',
-      data: new Date(),
+      dataReuniao: new Date(),
       local: 'Escritório',
     };
 
@@ -206,7 +209,7 @@ describe('useCreateMeeting', () => {
     const dto: CriarMeetingDTO = {
       membro1Id: 'membro-1',
       membro2Id: 'membro-2',
-      data: new Date(),
+      dataReuniao: new Date(),
       local: 'Escritório',
     };
 
@@ -303,8 +306,8 @@ describe('useCheckIn', () => {
     });
 
     const checkIn: CheckInDTO = {
+      membroId: 'membro-1',
       presente: true,
-      observacoes: 'Presente',
     };
 
     await waitFor(async () => {
@@ -343,6 +346,7 @@ describe('useCheckIn', () => {
     });
 
     const checkIn: CheckInDTO = {
+      membroId: 'membro-1',
       presente: true,
     };
 

@@ -1,8 +1,12 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { MeetingService } from '../MeetingService';
 import { MeetingRepository } from '@/lib/repositories/MeetingRepository';
 import { MemberRepository } from '@/lib/repositories/MemberRepository';
 import { Meeting, CriarMeetingDTO } from '@/types/meeting';
 import { BusinessError } from '@/lib/errors/BusinessError';
+import { getDatabase } from '@/lib/mongodb';
 
 jest.mock('@/lib/mongodb');
 jest.mock('@/lib/repositories/MeetingRepository');
@@ -33,8 +37,7 @@ describe('MeetingService', () => {
       buscarPorId: jest.fn(),
     } as any;
 
-    const { getDatabase } = require('@/lib/mongodb');
-    getDatabase.mockResolvedValue(mockDb);
+    (getDatabase as jest.Mock).mockResolvedValue(mockDb);
 
     (MeetingRepository as jest.MockedClass<typeof MeetingRepository>).mockImplementation(
       () => mockMeetingRepository

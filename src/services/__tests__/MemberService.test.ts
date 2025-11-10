@@ -1,9 +1,14 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { MemberService } from '../MemberService';
 import { MemberRepository } from '@/lib/repositories/MemberRepository';
 import { InviteService } from '../InviteService';
 import { criarMembroFake, criarConviteFake } from '@/tests/helpers/faker';
-import { Member, Invite } from '@/types/member';
+import { Member } from '@/types/member';
+import { Invite } from '@/types/invite';
 import { ZodError } from 'zod';
+import { getDatabase } from '@/lib/mongodb';
 
 jest.mock('@/lib/mongodb', () => ({
   getDatabase: jest.fn(),
@@ -38,8 +43,7 @@ describe('MemberService', () => {
       marcarComoUsado: jest.fn(),
     } as any;
 
-    const { getDatabase } = require('@/lib/mongodb');
-    getDatabase.mockResolvedValue(mockDb);
+    (getDatabase as jest.Mock).mockResolvedValue(mockDb);
 
     (MemberRepository as jest.MockedClass<typeof MemberRepository>).mockImplementation(
       () => mockRepository

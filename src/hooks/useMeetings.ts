@@ -75,7 +75,9 @@ export function useMeetings(options: UseMeetingsOptions) {
       return response.json();
     },
     enabled: enabled && !!membroToken,
-    staleTime: 1000 * 60 * 2, // 2 minutos
+    staleTime: 1000 * 5, // 5 segundos (dados dinâmicos)
+    gcTime: 1000 * 60 * 10, // 10 minutos no cache
+    refetchInterval: 1000 * 30, // Refetch a cada 30 segundos
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,

@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { render, screen } from '@testing-library/react';
 import { Card, CardHeader, CardTitle, CardContent } from '../card';
 

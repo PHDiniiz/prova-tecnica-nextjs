@@ -7,8 +7,7 @@ import { MetricCard } from './MetricCard';
 import { PerformanceChart } from './PerformanceChart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import { Card, CardContent } from '@/components/ui/card';
 
 /**
  * Props do componente DashboardPage

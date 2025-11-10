@@ -83,7 +83,8 @@ export function useNotices(options: UseNoticesOptions = {}) {
       return response.json();
     },
     enabled: enabled && (publico || !!adminToken),
-    staleTime: publico ? 1000 * 60 * 5 : 1000 * 60 * 2, // Público: 5min, Admin: 2min
+    staleTime: publico ? 1000 * 60 : 1000 * 60 * 2, // Público: 1min, Admin: 2min
+    gcTime: publico ? 1000 * 60 * 5 : 1000 * 60 * 10, // Público: 5min, Admin: 10min
     refetchOnMount: true,
     refetchOnWindowFocus: publico, // Apenas refetch público no focus
     refetchOnReconnect: true,

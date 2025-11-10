@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { PATCH } from '../route';
 import { IntentionService } from '@/services/IntentionService';
 import { InviteService } from '@/services/InviteService';
@@ -87,14 +90,20 @@ describe('PATCH /api/intentions/[id]/status', () => {
       _id: 'intention-1',
       nome: 'João Silva',
       email: 'joao@example.com',
+      empresa: 'Empresa Teste',
+      motivo: 'Quero participar',
       status: 'approved' as const,
+      criadoEm: new Date(),
+      atualizadoEm: new Date(),
     };
 
     const convite = {
       _id: 'invite-1',
       token: 'token-abc123',
       intencaoId: 'intention-1',
+      usado: false,
       expiraEm: new Date(),
+      criadoEm: new Date(),
     };
 
     mockIntentionService.atualizarStatusIntencao.mockResolvedValueOnce(intencaoAtualizada);
@@ -135,7 +144,11 @@ describe('PATCH /api/intentions/[id]/status', () => {
       _id: 'intention-1',
       nome: 'João Silva',
       email: 'joao@example.com',
+      empresa: 'Empresa Teste',
+      motivo: 'Quero participar',
       status: 'rejected' as const,
+      criadoEm: new Date(),
+      atualizadoEm: new Date(),
     };
 
     mockIntentionService.atualizarStatusIntencao.mockResolvedValueOnce(intencaoAtualizada);

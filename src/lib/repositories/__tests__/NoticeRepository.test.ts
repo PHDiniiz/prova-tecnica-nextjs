@@ -1,3 +1,6 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { NoticeRepository } from '../NoticeRepository';
 import { Db, ObjectId } from 'mongodb';
 import { Notice, NoticeType } from '@/types/notice';

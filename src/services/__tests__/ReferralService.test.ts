@@ -1,9 +1,13 @@
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 import { ReferralService } from '../ReferralService';
 import { ReferralRepository } from '@/lib/repositories/ReferralRepository';
 import { MemberRepository } from '@/lib/repositories/MemberRepository';
 import { BusinessError } from '@/lib/errors/BusinessError';
 import { Referral, ReferralStatus } from '@/types/referral';
 import { ZodError } from 'zod';
+import { getDatabase } from '@/lib/mongodb';
 
 // Mock do MongoDB e Repositories
 jest.mock('@/lib/mongodb', () => ({
@@ -37,8 +41,7 @@ describe('ReferralService', () => {
       buscarPorId: jest.fn(),
     } as any;
 
-    const { getDatabase } = require('@/lib/mongodb');
-    getDatabase.mockResolvedValue(mockDb);
+    (getDatabase as jest.Mock).mockResolvedValue(mockDb);
 
     (ReferralRepository as jest.MockedClass<typeof ReferralRepository>).mockImplementation(
       () => mockReferralRepository
@@ -89,8 +92,7 @@ describe('ReferralService', () => {
 
       const indicacaoCriada: Referral = {
         _id: '123',
-        membroIndicadorId,
-        membroIndicadoId,
+        membroIndicadorId: membroIndicadorId,
         ...dadosIndicacao,
         status: 'nova',
         criadoEm: new Date(),
